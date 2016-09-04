@@ -47,36 +47,6 @@ set -e
 top=${PWD}
 
 #
-# Defaults.
-#
-rtems_doc=yes
-
-#
-# Check for options
-#
-opts=yes
-while [ $opts = yes ];
-do
- case $1 in
-  -*)
-   case $1 in
-    --no-docs)
-     rtems_docs=no
-     ;;
-    *)
-     echo "error: invalid option: $1"
-     exit 1
-     ;;
-   esac
-   shift
-   ;;
-  *)
-   opts=no
-   ;;
- esac
-done
-
-#
 # The version and revision.
 #
 if [ $# -ne 2 ]; then
@@ -89,6 +59,19 @@ revision=$2
 release=${version}.${revision}
 
 checksum=sha512
+
+#
+# Defaults.
+#
+rtems_doc=yes
+rtems_readme=README.txt.in
+
+#
+# Version default settings.
+#
+if [ -f rtems-release-defaults-${version} ]; then
+ . rtems-release-defaults-${version}
+fi
 
 build()
 {
@@ -116,6 +99,7 @@ build rtems-source-builder ${version} ${revision} rtems-release-rsb-hashing
 #
 if [ ${rtems_docs} = yes ]; then
  ./rtems-release-docs rtems-docs ${version} ${revision}
+ rtems_readme=README-doc.txt.in
 fi
 
 #
@@ -128,7 +112,7 @@ echo "Collect tools sources"
 # Create the README.txt
 #
 now=$(date +"%d %B %Y")
-cat README.txt.in | \
+cat ${rtems_readme} | \
     sed -e "s/@RELEASE@/${release}/g" \
 	-e "s/@VERSION@/${version}/g" \
 	-e "s/@REVISION@/${revision}/g" \
