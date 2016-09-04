@@ -93,21 +93,21 @@ echo "tar Jxf ../${prefix}.tar.xz"
 tar Jxf ../${prefix}.tar.xz
 
 #
-# Get the RSB to download the source we need to release. This is 100% os the
+# Get the RSB to download the source we need to release. This is 100% of the
 # actual sourced used.
 #
 cd ${prefix}
  cd rtems
-  mkdir sources
+  export_source=rtems
+  mkdir sources patches
   #
-  # Copy in any source not present on the server. If these are not copied
-  # in the RSB does not find them.
+  # Copy in any source not present on the server. If these are not copied in
+  # the RSB does not find them.
   #
   for p in rtems-tools rtems
   do
    cp ${top}/${release}/${p}-${release}.tar.xz sources/
   done
-
   #
   # Fetch the source for RTEMS tools.
   #
@@ -116,8 +116,8 @@ cd ${prefix}
        "${rtems_pkgs}"
   ../source-builder/sb-set-builder --dry-run --with-download \
                                    --without-error-report \
-				   --without-release-url \
-				   ${rtems_pkgs}
+                                   --without-release-url \
+                                   ${rtems_pkgs}
   #
   # If git, svn or cvs exist the release fails.
   #
@@ -136,47 +136,50 @@ cd ${prefix}
  #
  # Fetch the source for 3rd party packages tools.
  #
- cd bare
-  echo "../source-builder/sb-set-builder --dry-run --with-download " \
-       "--without-error-report --without-release-url " \
-       "${bare_pkgs}"
-  ../source-builder/sb-set-builder --dry-run --with-download \
-				   --without-error-report \
-				   --without-release-url \
-				   ${bare_pkgs}
-  #
-  # If svn or cvs exist the release fails.
-  #
-  if [ -d sources/svn -o -d sources/cvs ]; then
-   echo "error: ${release} contains repositories and cannot be released."
-   exit 1
-  fi
-  #
-  # If there are git repos create packages of them as they are.
-  #
-  if [ -d sources/git ]; then
-   cd sources
-    cd git
-     for g in $(ls)
-     do
-      cd ${g}
-       hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
-       prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
-       echo "Packaging GIT repo: ${g} to ${prefix}"
-       git archive --format=tar --prefix=${prefix}/ ${hash} | xz > ../../${prefix}.tar.xz
-       cd ..
-     done
+ if [ -n "${bare_pkgs}" -a ${bare_pkgs} != None ]; then
+  cd bare
+   export_source=${export_source} bare
+   echo "../source-builder/sb-set-builder --dry-run --with-download " \
+        "--without-error-report --without-release-url " \
+        "${bare_pkgs}"
+   ../source-builder/sb-set-builder --dry-run --with-download \
+                                    --without-error-report \
+                                    --without-release-url \
+                                    ${bare_pkgs}
+   #
+   # If svn or cvs exist the release fails.
+   #
+   if [ -d sources/svn -o -d sources/cvs ]; then
+    echo "error: ${release} contains repositories and cannot be released."
+    exit 1
+   fi
+   #
+   # If there are git repos create packages of them as they are.
+   #
+   if [ -d sources/git ]; then
+    cd sources
+     cd git
+      for g in $(ls)
+      do
+       cd ${g}
+        hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
+        prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
+        echo "Packaging GIT repo: ${g} to ${prefix}"
+        git archive --format=tar --prefix=${prefix}/ ${hash} | xz > ../../${prefix}.tar.xz
+        cd ..
+      done
+      cd ..
+      rm -rf git
      cd ..
-     rm -rf git
-    cd ..
-  fi
-  cd ..
+   fi
+   cd ..
+ fi
  #
  # Export the sources and patches.
  #
  rm -rf ${top}/${release}/sources
  mkdir ${top}/${release}/sources
- for p in rtems bare
+ for p in ${export_source}
  do
   cp ${p}/sources/* ${top}/${release}/sources/
   cp ${p}/patches/* ${top}/${release}/sources/

@@ -30,16 +30,21 @@
 #
 
 #
-# The script collects the sources packages for RTEMS.
+# The script collects the sources packages for RTEMS for a version. If
+# there are no packages set the variable to None.
 #
 
 rtems_pkgs="${version}/rtems-all"
-rtems_pkgs="${rtems_pkgs} ${version}/graphics/libjpeg"
-rtems_pkgs="${rtems_pkgs} ${version}/databases/sqlite"
-rtems_pkgs="${rtems_pkgs} ${version}/net-mgmt/net-snmp"
-rtems_pkgs="${rtems_pkgs} ${version}/net/ntp"
-rtems_pkgs="${rtems_pkgs} ${version}/net/protobuf"
+bare_pkgs=None
 
-bare_pkgs="devel/dtc"
-bare_pkgs="${bare_pkgs} devel/qemu"
-bare_pkgs="${bare_pkgs} devel/or1ksim"
+if [ ${version} == 4.11 ]; then
+ rtems_pkgs="${rtems_pkgs} ${version}/graphics/libjpeg"
+ rtems_pkgs="${rtems_pkgs} ${version}/databases/sqlite"
+ rtems_pkgs="${rtems_pkgs} ${version}/net-mgmt/net-snmp"
+ rtems_pkgs="${rtems_pkgs} ${version}/net/ntp"
+ rtems_pkgs="${rtems_pkgs} ${version}/net/protobuf"
+
+ bare_pkgs="devel/dtc"
+ bare_pkgs="${bare_pkgs} devel/qemu"
+ bare_pkgs="${bare_pkgs} devel/or1ksim"
+fi
