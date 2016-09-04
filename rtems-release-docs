@@ -1,0 +1,167 @@
+#! /bin/sh
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# This worker script to build the doco.
+#
+echo "RTEMS Documentation Release builder, v0.1"
+
+#
+# Stop on any error
+#
+set -e
+
+#
+# Only build if sphinx-build is present on the system.
+#
+if [ "`command -v sphinx-build`"no = no ]; then
+ echo "warning: documentation not built"
+ exit 0
+fi
+
+#
+# Common package start.
+#
+. ./rtems-release-package-start
+
+#
+# The workspace pwd
+#
+ws_pwd=${PWD}
+
+#
+# The manuals we are building.
+#
+manuals="c_user networking posix_users shell user"
+
+#
+# Map the manual names in git to friendly names that are for download.
+#
+manual_map()
+{
+ case $1 in
+  c_user) echo "c-user" ;;
+  posix_users) echo "posix-user" ;;
+  *) echo "$1" ;;
+ esac
+}
+
+#
+#
+# Get a copy of waf.
+#
+echo "Get waf ...."
+curl https://waf.io/waf-1.8.20 > waf
+chmod +x waf
+waf=$PWD/waf
+
+#
+# Get the documentation, create the tarball and stamp.
+#
+echo "git clone ${git_remote} ${git_local}"
+git clone ${git_remote} ${git_local}
+
+cd ${git_local}
+echo "git archive --format=tar --prefix=${prefix}/ origin/master"
+git archive --format=tar --prefix=${prefix}/ origin/master | \
+    xz > ../${prefix}-unstamped.tar.xz
+cd ..
+
+#
+#
+# Build each manual.
+#
+cd ${git_local}
+for m in ${manuals}
+do
+ manual=$(manual_map $m)
+ echo "Configuring: $m ($manual)"
+ cd $m
+  ${waf} distclean
+  ${waf} configure
+  echo "Building HTML: $m"
+  ${waf}
+  echo "Building PDF: $m"
+  ${waf} --pdf
+  echo "Package ${prefix}-${manual}"
+  mkdir ${ws_pwd}/${prefix}-${manual}
+  cp -r build/html/* ${ws_pwd}/${prefix}-${manual}/.
+  echo "Package ${prefix}-${manual}.pdf"
+  cp -r build/latex/$m.pdf ${ws_pwd}/${prefix}-${manual}.pdf
+ cd ..
+done
+cd ..
+
+#
+# Stamp the source and package, include the waf we use.
+#
+echo "tar Jxf ../${prefix}-unstamped.tar.xz"
+tar Jxf ${prefix}-unstamped.tar.xz
+
+cd ${prefix}
+echo "Creating VERSION: ${release}"
+echo "[version]" > VERSION
+echo "release = ${release}" >> VERSION
+cp ${waf} .
+cd ..
+
+echo "tar cf - ${prefix}"
+tar cf - ${prefix} | xz > ../${prefix}.tar.xz
+
+echo "Created: ${release}/${prefix}.tar.xz"
+
+echo "Create: docs"
+mkdir ../docs
+
+#
+# Package all the documentation. Generated output in docs.
+#
+mkdir ${prefix}-docs-all-html
+
+for m in ${manuals}
+do
+ manual=$(manual_map $m)
+ echo "Packaging: ${manual}"
+ echo "tar cf - ${prefix}-${manual}"
+ tar cf - ${prefix}-${manual} | xz > ../docs/${prefix}-${manual}-html.tar.xz
+ cp -r ${prefix}-${manual} ${prefix}-docs-all-html/${manual}
+ cp ${prefix}-${manual}.pdf ../docs/
+done
+
+echo "tar cf - ${prefix}-doc-all-html"
+tar cf - ${prefix}-docs-all-html | xz > ../docs/${prefix}-docs-all-html.tar.xz
+
+#
+# Comman package end.
+#
+. ${top}/rtems-release-package-end
+
+exit 0

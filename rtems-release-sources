@@ -1,0 +1,205 @@
+#! /bin/sh
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# The script collects the sources for all the tools.
+#
+
+echo "RTEMS Release Sources, v0.1"
+
+#
+# Stop on any error
+#
+set -e
+
+#
+# Keep the top where we start.
+#
+top=${PWD}
+
+#
+# The version and revision.
+#
+if [ $# -ne 2 ]; then
+ echo "error: must be 2 arguments, the version, and release."
+ exit 1
+fi
+version=$1
+revision=$2
+
+package=rtems-source-builder
+
+release=${version}.${revision}
+prefix=${package}-${release}
+
+checksum=sha512
+
+workspace=ws-${package}
+
+#
+# Source the source packages to package (haha)
+#
+. rtems-source-packages
+
+echo "Package: ${package}"
+echo "Release: ${release}"
+
+if [ ! -e ${release} ]; then
+ mkdir ${release}
+else
+ if [ ! -d ${release} ]; then
+  echo "error: ${release} exists and is not a directory."
+  exit 1
+ fi
+fi
+
+#
+# Work in a package specific directory in the release directory.
+#
+cd ${release}
+rm -rf ${workspace}
+mkdir ${workspace}
+cd ${workspace}
+
+echo "tar Jxf ../${prefix}.tar.xz"
+tar Jxf ../${prefix}.tar.xz
+
+#
+# Get the RSB to download the source we need to release. This is 100% os the
+# actual sourced used.
+#
+cd ${prefix}
+ cd rtems
+  mkdir sources
+  #
+  # Copy in any source not present on the server. If these are not copied
+  # in the RSB does not find them.
+  #
+  for p in rtems-tools rtems
+  do
+   cp ${top}/${release}/${p}-${release}.tar.xz sources/
+  done
+
+  #
+  # Fetch the source for RTEMS tools.
+  #
+  echo "../source-builder/sb-set-builder --dry-run --with-download " \
+       "--without-error-report --without-release-url " \
+       "${rtems_pkgs}"
+  ../source-builder/sb-set-builder --dry-run --with-download \
+                                   --without-error-report \
+				   --without-release-url \
+				   ${rtems_pkgs}
+  #
+  # If git, svn or cvs exist the release fails.
+  #
+  if [ -d sources/git -o -d sources/svn -o -d sources/cvs ]; then
+   echo "error: ${release} contains repositories and cannot be released."
+   exit 1
+  fi
+  #
+  # Clean out the packages we do not places in 'sources' we copied in..
+  #
+  for p in rtems-tools rtems
+  do
+   rm sources/${p}-${release}.tar.xz
+  done
+  cd ..
+ #
+ # Fetch the source for 3rd party packages tools.
+ #
+ cd bare
+  echo "../source-builder/sb-set-builder --dry-run --with-download " \
+       "--without-error-report --without-release-url " \
+       "${bare_pkgs}"
+  ../source-builder/sb-set-builder --dry-run --with-download \
+				   --without-error-report \
+				   --without-release-url \
+				   ${bare_pkgs}
+  #
+  # If svn or cvs exist the release fails.
+  #
+  if [ -d sources/svn -o -d sources/cvs ]; then
+   echo "error: ${release} contains repositories and cannot be released."
+   exit 1
+  fi
+  #
+  # If there are git repos create packages of them as they are.
+  #
+  if [ -d sources/git ]; then
+   cd sources
+    cd git
+     for g in $(ls)
+     do
+      cd ${g}
+       hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
+       prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
+       echo "Packaging GIT repo: ${g} to ${prefix}"
+       git archive --format=tar --prefix=${prefix}/ ${hash} | xz > ../../${prefix}.tar.xz
+       cd ..
+     done
+     cd ..
+     rm -rf git
+    cd ..
+  fi
+  cd ..
+ #
+ # Export the sources and patches.
+ #
+ rm -rf ${top}/${release}/sources
+ mkdir ${top}/${release}/sources
+ for p in rtems bare
+ do
+  cp ${p}/sources/* ${top}/${release}/sources/
+  cp ${p}/patches/* ${top}/${release}/sources/
+ done
+ cd ..
+
+cd ..
+rm -rf ${workspace}
+cd ..
+
+cd ${release}/sources
+rm -f ${checksum}sum.txt
+for f in $(ls -1)
+do
+ if [ ! -d ${f} ]; then
+  csum=$(${checksum} -q ${f})
+  echo "${csum} ${f}" >> ${checksum}sum.txt
+ fi
+done
+
+cd ../..
+
+echo "Created: ${release}/sources/${checksum}sum.txt"
+echo "Created: ${release}/sources"
+
+exit 0

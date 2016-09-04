@@ -1,0 +1,171 @@
+#! /bin/sh
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# This is the top level RTEMS release script. Supply the version and and the
+# release.
+#
+
+echo "RTEMS Release, v0.1"
+
+#
+# Stop on any error
+#
+set -e
+
+#
+# Keep the top where we start.
+#
+top=${PWD}
+
+#
+# Defaults.
+#
+rtems_doc=yes
+
+#
+# Check for options
+#
+opts=yes
+while [ $opts = yes ];
+do
+ case $1 in
+  -*)
+   case $1 in
+    --no-docs)
+     rtems_docs=no
+     ;;
+    *)
+     echo "error: invalid option: $1"
+     exit 1
+     ;;
+   esac
+   shift
+   ;;
+  *)
+   opts=no
+   ;;
+ esac
+done
+
+#
+# The version and revision.
+#
+if [ $# -ne 2 ]; then
+ echo "error: must be 2 arguments, version and revision."
+ exit 1
+fi
+version=$1
+revision=$2
+
+release=${version}.${revision}
+
+checksum=sha512
+
+build()
+{
+ echo "Package: $1"
+ ./rtems-release-package $*
+}
+
+#
+# Clean the release directory away.
+#
+rm -rf ${release}
+mkdir ${release}
+
+#
+# Package the RSB must be before the kernel. The kernel worker script uses the
+# RSB to create autoconf and automake so it can bootstrap the kernel.
+#
+build rtems-source-builder ${version} ${revision}
+build rtems-tools          ${version} ${revision}
+build rtems                ${version} ${revision} rtems-release-kernel
+build rtems-source-builder ${version} ${revision} rtems-release-rsb-hashing
+
+#
+# Documentation currently uses a custom packaging script. It needs a branch.
+#
+if [ ${rtems_docs} = yes ]; then
+ ./rtems-release-docs rtems-docs ${version} ${revision}
+fi
+
+#
+# The sources is always last.
+#
+echo "Collect tools sources"
+./rtems-release-sources ${version} ${revision}
+
+#
+# Create the README.txt
+#
+now=$(date +"%d %B %Y")
+cat README.txt.in | \
+    sed -e "s/@RELEASE@/${release}/g" \
+	-e "s/@VERSION@/${version}/g" \
+	-e "s/@REVISION@/${revision}/g" \
+	-e "s/@DATE@/${now}/g" > ${release}/README.txt
+echo >> ${release}/README.txt
+echo "RTEMS Architectures and BSPs" >> ${release}/README.txt
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> ${release}/README.txt
+echo >> ${release}/README.txt
+cat ARCH-BSP.txt >> ${release}/README.txt
+rm ARCH-BSP.txt
+
+#
+# Copy these release scripts to a contrib directory.
+#
+mkdir -p ${release}/contrib/releasing
+for f in README.txt README.txt.in \
+         rtems-release rtems-release-kernel \
+         rtems-release-package rtems-release-rsb-hashing \
+         rtems-release-sources
+do
+ cp ${f} ${release}/contrib/releasing/
+ csum=$(${checksum} -q ${f})
+ echo "${csum} ${f}" >> ${release}/contrib/releasing/${checksum}sum.txt
+done
+
+#
+# Checksum the top level.
+#
+cd ${release}
+rm -f ${checksum}sum.txt
+for f in $(ls -1)
+do
+ if [ ! -d ${f} ]; then
+  csum=$(${checksum} -q ${f})
+  echo "${csum} ${f}" >> ${checksum}sum.txt
+ fi
+done
+cd ..
+
+exit 0

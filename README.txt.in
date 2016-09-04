@@ -1,0 +1,104 @@
+RTEMS Embedded Realtime Operating System
+----------------------------------------
+
+Release: @RELEASE@
+Date   : @DATE@
+
+The Real-Time Executive for Multiprocessor Systems or RTEMS is an open source
+Real Time Operating System (RTOS) that supports open standard application
+programming interfaces (API) such as POSIX. It is used in space flight,
+medical, networking and many more embedded devices using processor
+architectures including ARM, PowerPC, Intel, Blackfin, MIPS, Microblaze and
+more.
+
+This directory contains the source code for the RTEMS @VERSION@ operating
+system and tools. Please refer to the RTEMS Developers Wiki for the release
+notes.
+
+Please drop by the Users mailing list (users@rtems.org) and let us know how you
+are using RTEMS. We love hearing about user's projects.
+
+Many thanks to everyone who helped create this release.
+
+Regards
+The RTEMS Development Team.
+
+RTEMS Web Sites
+~~~~~~~~~~~~~~~
+
+      Home: https://www.rtems.org/
+Developers: https://devel.rtems.org/
+      Docs: https://docs.rtems.org/
+       Bug: https://devel.rtems.org/query
+     Lists: https://lists.rtems.org/
+       GIT: https://git.rtems.org/
+
+Release Files
+~~~~~~~~~~~~~
+
+ - README.txt					This document.
+ - contrib			     		Directory contains extra release related files.
+ - rtems-@RELEASE@.tar.xz  		    	The RTEMS kernel source code.
+ - rtems-source-builder-@RELEASE@.tar.xz	The RTEMS Source Builder source code.
+ - rtems-tools-@RELEASE@.tar.xz		The RTEMS Tools source code.
+ - rtems-docs-@RELEASE@.tar.xz		The RTEMS Documentation source.
+ - sha512sum.txt				The SHA512 checksums for this directory.
+ - docs						The generated RTEMS documentation.
+ - sources					The source code the tools for this release.
+
+RTEMS Documentation
+~~~~~~~~~~~~~~~~~~~
+
+The generated documentation can be found in the `docs` directory.
+
+The following manuals are available as compress HTML tar files or PDF:
+
+ - RTEMS User Manual
+  - docs/rtems-docs-@RELEASE@-user.pdf
+  - docs/rtems-docs-@RELEASE@-user-html.tar.xz
+
+ - RTEMS C User Manual
+  - docs/rtems-docs-@RELEASE@-c-user.pdf
+  - docs/rtems-docs-@RELEASE@-c-user-html.tar.xz
+
+ - RTEMS POSIX User Manual
+  - docs/rtems-docs-@RELEASE@-posix-user.pdf
+  - docs/rtems-docs-@RELEASE@-posix-user-html.tar.xz
+
+ - RTEMS Networking User Manual
+  - docs/rtems-docs-@RELEASE@-networking.pdf
+  - docs/rtems-docs-@RELEASE@-networking-html.tar.xz
+
+ - RTEMS Shell User Manual
+  - docs/rtems-docs-@RELEASE@-shell.pdf
+  - docs/rtems-docs-@RELEASE@-shell-html.tar.xz
+
+Quick Guide to Building
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To build the tools and kernel for an archicture download:
+
+  rtems-source-builder-@RELEASE@.tar.xz
+
+Please check to the RSB documentation (https://docs.rtems.org/rsb/) and the
+Wiki (TBD) if you have any issues.
+
+If you encounter a problem please post to the user@rtems.org mailing list and
+if you find a bug please raise a ticket (https://devel.rtems.org/newticket).
+
+The following builds RTEMS for the SPARC architecture:
+
+ $ cd
+ $ mkdir development/rtems
+ $ cd development/rtems
+ $ tar Jxf rtems-source-builder-@RELEASE@.tar.xz
+ $ cd rtems-source-builder-@RELEASE@/rtems
+ $ ../source-builder/sb-set-builder \
+         --prefix=$HOME/development/rtems/@RELEASE@ \
+	 @VERSION@/rtems-sparc
+
+To not build the RTEMS Kernel add to the command line '--without-rtems'.
+
+To build a single BSP add to the command line '--with-rtemsbsp'. You can
+specify more than one BSP with quotes and a space delimiting the BSP names. By
+default all BSPs for an architecture are built.
