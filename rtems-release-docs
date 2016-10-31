@@ -130,10 +130,6 @@ tar cf - ${prefix} | xz > ../${prefix}.tar.xz
 echo "Created: ${release}/${prefix}.tar.xz"
 
 #
-# Clean up.
-#
-rm -rf
-#
 # Comman package end.
 #
 . ${top}/rtems-release-package-end
