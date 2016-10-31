@@ -118,7 +118,7 @@ cd ${prefix}
                                    --without-error-report \
                                    --without-release-url \
                                    ${rtems_pkgs}
-  #
+
   # If git, svn or cvs exist the release fails.
   #
   if [ -d sources/git -o -d sources/svn -o -d sources/cvs ]; then
@@ -136,9 +136,10 @@ cd ${prefix}
  #
  # Fetch the source for 3rd party packages tools.
  #
- if [ -n "${bare_pkgs}" -a ${bare_pkgs} != None ]; then
+ if [ -n "${bare_pkgs}" -a "${bare_pkgs}" != "None" ]; then
   cd bare
-   export_source=${export_source} bare
+   export_source="${export_source} bare"
+  mkdir sources patches
    echo "../source-builder/sb-set-builder --dry-run --with-download " \
         "--without-error-report --without-release-url " \
         "${bare_pkgs}"
