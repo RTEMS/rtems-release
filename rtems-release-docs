@@ -69,6 +69,7 @@ manuals="${manuals} cpu_supplement filesystem develenv"
 manual_map()
 {
  case $1 in
+  bsp_howto) echo "bsp-howto" ;;
   c_user) echo "c-user" ;;
   posix_users) echo "posix-user" ;;
   *) echo "$1" ;;
