@@ -108,8 +108,8 @@ cd install
   manual=$(echo $(basename $p) | sed -e "s/\\..*//")
   name=$(manual_map ${manual})
   xz $p
-  mv $p.xz ${top}/${release}/docs/${release}-${name}.pdf.xz
-  tar cf - ${prefix}/${manual} > ${top}/${release}/docs/${release}-${name}-html.tar.xz
+  mv $p.xz ${top}/${release}/docs/rtems-${release}-${name}.pdf.xz
+  tar cf - ${prefix}/${manual} > ${top}/${release}/docs/rtems-${release}-${name}-html.tar.xz
  done
  cd ..
 
