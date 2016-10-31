@@ -60,7 +60,8 @@ ws_pwd=${PWD}
 #
 # The manuals we are building.
 #
-manuals="c_user networking posix_users shell user"
+manuals="c_user posix_users shell user eclipse bsp_howto"
+manuals="${manuals} cpu_supplement filesystem develenv"
 
 #
 # Map the manual names in git to friendly names that are for download.
@@ -75,50 +76,41 @@ manual_map()
 }
 
 #
-#
-# Get a copy of waf.
-#
-echo "Get waf ...."
-curl https://waf.io/waf-1.8.20 > waf
-chmod +x waf
-waf=$PWD/waf
-
-#
 # Get the documentation, create the tarball and stamp.
 #
 echo "git clone ${git_remote} ${git_local}"
 git clone ${git_remote} ${git_local}
 
 cd ${git_local}
-echo "git archive --format=tar --prefix=${prefix}/ origin/master"
-git archive --format=tar --prefix=${prefix}/ origin/master | \
-    xz > ../${prefix}-unstamped.tar.xz
-cd ..
+ echo "git archive --format=tar --prefix=${prefix}/ origin/master"
+ git archive --format=tar --prefix=${prefix}/ origin/master | \
+     xz > ../${prefix}-unstamped.tar.xz
+ cd ..
 
 #
+# Build the docs.
 #
-# Build each manual.
-#
+mkdir install
 cd ${git_local}
-for m in ${manuals}
-do
- manual=$(manual_map $m)
- echo "Configuring: $m ($manual)"
- cd $m
-  ${waf} distclean
-  ${waf} configure
-  echo "Building HTML: $m"
-  ${waf}
-  echo "Building PDF: $m"
-  ${waf} --pdf
-  echo "Package ${prefix}-${manual}"
-  mkdir ${ws_pwd}/${prefix}-${manual}
-  cp -r build/html/* ${ws_pwd}/${prefix}-${manual}/.
-  echo "Package ${prefix}-${manual}.pdf"
-  cp -r build/latex/$m.pdf ${ws_pwd}/${prefix}-${manual}.pdf
+ ./waf distclean configure --prefix=../install/${prefix}
+ ./waf build install
+ ./waf --pdf build install
  cd ..
-done
-cd ..
+
+#
+# Package the docs, PDF first.
+#
+mkdir ${top}/${release}/docs
+cd install
+ for p in $(find . -name \*.pdf)
+ do
+  manual=$(echo $(basename $p) | sed -e "s/\\..*//")
+  name=$(manual_map ${manual})
+  xz $p
+  mv $p.xz ${top}/${release}/docs/${release}-${name}.pdf.xz
+  tar cf - ${prefix}/${manual} > ${top}/${release}/docs/${release}-${name}-html.tar.xz
+ done
+ cd ..
 
 #
 # Stamp the source and package, include the waf we use.
@@ -130,7 +122,6 @@ cd ${prefix}
 echo "Creating VERSION: ${release}"
 echo "[version]" > VERSION
 echo "release = ${release}" >> VERSION
-cp ${waf} .
 cd ..
 
 echo "tar cf - ${prefix}"
@@ -138,27 +129,10 @@ tar cf - ${prefix} | xz > ../${prefix}.tar.xz
 
 echo "Created: ${release}/${prefix}.tar.xz"
 
-echo "Create: docs"
-mkdir ../docs
-
 #
-# Package all the documentation. Generated output in docs.
+# Clean up.
 #
-mkdir ${prefix}-docs-all-html
-
-for m in ${manuals}
-do
- manual=$(manual_map $m)
- echo "Packaging: ${manual}"
- echo "tar cf - ${prefix}-${manual}"
- tar cf - ${prefix}-${manual} | xz > ../docs/${prefix}-${manual}-html.tar.xz
- cp -r ${prefix}-${manual} ${prefix}-docs-all-html/${manual}
- cp ${prefix}-${manual}.pdf ../docs/
-done
-
-echo "tar cf - ${prefix}-doc-all-html"
-tar cf - ${prefix}-docs-all-html | xz > ../docs/${prefix}-docs-all-html.tar.xz
-
+rm -rf
 #
 # Comman package end.
 #

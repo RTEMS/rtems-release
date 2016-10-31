@@ -63,7 +63,7 @@ checksum=sha512
 #
 # Defaults.
 #
-rtems_doc=yes
+rtems_docs=yes
 rtems_readme=README.txt.in
 
 #
@@ -86,7 +86,7 @@ rm -rf ${release}
 mkdir ${release}
 
 #
-# Package the RSB must be before the kernel. The kernel worker script uses the
+# Package the RSB, must be before the kernel. The kernel worker script uses the
 # RSB to create autoconf and automake so it can bootstrap the kernel.
 #
 build rtems-source-builder ${version} ${revision}

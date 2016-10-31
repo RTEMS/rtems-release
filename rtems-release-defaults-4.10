@@ -32,4 +32,4 @@
 #
 # The script is the defaults for 4.10.
 #
-rtems_doc=no
+rtems_docs=no
