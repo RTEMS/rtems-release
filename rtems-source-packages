@@ -46,5 +46,4 @@ if [ ${version} == 4.11 ]; then
 
  bare_pkgs="devel/dtc"
  bare_pkgs="${bare_pkgs} devel/qemu"
- bare_pkgs="${bare_pkgs} devel/or1ksim"
 fi
