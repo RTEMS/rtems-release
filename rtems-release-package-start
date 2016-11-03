@@ -65,6 +65,8 @@ git_local=${package}-release-${release}.git
 
 workspace=ws-${package}
 
+checksum=sha512
+
 echo "Package: ${package}"
 echo "Release: ${release}"
 echo "Repo   : ${git_remote}"
