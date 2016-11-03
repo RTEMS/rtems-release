@@ -142,14 +142,14 @@ done
 # Checksum the top level.
 #
 cd ${release}
-rm -f ${checksum}sum.txt
-for f in $(ls -1)
-do
- if [ ! -d ${f} ]; then
-  csum=$(${checksum} -q ${f})
-  echo "${csum} ${f}" >> ${checksum}sum.txt
- fi
-done
-cd ..
+ rm -f ${checksum}sum.txt
+ for f in $(ls -1)
+ do
+  if [ ! -d ${f} ]; then
+   csum=$(${checksum} -q ${f})
+   echo "${csum} ${f}" >> ${checksum}sum.txt
+  fi
+ done
+ cd ..
 
 exit 0
