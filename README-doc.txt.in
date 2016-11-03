@@ -91,7 +91,7 @@ The following builds RTEMS for the SPARC architecture:
  $ cd
  $ mkdir development/rtems
  $ cd development/rtems
- $ tar Jxf rtems-source-builder-@RELEASE@.tar.xz
+ $ tar Jxf /path/to/rtems-source-builder-@RELEASE@.tar.xz
  $ cd rtems-source-builder-@RELEASE@/rtems
  $ ../source-builder/sb-set-builder \
          --prefix=$HOME/development/rtems/@RELEASE@ \
