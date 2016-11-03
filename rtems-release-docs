@@ -58,25 +58,6 @@ fi
 ws_pwd=${PWD}
 
 #
-# The manuals we are building.
-#
-manuals="c_user posix_users shell user eclipse bsp_howto"
-manuals="${manuals} cpu_supplement filesystem develenv"
-
-#
-# Map the manual names in git to friendly names that are for download.
-#
-manual_map()
-{
- case $1 in
-  bsp_howto) echo "bsp-howto" ;;
-  c_user) echo "c-user" ;;
-  posix_users) echo "posix-user" ;;
-  *) echo "$1" ;;
- esac
-}
-
-#
 # Get the documentation, create the tarball and stamp.
 #
 echo "git clone ${git_remote} ${git_local}"
@@ -93,9 +74,8 @@ cd ${git_local}
 #
 mkdir install
 cd ${git_local}
- ./waf distclean configure --prefix=../install/${prefix}
+ ./waf distclean configure --prefix=../install/${prefix} --pdf --singlehtml
  ./waf build install
- ./waf --pdf build install
  cd ..
 
 #
@@ -103,27 +83,44 @@ cd ${git_local}
 #
 mkdir ${top}/${release}/docs
 cd install
+ echo "Creating DOC all rtems-${release}-docs-all.tar.xz"
+ tar cf - * > ${top}/${release}/docs/rtems-${release}-docs-all.tar.xz
  for p in $(find . -name \*.pdf)
  do
   manual=$(echo $(basename $p) | sed -e "s/\\..*//")
-  name=$(manual_map ${manual})
+  base=$(dirname $p)
+  #
+  # Compress the PDF and move it out of the way.
+  #
+  echo "Creating PDF rtems-${release}-${manual}.pdf.xz"
   xz $p
-  mv $p.xz ${top}/${release}/docs/rtems-${release}-${name}.pdf.xz
-  tar cf - ${prefix}/${manual} > ${top}/${release}/docs/rtems-${release}-${name}-html.tar.xz
+  mv $p.xz ${top}/${release}/docs/rtems-${release}-${manual}.pdf.xz
+  #
+  # Create the single html manual
+  #
+  echo "Creating SingleHTML rtems-${release}-${manual}.html.xz"
+  mv ${base}/${manual}.html ${base}/rtems-${release}-${manual}.html
+  xz ${base}/rtems-${release}-${manual}.html
+  mv ${base}/rtems-${release}-${manual}.html.xz ${top}/${release}/docs/.
+  #
+  # Tar the multi-page html and install.
+  #
+  echo "Creating HTML rtems-${release}-${manual}-html.tar.xz"
+  tar cf - ${base}/${manual} > ${top}/${release}/docs/rtems-${release}-${manual}-html.tar.xz
  done
  cd ..
 
 #
-# Stamp the source and package, include the waf we use.
+# Stamp the source and package
 #
 echo "tar Jxf ../${prefix}-unstamped.tar.xz"
 tar Jxf ${prefix}-unstamped.tar.xz
 
 cd ${prefix}
-echo "Creating VERSION: ${release}"
-echo "[version]" > VERSION
-echo "release = ${release}" >> VERSION
-cd ..
+ echo "Creating VERSION: ${release}"
+ echo "[version]" > VERSION
+ echo "release = ${release}" >> VERSION
+ cd ..
 
 echo "tar cf - ${prefix}"
 tar cf - ${prefix} | xz > ../${prefix}.tar.xz
@@ -134,5 +131,19 @@ echo "Created: ${release}/${prefix}.tar.xz"
 # Comman package end.
 #
 . ${top}/rtems-release-package-end
+
+cd ${release}/docs
+ rm -f ${checksum}sum.txt
+ for f in $(ls -1)
+ do
+  if [ ! -d ${f} ]; then
+   csum=$(${checksum} -q ${f})
+   echo "${csum} ${f}" >> ${checksum}sum.txt
+  fi
+ done
+ cd ..
+
+echo "Created: ${release}/docs/${checksum}sum.txt"
+echo "Created: ${release}/docs"
 
 exit 0
