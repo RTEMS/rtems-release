@@ -95,11 +95,10 @@ build rtems                ${version} ${revision} rtems-release-kernel
 build rtems-source-builder ${version} ${revision} rtems-release-rsb-hashing
 
 #
-# Documentation currently uses a custom packaging script. It needs a branch.
+# Documentation.
 #
 if [ ${rtems_docs} = yes ]; then
  ./rtems-release-docs rtems-docs ${version} ${revision}
- rtems_readme=README-doc.txt.in
 fi
 
 #
@@ -128,10 +127,18 @@ rm ARCH-BSP.txt
 # Copy these release scripts to a contrib directory.
 #
 mkdir -p ${release}/contrib/releasing
-for f in README.txt README.txt.in \
-         rtems-release rtems-release-kernel \
-         rtems-release-package rtems-release-rsb-hashing \
-         rtems-release-sources
+for f in README.txt \
+	 README.txt.in \
+         rtems-release \
+	 rtems-release-defaults-4.10 \
+	 rtems-release-docs \
+	 rtems-release-kernel \
+         rtems-release-package \
+         rtems-release-package-end \
+         rtems-release-package-start \
+	 rtems-release-rsb-hashing \
+         rtems-release-sources \
+	 rtems-source-packages
 do
  cp ${f} ${release}/contrib/releasing/
  csum=$(${checksum} -q ${f})

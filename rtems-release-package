@@ -53,12 +53,12 @@ git clone ${git_remote} ${git_local}
 stamped_tar=${prefix}-unstamped.tar.xz
 
 cd ${git_local}
-echo "git fetch origin"
-git fetch origin
-echo "git archive --format=tar --prefix=${prefix}/ origin/${version}"
-git archive --format=tar --prefix=${prefix}/ origin/${version} | \
-    xz > ../${stamped_tar}
-cd ..
+ echo "git fetch origin"
+ git fetch origin
+ echo "git archive --format=tar --prefix=${prefix}/ origin/${version}"
+ git archive --format=tar --prefix=${prefix}/ origin/${version} | \
+     xz > ../${stamped_tar}
+ cd ..
 
 if [ ! -f ${stamped_tar} ]; then
  echo "error: git archive failed, no tar file"
@@ -68,10 +68,10 @@ echo "tar Jxf ${stamped_tar}"
 tar Jxf ${stamped_tar}
 
 cd ${prefix}
-echo "Creating VERSION: ${release}"
-echo "[version]" > VERSION
-echo "release = ${release}" >> VERSION
-cd ..
+ echo "Creating VERSION: ${release}"
+ echo "[version]" > VERSION
+ echo "release = ${release}" >> VERSION
+ cd ..
 
 #
 # Run the worker script if provided. It can perform any package

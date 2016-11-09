@@ -89,118 +89,119 @@ cd ${release}
  mkdir ${workspace}
  cd ${workspace}
 
- echo "tar Jxf ../${prefix}.tar.xz"
- tar Jxf ../${prefix}.tar.xz
+  echo "tar Jxf ../${prefix}.tar.xz"
+  tar Jxf ../${prefix}.tar.xz
 
- #
- # Get the RSB to download the source we need to release. This is 100% of the
- # actual sourced used.
- #
- cd ${prefix}
-  cd rtems
-   export_source=rtems
-   mkdir sources patches
-   #
-   # Copy in any source not present on the server. If these are not copied in
-   # the RSB does not find them.
-   #
-   for p in rtems-tools rtems
-   do
-    cp ${top}/${release}/${p}-${release}.tar.xz sources/
-   done
-   #
-   # Fetch the source for RTEMS tools.
-   #
-   echo "../source-builder/sb-set-builder --dry-run --with-download " \
-        "--without-error-report --without-release-url " \
-        "${rtems_pkgs}"
-   ../source-builder/sb-set-builder --dry-run --with-download \
-                                    --without-error-report \
-                                    --without-release-url \
-                                    ${rtems_pkgs}
-
-   # If git, svn or cvs exist the release fails.
-   #
-   if [ -d sources/git -o -d sources/svn -o -d sources/cvs ]; then
-    echo "error: ${release} contains repositories and cannot be released."
-    exit 1
-   fi
-   #
-  # Clean out the packages we do not places in 'sources' we copied in..
   #
-  for p in rtems-tools rtems
-  do
-   rm sources/${p}-${release}.tar.xz
-  done
-  cd ..
+  # Get the RSB to download the source we need to release. This is 100% of the
+  # actual sourced used.
   #
-  # Fetch the source for 3rd party packages tools.
-  #
-  if [ -n "${bare_pkgs}" -a "${bare_pkgs}" != "None" ]; then
-   cd bare
-    export_source="${export_source} bare"
+  cd ${prefix}
+   cd rtems
+    export_source=rtems
     mkdir sources patches
+    #
+    # Copy in any source not present on the server. If these are not copied in
+    # the RSB does not find them.
+    #
+    for p in rtems-tools rtems
+    do
+     cp ${top}/${release}/${p}-${release}.tar.xz sources/
+    done
+    #
+    # Fetch the source for RTEMS tools.
+    #
     echo "../source-builder/sb-set-builder --dry-run --with-download " \
          "--without-error-report --without-release-url " \
-         "${bare_pkgs}"
+         "${rtems_pkgs}"
     ../source-builder/sb-set-builder --dry-run --with-download \
                                      --without-error-report \
                                      --without-release-url \
-                                     ${bare_pkgs}
+                                     ${rtems_pkgs}
+
+    # If git, svn or cvs exist the release fails.
     #
-    # If svn or cvs exist the release fails.
-    #
-    if [ -d sources/svn -o -d sources/cvs ]; then
+    if [ -d sources/git -o -d sources/svn -o -d sources/cvs ]; then
      echo "error: ${release} contains repositories and cannot be released."
      exit 1
     fi
     #
-    # If there are git repos create packages of them as they are.
+    # Clean out the packages we do not places in 'sources' we copied in..
     #
-    if [ -d sources/git ]; then
-     cd sources
-      cd git
-       for g in $(ls)
-       do
-        cd ${g}
-         hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
-         prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
-         echo "Packaging GIT repo: ${g} to ${prefix}"
-         git archive --format=tar --prefix=${prefix}/ ${hash} | xz > ../../${prefix}.tar.xz
-         cd ..
-       done
-       cd ..
+    for p in rtems-tools rtems
+    do
+     rm sources/${p}-${release}.tar.xz
+    done
+    cd ..    # rtems
+
+   #
+   # Fetch the source for 3rd party packages tools.
+   #
+   if [ -n "${bare_pkgs}" -a "${bare_pkgs}" != "None" ]; then
+    cd bare
+     export_source="${export_source} bare"
+     mkdir sources patches
+     echo "../source-builder/sb-set-builder --dry-run --with-download " \
+          "--without-error-report --without-release-url " \
+          "${bare_pkgs}"
+     ../source-builder/sb-set-builder --dry-run --with-download \
+                                      --without-error-report \
+                                      --without-release-url \
+                                      ${bare_pkgs}
+     #
+     # If svn or cvs exist the release fails.
+     #
+     if [ -d sources/svn -o -d sources/cvs ]; then
+      echo "error: ${release} contains repositories and cannot be released."
+      exit 1
+     fi
+     #
+     # If there are git repos create packages of them as they are.
+     #
+     if [ -d sources/git ]; then
+      cd sources
+       cd git
+        for g in $(ls)
+        do
+         cd ${g}
+          hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
+          prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
+          echo "Packaging GIT repo: ${g} to ${prefix}"
+          git archive --format=tar --prefix=${prefix}/ ${hash} | xz > ../../${prefix}.tar.xz
+          cd ..  # ${g}
+        done
+        cd ..   # git
        rm -rf git
-      cd ..
-    fi
-    cd ..
-  fi
-  #
-  # Export the sources and patches.
-  #
-  rm -rf ${top}/${release}/sources
-  mkdir ${top}/${release}/sources
-  for p in ${export_source}
-  do
-   cp ${p}/sources/* ${top}/${release}/sources/
-   cp ${p}/patches/* ${top}/${release}/sources/
-  done
-  cd ..
-
- cd ..
- rm -rf ${workspace}
-
- cd ${release}/sources
-  rm -f ${checksum}sum.txt
-  for f in $(ls -1)
-  do
-   if [ ! -d ${f} ]; then
-    csum=$(${checksum} -q ${f})
-    echo "${csum} ${f}" >> ${checksum}sum.txt
+       cd ..   # source
+     fi
+     cd ..   # ${bare}
    fi
-  done
-  cd ..
- cd ..
+   #
+   # Export the sources and patches.
+   #
+   rm -rf ${top}/${release}/sources
+   mkdir ${top}/${release}/sources
+   for p in ${export_source}
+   do
+    cp ${p}/sources/* ${top}/${release}/sources/
+    cp ${p}/patches/* ${top}/${release}/sources/
+   done
+   cd ..   # ${prefix}
+  cd ..   # ${workspace}
+
+  rm -rf ${workspace}
+
+  cd sources
+   rm -f ${checksum}sum.txt
+   for f in $(ls -1)
+   do
+    if [ ! -d ${f} ]; then
+     csum=$(${checksum} -q ${f})
+     echo "${csum} ${f}" >> ${checksum}sum.txt
+    fi
+   done
+   cd ..   # sources
+  cd ..   # ${release}
 
 echo "Created: ${release}/sources/${checksum}sum.txt"
 echo "Created: ${release}/sources"

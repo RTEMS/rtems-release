@@ -64,8 +64,10 @@ echo "git clone ${git_remote} ${git_local}"
 git clone ${git_remote} ${git_local}
 
 cd ${git_local}
- echo "git archive --format=tar --prefix=${prefix}/ origin/master"
- git archive --format=tar --prefix=${prefix}/ origin/master | \
+ echo "git fetch origin"
+ git fetch origin
+ echo "git archive --format=tar --prefix=${prefix}/ origin/${version}"
+ git archive --format=tar --prefix=${prefix}/ origin/${version} | \
      xz > ../${prefix}-unstamped.tar.xz
  cd ..
 

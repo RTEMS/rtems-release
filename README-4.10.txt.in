@@ -4,12 +4,12 @@ RTEMS Embedded Realtime Operating System
 Release: @RELEASE@
 Date   : @DATE@
 
-The Real-Time Executive for Multiprocessor Systems or RTEMS is an open
-source Real Time Operating System (RTOS) that supports open standard
-application programming interfaces (API) such as POSIX. It is used in
-space flight, medical, networking and many more embedded devices using
-processor architectures including ARM, PowerPC, SPARC, Intel, Blackfin,
-MIPS, Microblaze and more.
+The Real-Time Executive for Multiprocessor Systems or RTEMS is an open source
+Real Time Operating System (RTOS) that supports open standard application
+programming interfaces (API) such as POSIX. It is used in space flight,
+medical, networking and many more embedded devices using processor
+architectures including ARM, PowerPC, Intel, Blackfin, MIPS, Microblaze and
+more.
 
 This directory contains the source code for the RTEMS @VERSION@ operating
 system and tools. Please refer to the RTEMS Developers Wiki for the release
@@ -40,38 +40,9 @@ Release Files
  - contrib			     		Directory contains extra release related files.
  - rtems-@RELEASE@.tar.xz  		    	The RTEMS kernel source code.
  - rtems-source-builder-@RELEASE@.tar.xz	The RTEMS Source Builder source code.
- - rtems-tools-@RELEASE@.tar.xz			The RTEMS Tools source code.
- - rtems-docs-@RELEASE@.tar.xz			The RTEMS Documentation source.
+ - rtems-tools-@RELEASE@.tar.xz		The RTEMS Tools source code.
  - sha512sum.txt				The SHA512 checksums for this directory.
- - docs						The generated RTEMS documentation.
  - sources					The source code the tools for this release.
-
-RTEMS Documentation
-~~~~~~~~~~~~~~~~~~~
-
-The generated documentation can be found in the `docs` directory.
-
-The following manuals are available as compress HTML tar files or PDF:
-
- - RTEMS User Manual
-  - docs/rtems-docs-@RELEASE@-user.pdf
-  - docs/rtems-docs-@RELEASE@-user-html.tar.xz
-
- - RTEMS C User Manual
-  - docs/rtems-docs-@RELEASE@-c-user.pdf
-  - docs/rtems-docs-@RELEASE@-c-user-html.tar.xz
-
- - RTEMS POSIX User Manual
-  - docs/rtems-docs-@RELEASE@-posix-user.pdf
-  - docs/rtems-docs-@RELEASE@-posix-user-html.tar.xz
-
- - RTEMS Networking User Manual
-  - docs/rtems-docs-@RELEASE@-networking.pdf
-  - docs/rtems-docs-@RELEASE@-networking-html.tar.xz
-
- - RTEMS Shell User Manual
-  - docs/rtems-docs-@RELEASE@-shell.pdf
-  - docs/rtems-docs-@RELEASE@-shell-html.tar.xz
 
 Quick Guide to Building
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,7 +66,7 @@ The following builds RTEMS for the SPARC architecture:
  $ cd rtems-source-builder-@RELEASE@/rtems
  $ ../source-builder/sb-set-builder \
          --prefix=$HOME/development/rtems/@RELEASE@ \
-         @VERSION@/rtems-sparc
+	 @VERSION@/rtems-sparc
 
 To disable building the RTEMS Kernel add to the command line '--without-rtems'.
 
