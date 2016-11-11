@@ -63,14 +63,20 @@ checksum=sha512
 #
 # Defaults.
 #
+rtems_examples=yes
+rtems_libbsd=yes
 rtems_docs=yes
+rtems_docs_build=sphinx
 rtems_readme=README.txt.in
+rtems_readme_release_notes=
+rtems_release_conf=
 
 #
-# Version default settings.
+# Version configuration. Overrides defaults.
 #
-if [ -f rtems-release-defaults-${version} ]; then
- . rtems-release-defaults-${version}
+if [ -f rtems-release-${version}-conf ]; then
+ rtems_release_conf=rtems-release-${version}-conf
+ . rtems-release-${version}-conf
 fi
 
 build()
@@ -93,6 +99,12 @@ build rtems-source-builder ${version} ${revision}
 build rtems-tools          ${version} ${revision}
 build rtems                ${version} ${revision} rtems-release-kernel
 build rtems-source-builder ${version} ${revision} rtems-release-rsb-hashing
+if [ ${rtems_examples} = yes ]; then
+ build examples-v2         ${version} ${revision}
+fi
+if [ ${rtems_libbsd} = yes ]; then
+ build rtems-libbsd        ${version} ${revision}
+fi
 
 #
 # Documentation.
@@ -116,6 +128,13 @@ cat ${rtems_readme} | \
 	-e "s/@VERSION@/${version}/g" \
 	-e "s/@REVISION@/${revision}/g" \
 	-e "s/@DATE@/${now}/g" > ${release}/README.txt
+if [ -n "${rtems_readme_release_notes}" ]; then
+ echo >> ${release}/README.txt
+ echo "Release Notes" >> ${release}/README.txt
+ echo "~~~~~~~~~~~~~" >> ${release}/README.txt
+ echo >> ${release}/README.txt
+ echo "${rtems_readme_release_notes}" >> ${release}/README.txt
+fi
 echo >> ${release}/README.txt
 echo "RTEMS Architectures and BSPs" >> ${release}/README.txt
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> ${release}/README.txt
@@ -130,7 +149,7 @@ mkdir -p ${release}/contrib/releasing
 for f in README.txt \
 	 README.txt.in \
          rtems-release \
-	 rtems-release-defaults-4.10 \
+	 ${rtems_release_conf} \
 	 rtems-release-docs \
 	 rtems-release-kernel \
          rtems-release-package \

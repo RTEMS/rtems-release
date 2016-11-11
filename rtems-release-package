@@ -50,28 +50,69 @@ set -e
 echo "git clone ${git_remote} ${git_local}"
 git clone ${git_remote} ${git_local}
 
-stamped_tar=${prefix}-unstamped.tar.xz
+stamped_tar=${prefix}-unstamped
 
+#
+# Clone the repo and then check if there are any submodules.
+#
+# If there are submodules, exclude the ones we do not wish to package, eg the
+# whole of the FreeBSD source tree. For the ones to package get the commit
+# (treeish) for the branch we releasing and then create an archive. The
+# submodule archives are merged into the main archive once we have collected
+# them all.
+#
+#
 cd ${git_local}
  echo "git fetch origin"
  git fetch origin
+ git_submodules=$(git submodule | cut -w -f 2)
+ if [ -n "${git_submodules}" ]; then
+  echo "git submodules found ...."
+  git submodule init
+  for s in ${git_submodules}
+  do
+   ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
+   if [ "${ok}" != "no" ]; then
+    echo "git submodule update ${s}"
+    git submodule update ${s}
+    treeish=$(git ls-tree origin/${version} ${s} | cut -w -f 3)
+    cd ${s}
+     echo "git archive --format=tar --prefix=${prefix}/${s}/ ${treeish}"
+     git archive --format=tar --prefix=${prefix}/${s}/ ${treeish} > \
+ 	                                  ../../${stamped_tar}-${s}.tar
+     cd ..   # ${s}
+   else
+    echo "git submodule ${s} excluded"
+   fi
+  done
+ fi
  echo "git archive --format=tar --prefix=${prefix}/ origin/${version}"
- git archive --format=tar --prefix=${prefix}/ origin/${version} | \
-     xz > ../${stamped_tar}
- cd ..
+ git archive --format=tar --prefix=${prefix}/ origin/${version} > \
+                                          ../${stamped_tar}.tar
+ cd ..   # ${git_local}
 
-if [ ! -f ${stamped_tar} ]; then
+if [ ! -f ${stamped_tar}.tar ]; then
  echo "error: git archive failed, no tar file"
  exit 1
 fi
-echo "tar Jxf ${stamped_tar}"
-tar Jxf ${stamped_tar}
+echo "tar Jxf ${stamped_tar}.tar"
+tar Jxf ${stamped_tar}.tar
+if [ -n "${git_submodules}" ]; then
+ for s in ${git_submodules}
+ do
+   ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
+   if [ "${ok}" != "no" ]; then
+    echo "tar Jxf ${stamped_tar}-${s}.tar"
+    tar Jxf ${stamped_tar}-${s}.tar
+   fi
+ done
+fi
 
 cd ${prefix}
  echo "Creating VERSION: ${release}"
  echo "[version]" > VERSION
  echo "release = ${release}" >> VERSION
- cd ..
+ cd ..   # ${prefix}
 
 #
 # Run the worker script if provided. It can perform any package

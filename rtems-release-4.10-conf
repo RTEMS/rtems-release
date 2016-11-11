@@ -32,5 +32,6 @@
 #
 # The script is the defaults for 4.10.
 #
+rtems_libbsd=no
 rtems_docs=no
 rtems_readme=README-4.10.txt.in

@@ -1,3 +1,5 @@
+#! /bin/sh
+#
 # RTEMS Tools Project (http://www.rtems.org/)
 # Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
@@ -28,63 +30,13 @@
 #
 
 #
-# This script starts the packaging.
+# The script is the overridded configuration for 4.11.
 #
+rtems_readme_release_notes="$(cat <<- EOF
+- The rtems-libbsd package is experimental in this release.
+  You need to closely evaluate it's suitablility for production.
 
-#
-# Keep the top where we start.
-#
-top=${PWD}
-
-#
-# The package, version and revision amd maybe a worker script.
-#
-if [ $# -lt 3 -o $# -gt 4 ]; then
-    echo "error: must be 3 or 4 arguments, the package, version," \
-	 "release and optionally a worker script."
- exit 1
-fi
-package=$1
-version=$2
-revision=$3
-if [ $# -eq 4 ]; then
- if [ ! -x ${top}/$4 ]; then
-  echo "error: cannot find the worker: $4"
-  exit 1
- fi
- worker=${top}/$4
-else
- worker=
-fi
-
-release=${version}.${revision}
-prefix=${package}-${release}
-
-git_remote=git://git.rtems.org/${package}.git
-git_local=${package}-release-${release}.git
-git_submodules_excludes="freebsd-org"
-
-workspace=ws-${package}
-
-checksum=sha512
-
-echo "Package: ${package}"
-echo "Release: ${release}"
-echo "Repo   : ${git_remote}"
-
-if [ ! -e ${release} ]; then
- mkdir ${release}
-else
- if [ ! -d ${release} ]; then
-  echo "error: ${release} exists and is not a directory."
-  exit 1
- fi
-fi
-
-#
-# Work in a package specific directory in the release directory.
-#
-cd ${release}
-rm -rf ${workspace}
-mkdir ${workspace}
-cd ${workspace}
+- SMP support is experimental in this release and we recommend a
+  later release.
+EOF
+)"

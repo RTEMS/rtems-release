@@ -42,6 +42,8 @@ Release Files
  - rtems-source-builder-@RELEASE@.tar.xz	The RTEMS Source Builder source code.
  - rtems-tools-@RELEASE@.tar.xz			The RTEMS Tools source code.
  - rtems-docs-@RELEASE@.tar.xz			The RTEMS Documentation source.
+ - rtems-libbsd-@RELEASE@.tar.xz		The RTEMS LibBSD source.
+ - examples-v2-@RELEASE@.tar.xz			The RTEMS Examples source.
  - sha512sum.txt				The SHA512 checksums for this directory.
  - docs						The generated RTEMS documentation.
  - sources					The source code the tools for this release.
