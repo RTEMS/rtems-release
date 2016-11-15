@@ -1,0 +1,128 @@
+#! /bin/sh
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2016 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# This is the top level RTEMS release script. Supply the version and and the
+# release.
+#
+
+echo "RTEMS Release, v0.1"
+
+#
+# Stop on any error
+#
+set -e
+
+#
+# Keep the top where we start.
+#
+top=${PWD}
+
+#
+# The user, version and revision.
+#
+if [ $# -ne 3 ]; then
+ echo "error: must be 3 arguments, your git user name, the release and version."
+ exit 1
+fi
+user=$1
+version=$2
+revision=$3
+
+release=${version}.${revision}
+
+#
+# Enable to push.
+#
+push=no
+
+#
+# Repositories to tag.
+#
+rtems_repos="${rtems_repos} rtems-release.git"
+rtems_repos="${rtems_repos} rtems-source-builder.git"
+rtems_repos="${rtems_repos} rtems-tools.git"
+rtems_repos="${rtems_repos} rtems.git"
+rtems_repos="${rtems_repos} rtems-docs.git"
+rtems_repos="${rtems_repos} rtems-libbsd.git"
+rtems_repos="${rtems_repos} examples-v2.git"
+
+#
+# The tagging workspace.
+#
+ws_tag=${release}-tagged
+
+#
+# Version configuration. Overrides defaults.
+#
+if [ -f rtems-release-${version}-conf ]; then
+ rtems_release_conf=rtems-release-${version}-conf
+ . rtems-release-${version}-conf
+fi
+
+#
+# Clean the tagging directory away.
+#
+rm -rf ${ws_tag}
+mkdir ${ws_tag}
+
+#
+# Clone and tag the repositories.
+#
+cd ${ws_tag}
+ for r in ${rtems_repos}
+ do
+  ref=origin/${version}
+  #
+  # We tag master for the rtems-release.git repo. No branchs.
+  #
+  if [ ${r} = rtems-release.git ]; then
+   ref=master
+  fi
+  echo "git clone ssh://${user}@dispatch.rtems.org/data/git/${r} ${r}"
+  git clone ssh://${user}@dispatch.rtems.org/data/git/${r} ${r}
+  cd ${r}
+   echo "git tag ${release} ${ref}"
+   git  tag ${release} ${ref}
+   cd ..
+ done
+
+ if [ ${push} = yes ]; then
+  for r in ${rtems_repos}
+  do
+   cd ${r}
+    echo "git push --follow-tags"
+    git push --follow-tags
+    cd ..
+  done
+ cd ..
+
+exit 0
