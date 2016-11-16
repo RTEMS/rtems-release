@@ -119,8 +119,8 @@ cd ${ws_tag}
   for r in ${rtems_repos}
   do
    cd ${r}
-    echo "git push --follow-tags"
-    git push --follow-tags
+    echo "git push origin ${release}"
+    git push origin ${release}
     cd ..
   done
  cd ..
