@@ -62,7 +62,7 @@ release=${version}.${revision}
 #
 # Enable to push.
 #
-push=no
+push=yes
 
 #
 # Repositories to tag.
@@ -123,6 +123,7 @@ cd ${ws_tag}
     git push origin ${release}
     cd ..
   done
+ fi
  cd ..
 
 exit 0
