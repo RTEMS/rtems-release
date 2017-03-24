@@ -1,0 +1,134 @@
+#! /bin/sh
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2017 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# This worker script to build the doco.
+#
+echo "RTEMS Release Notes builder, v0.1"
+
+#
+# Stop on any error
+#
+set -e
+
+#
+# Only build if wkhtmltopdf is present on the system.
+#
+if [ "`command -v wkhtmltopdf`"no = no ]; then
+ echo "warning: release notes not built: no wkhtmltopdf"
+ exit 0
+fi
+
+#
+# Only build if gs is present on the system.
+#
+if [ "`command -v gs`"no = no ]; then
+ echo "warning: release notes not built: no gs"
+ exit 0
+fi
+
+#
+# Common package start. No git repo the data source is Trac.
+#
+rtems_git_repo=no
+. ./rtems-release-package-start
+
+#
+# The workspace pwd
+#
+ws_pwd=${PWD}
+
+#
+# The release notes are all held in the wiki
+#
+release_pages="https://devel.rtems.org/wiki/Release/"
+
+#
+# Set up the wkhtmltopdf defaults.
+#
+page_options="--print-media-type --zoom 0.8"
+header="--header-right [page]/[toPage] --header-font-size 10"
+footer="--footer-left [webpage] --footer-font-size 10"
+
+echo "Creating release notes"
+
+rel_html=""
+rel_html_line="<div>@RELEASE@</div>"
+rev=0
+while [ ${rev} -le ${revision_no} ]
+do
+  rel=${version}.${rev}
+  rel_html="$(echo ${rel_html_line} | sed -e "s/@RELEASE@/${rel}/g")${rel_html}"
+  rev=$(expr ${rev} + 1)
+done
+rel_html=$(echo ${rel_html} | sed -e 's/\./\\\./g' -e  's/\//\\\//g')
+
+echo "Create the coverpage"
+cp ${top}/rtems-release-notes-coverpage/* .
+cat rtems-release-notes-coverpage.html.in | \
+    sed -e "s/@RELEASE@/${release}/g" \
+	-e "s/@VERSION@/${version}/g" \
+	-e "s/@REVISION@/${revision}/g" \
+	-e "s/@DATE@/${now}/g" \
+	-e "s/@REVISIONS@/${rel_html}/g" > rtems-release-notes-coverpage.html
+wkhtmltopdf file://${ws_pwd}/rtems-release-notes-coverpage.html \
+	    --disable-smart-shrinking \
+	    ${page_options} \
+	    --no-header-line \
+	    --no-footer-line cp.pdf
+
+pdfs=""
+rev=0
+while [ ${rev} -le ${revision_no} ]
+do
+  rel=${version}.${rev}
+  echo "Creating the ${rel} PDF"
+  wkhtmltopdf --user-style-sheet file://${ws_pwd}/trac-rtems-style.html \
+	      -L 5mm -R 5mm \
+	      ${release_pages}/${version}/${version}.${rev} \
+              ${page_options} \
+              --header-left "RTEMS ${rel} Release Notes" ${header} \
+              ${footer} \
+              p${rev}.pdf
+  pdfs="p${rev}.pdf ${pdfs}"
+  rev=$(expr ${rev} + 1)
+done
+
+gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=../rtems-${release}-release-notes.pdf cp.pdf ${pdfs}
+
+echo "Created: ${release}/rtems-${release}-release-notes.pdf cp.pdf"
+
+#
+# Comman package end.
+#
+. ${top}/rtems-release-package-end
+
+exit 0

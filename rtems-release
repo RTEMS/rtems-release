@@ -67,9 +67,16 @@ rtems_examples=yes
 rtems_libbsd=yes
 rtems_docs=yes
 rtems_docs_build=sphinx
+rtems_release_notes=yes
 rtems_readme=README.txt.in
 rtems_readme_release_notes=
 rtems_release_conf=
+
+#
+# The date stamp
+#
+now=$(date +"%d %B %Y")
+export now
 
 #
 # Version configuration. Overrides defaults.
@@ -100,7 +107,9 @@ build rtems-tools          ${version} ${revision}
 build rtems                ${version} ${revision} rtems-release-kernel
 build rtems-source-builder ${version} ${revision} rtems-release-rsb-hashing
 if [ ${rtems_examples} = yes ]; then
- build examples-v2         ${version} ${revision}
+  build examples-v2         ${version} ${revision}
+  # Hack around the repo naming.
+  mv examples-v2-${release}.tar.xz rtems-examples-v2-${release}.tar.xz
 fi
 if [ ${rtems_libbsd} = yes ]; then
  build rtems-libbsd        ${version} ${revision}
@@ -114,6 +123,13 @@ if [ ${rtems_docs} = yes ]; then
 fi
 
 #
+# Release notes.
+#
+if [ ${rtems_release_notes} = yes ]; then
+ ./rtems-release-notes rtems-release-notes ${version} ${revision}
+fi
+
+#
 # The sources is always last.
 #
 echo "Collect tools sources"
@@ -122,7 +138,6 @@ echo "Collect tools sources"
 #
 # Create the README.txt
 #
-now=$(date +"%d %B %Y")
 cat ${rtems_readme} | \
     sed -e "s/@RELEASE@/${release}/g" \
 	-e "s/@VERSION@/${version}/g" \

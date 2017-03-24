@@ -1,0 +1,41 @@
+<html lang="en">
+  <head>
+    <style>
+      // Table row skip break
+      table {
+        // Super-duper fix for PDF table headers
+        width: 100%;
+        clear: both;
+        border-collapse: collapse;
+        table-layout: auto;
+        thead, tfoot {
+          // Commented to avoid forget about that fix
+          //display: table-row-group;
+        }
+        tr {
+          page-break-inside: avoid;
+        }
+      }
+
+      listing {
+        page-break-inside: avoid;
+      }
+
+      table thead {
+        display: table-row-group;
+      }
+
+      trac-content,table {
+        word-break: break-word;
+      }
+
+      @media print {
+        .wikipage, .main {
+          overflow: visible !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+  </body>
+</html>

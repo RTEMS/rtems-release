@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <title>RTEMS - @RELEASE@ Release Notes</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <meta name="description" content="" />
+  <meta name="keywords" content="" />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <link rel="stylesheet" href="bootstrap.min.css" media="print"/>
+  <script type="text/javascript" src="bootstrap.min.js"></script>
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="rtems.css" />
+ </head>
+ <body>
+   <br>
+   <br>
+   <br>
+   <div class="container">
+     <div class"row">
+       <div class="col-xs-6 col-md-3">
+	 <img class="img-responsive" alt="Header logo" src="rtemslogo.png"/>
+       </div>
+       <div class="col-xs-6 col-md-3">
+	 <h1>RTEMS - @RELEASE@ Release Notes</h1>
+	 @DATE@
+       </div>
+     </div>
+   </div>
+   <br>
+   <br>
+   <div class="panel panel-default">
+     <div class="panel-heading">
+       RTEMS @VERSION@ Series Release Notes
+     </div>
+     <div class="panel-body">
+       These notes cover the dot releases:
+       <div class="container">
+	 @REVISIONS@
+       </div>
+     </div>
+   </div>
+   <footer class="footer">
+     <div class="container">
+       Copyright 2017 RTEMS Project
+     </div>
+   </footer>
+ </body>
+</html>

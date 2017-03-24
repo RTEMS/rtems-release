@@ -72,10 +72,33 @@ cd ${git_local}
  cd ..
 
 #
+# Stamp the source and package
+#
+echo "tar Jxf ../${prefix}-unstamped.tar.xz"
+tar Jxf ${prefix}-unstamped.tar.xz
+
+cd ${prefix}
+ #
+ # This is a hack until I add support for the VERSION file created below.
+ #
+ cat wscript | sed -e "s/^version[[:space:]].*=.*$/version = '${release}'/g" > wscript.tmp
+ rm -f wscript
+ mv wscript.tmp wscript
+ echo "Creating VERSION: ${release}"
+ echo "[version]" > VERSION
+ echo "release = ${release}" >> VERSION
+ cd ..
+
+echo "tar cf - ${prefix}"
+tar cf - ${prefix} | xz > ../${prefix}.tar.xz
+
+echo "Created: ${release}/${prefix}.tar.xz"
+
+#
 # Build the docs.
 #
 mkdir install
-cd ${git_local}
+cd ${prefix}
  ./waf distclean configure --prefix=../install/${prefix} --pdf --singlehtml
  ./waf build install
  cd ..
@@ -111,23 +134,6 @@ cd install
   tar cf - ${base}/${manual} > ${top}/${release}/docs/rtems-${release}-${manual}-html.tar.xz
  done
  cd ..
-
-#
-# Stamp the source and package
-#
-echo "tar Jxf ../${prefix}-unstamped.tar.xz"
-tar Jxf ${prefix}-unstamped.tar.xz
-
-cd ${prefix}
- echo "Creating VERSION: ${release}"
- echo "[version]" > VERSION
- echo "release = ${release}" >> VERSION
- cd ..
-
-echo "tar cf - ${prefix}"
-tar cf - ${prefix} | xz > ../${prefix}.tar.xz
-
-echo "Created: ${release}/${prefix}.tar.xz"
 
 #
 # Comman package end.

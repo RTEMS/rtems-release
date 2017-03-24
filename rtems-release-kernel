@@ -118,4 +118,28 @@ rm -rf ${rsb} ${at}
 
 echo "Bootstrap complete."
 
+#
+# Only build doxygen output if present on the system.
+#
+if [ "`command -v doxygen`"no = no ]; then
+ echo "warning: doxygen not built: doxygen not found"
+ exit 0
+fi
+
+#
+# Doxygen
+#
+echo "Creating: Doxyfile"
+top_srcdir=$(echo ${prefix}/cpukit | sed -e 's/\//\\\//g')
+cat ${prefix}/cpukit/Doxyfile.in | \
+    sed -e "s/@PACKAGE_VERSION@/${release}/g" \
+	-e "s/@top_srcdir@/${top_srcdir}/g" \
+	-e "s/@PERL@/perl/g" \
+	-e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" > Doxyfile
+doxygen Doxyfile
+
+echo "Creating: rtems-doxygen-${release}.tar.xz"
+mv cpukit_doxy/html rtems-doxygen-${release}
+tar cf - ${prefix}-doxygen | xz > ../rtems-doxygen-${release}.tar.xz
+
 exit 0

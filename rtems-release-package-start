@@ -57,12 +57,19 @@ else
  worker=
 fi
 
+revision_no=$(echo ${revision} | sed -e 's/\-.*$//')
 release=${version}.${revision}
 prefix=${package}-${release}
 
-git_remote=git://git.rtems.org/${package}.git
-git_local=${package}-release-${release}.git
-git_submodules_excludes="freebsd-org"
+if [ -z "${rtems_git_repo}" ]; then
+ rtems_git_repo=yes
+fi
+
+if [ ${rtems_git_repo} = yes ]; then
+ git_remote=git://git.rtems.org/${package}.git
+ git_local=${package}-release-${release}.git
+ git_submodules_excludes="freebsd-org"
+fi
 
 workspace=ws-${package}
 
@@ -70,7 +77,9 @@ checksum=sha512
 
 echo "Package: ${package}"
 echo "Release: ${release}"
-echo "Repo   : ${git_remote}"
+if [ ${rtems_git_repo} = yes ]; then
+ echo "Repo   : ${git_remote}"
+fi
 
 if [ ! -e ${release} ]; then
  mkdir ${release}
