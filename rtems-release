@@ -109,7 +109,7 @@ build rtems-source-builder ${version} ${revision} rtems-release-rsb-hashing
 if [ ${rtems_examples} = yes ]; then
   build examples-v2         ${version} ${revision}
   # Hack around the repo naming.
-  mv examples-v2-${release}.tar.xz rtems-examples-v2-${release}.tar.xz
+  mv ${release}/examples-v2-${release}.tar.xz ${release}/rtems-examples-v2-${release}.tar.xz
 fi
 if [ ${rtems_libbsd} = yes ]; then
  build rtems-libbsd        ${version} ${revision}
