@@ -36,14 +36,9 @@
 echo "RTEMS Release Sources, v0.1"
 
 #
-# Stop on any error
+# Defaults.
 #
-set -e
-
-#
-# Keep the top where we start.
-#
-top=${PWD}
+. ${release_top}/rtems-release-defaults
 
 #
 # The version and revision.

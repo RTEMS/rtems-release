@@ -37,14 +37,14 @@
 echo "RTEMS Release, v0.1"
 
 #
-# Stop on any error
+# Global release top path.
 #
-set -e
+export release_top=${PWD}
 
 #
-# Keep the top where we start.
+# Defaults.
 #
-top=${PWD}
+. ${release_top}/rtems-release-defaults
 
 #
 # The version and revision.
@@ -57,34 +57,6 @@ version=$1
 revision=$2
 
 release=${version}.${revision}
-
-checksum=sha512
-
-#
-# Defaults.
-#
-rtems_examples=yes
-rtems_libbsd=yes
-rtems_docs=yes
-rtems_docs_build=sphinx
-rtems_release_notes=yes
-rtems_readme=README.txt.in
-rtems_readme_release_notes=
-rtems_release_conf=
-
-#
-# The date stamp
-#
-now=$(date +"%d %B %Y")
-export now
-
-#
-# Version configuration. Overrides defaults.
-#
-if [ -f rtems-release-${version}-conf ]; then
- rtems_release_conf=rtems-release-${version}-conf
- . rtems-release-${version}-conf
-fi
 
 build()
 {
@@ -105,7 +77,7 @@ mkdir ${release}
 build rtems-source-builder ${version} ${revision}
 build rtems-tools          ${version} ${revision}
 build rtems                ${version} ${revision} rtems-release-kernel
-build rtems-source-builder ${version} ${revision} rtems-release-rsb-hashing
+build rtems-source-builder ${version} ${revision} rtems-release-rsb-version
 if [ ${rtems_examples} = yes ]; then
   build examples-v2         ${version} ${revision}
   # Hack around the repo naming.
@@ -170,7 +142,7 @@ for f in README.txt \
          rtems-release-package \
          rtems-release-package-end \
          rtems-release-package-start \
-	 rtems-release-rsb-hashing \
+	 rtems-release-rsb-version \
          rtems-release-sources \
 	 rtems-source-packages
 do

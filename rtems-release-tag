@@ -37,14 +37,14 @@
 echo "RTEMS Release, v0.1"
 
 #
-# Stop on any error
+# Global release top path.
 #
-set -e
+export release_top=${PWD}
 
 #
-# Keep the top where we start.
+# Defaults.
 #
-top=${PWD}
+. ${release_top}/rtems-release-defaults
 
 #
 # The user, version and revision.

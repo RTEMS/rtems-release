@@ -35,9 +35,9 @@
 echo "RTEMS Documentation Release builder, v0.1"
 
 #
-# Stop on any error
+# Defaults.
 #
-set -e
+. ${release_top}/rtems-release-defaults
 
 #
 # Only build if sphinx-build is present on the system.

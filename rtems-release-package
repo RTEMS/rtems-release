@@ -35,9 +35,9 @@
 echo "RTEMS Release Package, v0.1"
 
 #
-# Stop on any error
+# Defaults.
 #
-set -e
+. ${release_top}/rtems-release-defaults
 
 #
 # Common package start.
