@@ -120,13 +120,6 @@ cd ${release}
      echo "error: ${release} contains repositories and cannot be released."
      exit 1
     fi
-    #
-    # Clean out the packages we do not places in 'sources' we copied in..
-    #
-    for p in rtems-tools rtems
-    do
-     rm sources/${p}-${release}.tar.xz
-    done
     cd ..    # rtems
 
    #
