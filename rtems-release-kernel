@@ -126,11 +126,14 @@ fi
 #
 echo "Creating: Doxyfile"
 top_srcdir=$(echo ${prefix}/cpukit | sed -e 's/\//\\\//g')
+perl=$(which perl | sed -e 's/\//\\\//g')
 cat ${prefix}/cpukit/Doxyfile.in | \
     sed -e "s/@PACKAGE_VERSION@/${release}/g" \
 	-e "s/@top_srcdir@/${top_srcdir}/g" \
-	-e "s/@PERL@/perl/g" \
-	-e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" > Doxyfile
+	-e "s/@PERL@/${perl}/g" \
+	-e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" \
+	-e "s/^HAVE_DOT[[:blank:]]/DOT_NUM_THREADS = 5\\
+HAVE_DOT /g"> Doxyfile
 doxygen Doxyfile
 
 echo "Creating: rtems-doxygen-${release}.tar.${comp_ext}"
