@@ -68,14 +68,14 @@ cd ${git_local}
  git fetch origin
  echo "git archive --format=tar --prefix=${prefix}/ origin/${version}"
  git archive --format=tar --prefix=${prefix}/ origin/${version} | \
-     xz > ../${prefix}-unstamped.tar.xz
+     ${comp} > ../${prefix}-unstamped.tar.${comp_ext}
  cd ..
 
 #
 # Stamp the source and package
 #
-echo "tar Jxf ../${prefix}-unstamped.tar.xz"
-tar Jxf ${prefix}-unstamped.tar.xz
+echo "tar ${comp_tar}xf ../${prefix}-unstamped.tar.${comp_ext}"
+tar ${comp_tar}xf ${prefix}-unstamped.tar.${comp_ext}
 
 cd ${prefix}
  #
@@ -90,9 +90,9 @@ cd ${prefix}
  cd ..
 
 echo "tar cf - ${prefix}"
-tar cf - ${prefix} | xz > ../${prefix}.tar.xz
+tar cf - ${prefix} | ${comp} > ../${prefix}.tar.${comp_ext}
 
-echo "Created: ${release}/${prefix}.tar.xz"
+echo "Created: ${release}/${prefix}.tar.${comp_ext}"
 
 #
 # Build the docs.
@@ -108,8 +108,8 @@ cd ${prefix}
 #
 mkdir ${top}/${release}/docs
 cd install
- echo "Creating DOC all rtems-${release}-docs-all.tar.xz"
- tar cf - * > ${top}/${release}/docs/rtems-${release}-docs-all.tar.xz
+ echo "Creating DOC all rtems-${release}-docs-all.tar.${comp_ext}"
+ tar cf - * | ${comp} > ${top}/${release}/docs/rtems-${release}-docs-all.tar.${comp_ext}
  for p in $(find . -name \*.pdf)
  do
   manual=$(echo $(basename $p) | sed -e "s/\\..*//")
@@ -117,21 +117,22 @@ cd install
   #
   # Compress the PDF and move it out of the way.
   #
-  echo "Creating PDF rtems-${release}-${manual}.pdf.xz"
-  xz $p
-  mv $p.xz ${top}/${release}/docs/rtems-${release}-${manual}.pdf.xz
+  echo "Creating PDF rtems-${release}-${manual}.pdf.${comp_ext}"
+  ${comp} $p
+  mv $p.${comp_ext} ${top}/${release}/docs/rtems-${release}-${manual}.pdf.${comp_ext}
   #
   # Create the single html manual
   #
-  echo "Creating SingleHTML rtems-${release}-${manual}.html.xz"
+  echo "Creating SingleHTML rtems-${release}-${manual}.html.${comp_ext}"
   mv ${base}/${manual}.html ${base}/rtems-${release}-${manual}.html
-  xz ${base}/rtems-${release}-${manual}.html
-  mv ${base}/rtems-${release}-${manual}.html.xz ${top}/${release}/docs/.
+  ${comp} ${base}/rtems-${release}-${manual}.html
+  mv ${base}/rtems-${release}-${manual}.html.${comp_ext} ${top}/${release}/docs/.
   #
   # Tar the multi-page html and install.
   #
-  echo "Creating HTML rtems-${release}-${manual}-html.tar.xz"
-  tar cf - ${base}/${manual} > ${top}/${release}/docs/rtems-${release}-${manual}-html.tar.xz
+  echo "Creating HTML rtems-${release}-${manual}-html.tar.${comp_ext}"
+  tar cf - ${base}/${manual} | \
+      ${comp} > ${top}/${release}/docs/rtems-${release}-${manual}-html.tar.${comp_ext}
  done
  cd ..
 

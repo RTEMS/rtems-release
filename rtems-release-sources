@@ -84,8 +84,8 @@ cd ${release}
  mkdir ${workspace}
  cd ${workspace}
 
-  echo "tar Jxf ../${prefix}.tar.xz"
-  tar Jxf ../${prefix}.tar.xz
+  echo "tar ${comp_tar}xf ../${prefix}.tar.${comp_ext}"
+  tar ${comp_tar}xf ../${prefix}.tar.${comp_ext}
 
   #
   # Get the RSB to download the source we need to release. This is 100% of the
@@ -101,7 +101,7 @@ cd ${release}
     #
     for p in rtems-tools rtems
     do
-     cp ${top}/${release}/${p}-${release}.tar.xz sources/
+     cp ${top}/${release}/${p}-${release}.tar.${comp_ext} sources/
     done
     #
     # Fetch the source for RTEMS tools.
@@ -155,7 +155,7 @@ cd ${release}
           hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
           prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
           echo "Packaging GIT repo: ${g} to ${prefix}"
-          git archive --format=tar --prefix=${prefix}/ ${hash} | xz > ../../${prefix}.tar.xz
+          git archive --format=tar --prefix=${prefix}/ ${hash} | ${comp} > ../../${prefix}.tar.${comp_ext}
           cd ..  # ${g}
         done
         cd ..   # git

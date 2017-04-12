@@ -48,6 +48,13 @@ top=${PWD}
 checksum=sha512
 
 #
+# Default compression and options plus file suffix.
+#
+comp=xz --threads=0
+comp_ext=xz
+comp_tar=J
+
+#
 # Defaults.
 #
 rtems_examples=yes

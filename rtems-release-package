@@ -127,9 +127,9 @@ fi
 # The '..' is the release directory.
 #
 echo "tar cf - ${prefix}"
-tar cf - ${prefix} | xz > ../${prefix}.tar.xz
+tar cf - ${prefix} | ${comp} > ../${prefix}.tar.${comp_ext}
 
-echo "Created: ${release}/${prefix}.tar.xz"
+echo "Created: ${release}/${prefix}.tar.${comp_ext}"
 
 #
 # Comman package end.

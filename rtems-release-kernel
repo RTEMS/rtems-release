@@ -62,8 +62,8 @@ echo "Release: ${release}"
 # Unpack the released RSB.
 #
 rsb=rtems-source-builder-${release}
-echo "tar Jxf ../${rsb}.tar.xz"
-tar Jxf ../${rsb}.tar.xz
+echo "tar ${comp_tar}xf ../${rsb}.tar.${comp_ext}"
+tar ${comp_tar}xf ../${rsb}.tar.${comp_ext}
 
 #
 # Build autoconf and automake.
@@ -133,8 +133,9 @@ cat ${prefix}/cpukit/Doxyfile.in | \
 	-e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" > Doxyfile
 doxygen Doxyfile
 
-echo "Creating: rtems-doxygen-${release}.tar.xz"
+echo "Creating: rtems-doxygen-${release}.tar.${comp_ext}"
 mv cpukit_doxy/html rtems-doxygen-${release}
-tar cf - rtems-doxygen-${release} | xz > ../rtems-doxygen-${release}.tar.xz
+tar cf - rtems-doxygen-${release} | \
+    ${comp} > ../rtems-doxygen-${release}.tar.${comp_ext}
 
 exit 0
