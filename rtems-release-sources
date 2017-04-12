@@ -128,7 +128,9 @@ cd ${release}
     #
     for d in git svn cvs
     do
-     find sources/${d} -type d -empty -delete
+     if [ -e sources/${d} ]; then
+      find sources/${d} -type d -empty -delete
+     fi
     done
     #
     # If git, svn or cvs exist the release fails.
@@ -158,7 +160,9 @@ cd ${release}
      #
      for d in git svn cvs
      do
-      find sources/${d} -type d -empty -delete
+      if [ -e sources/${d} ]; then
+       find sources/${d} -type d -empty -delete
+      fi
      done
      #
      # If svn or cvs exist the release fails. Git is ok.
