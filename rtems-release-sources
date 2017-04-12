@@ -113,7 +113,24 @@ cd ${release}
                                      --without-error-report \
                                      --without-release-url \
                                      ${rtems_pkgs}
-
+    #
+    # Remove the top level packages because they do not have a VERSION file.
+    #
+    # These packages may or will be referencing git so remove those as well.
+    #
+    for p in rtems-tools rtems
+    do
+     rm sources/${p}-${release}.tar.${comp_ext}
+     rm -rf sources/git/${p}.git
+    done
+    #
+    # Remove the git, svn or cvs directory if empty.
+    #
+    for d in git svn cvs
+    do
+     find sources/${d} -type d -empty -delete
+    done
+    #
     # If git, svn or cvs exist the release fails.
     #
     if [ -d sources/git -o -d sources/svn -o -d sources/cvs ]; then
@@ -137,7 +154,14 @@ cd ${release}
                                       --without-release-url \
                                       ${bare_pkgs}
      #
-     # If svn or cvs exist the release fails.
+     # Remove the git, svn or cvs directory if empty.
+     #
+     for d in git svn cvs
+     do
+      find sources/${d} -type d -empty -delete
+     done
+     #
+     # If svn or cvs exist the release fails. Git is ok.
      #
      if [ -d sources/svn -o -d sources/cvs ]; then
       echo "error: ${release} contains repositories and cannot be released."
@@ -178,6 +202,16 @@ cd ${release}
   cd ..   # ${workspace}
 
   rm -rf ${workspace}
+
+  #
+  # Copy the stamped packages from the top level release directory to the
+  # sources directory. The RSB requires all source be in the `sources`
+  # directory under the release URL.
+  #
+  for p in rtems-tools rtems
+  do
+   cp ${p}-${release}.tar.${comp_ext} sources/${p}-${release}.tar.${comp_ext}
+  done
 
   cd sources
    rm -f ${checksum}sum.txt
