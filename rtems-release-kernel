@@ -132,7 +132,7 @@ cat ${prefix}/cpukit/Doxyfile.in | \
 	-e "s/@top_srcdir@/${top_srcdir}/g" \
 	-e "s/@PERL@/${perl}/g" \
 	-e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" \
-	-e "s/^HAVE_DOT[[:blank:]]/DOT_NUM_THREADS = 5\\
+	-e "s/^HAVE_DOT[[:blank:]]/DOT_NUM_THREADS = 1\\
 HAVE_DOT /g"> Doxyfile
 doxygen Doxyfile
 
