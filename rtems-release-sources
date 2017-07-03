@@ -183,7 +183,8 @@ cd ${release}
           hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
           prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
           echo "Packaging GIT repo: ${g} to ${prefix}"
-          git archive --format=tar --prefix=${prefix}/ ${hash} | ${comp} > ../../${prefix}.tar.${comp_ext}
+          git archive --format=tar --prefix=${prefix}/ ${hash} | \
+	      ${comp} > ../../${prefix}.tar.${comp_ext}
           cd ..  # ${g}
         done
         cd ..   # git
