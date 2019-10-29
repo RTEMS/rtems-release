@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -32,7 +32,8 @@
 #
 # This script packages a package in a tar file.
 #
-echo "RTEMS Release Package, v0.1"
+. ${release_top}/rtems-release-version
+echo "RTEMS Release Package, v${rtems_release_version}"
 
 #
 # Defaults.
@@ -65,6 +66,11 @@ stamped_tar=${prefix}-unstamped
 cd ${git_local}
  echo "git fetch origin"
  git fetch origin
+ # Get the remote branch. If the release branch is not found use master.
+ remote_branch=$(git branch --remote | grep ${version} | tr -d "[:space:]")
+ if [ -z "${remote_branch}" ]; then
+  remote_branch="master"
+ fi
  git_submodules=$(git submodule | cut -w -f 2)
  if [ -n "${git_submodules}" ]; then
   echo "git submodules found ...."
@@ -75,7 +81,7 @@ cd ${git_local}
    if [ "${ok}" != "no" ]; then
     echo "git submodule update ${s}"
     git submodule update ${s}
-    treeish=$(git ls-tree origin/${version} ${s} | cut -w -f 3)
+    treeish=$(git ls-tree ${remote_branch} ${s} | cut -w -f 3)
     cd ${s}
      echo "git archive --format=tar --prefix=${prefix}/${s}/ ${treeish}"
      git archive --format=tar --prefix=${prefix}/${s}/ ${treeish} > \
@@ -86,8 +92,8 @@ cd ${git_local}
    fi
   done
  fi
- echo "git archive --format=tar --prefix=${prefix}/ origin/${version}"
- git archive --format=tar --prefix=${prefix}/ origin/${version} > \
+ echo "git archive --format=tar --prefix=${prefix}/ ${remote_branch}"
+ git archive --format=tar --prefix=${prefix}/ ${remote_branch} > \
                                           ../${stamped_tar}.tar
  cd ..   # ${git_local}
 

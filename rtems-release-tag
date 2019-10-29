@@ -33,8 +33,8 @@
 # This is the top level RTEMS release script. Supply the version and and the
 # release.
 #
-
-echo "RTEMS Release, v0.1"
+. ./rtems-release-version
+echo "RTEMS Release, v${rtems_release_version}"
 
 #
 # Global release top path.

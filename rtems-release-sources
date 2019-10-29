@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -32,8 +32,8 @@
 #
 # The script collects the sources for all the tools.
 #
-
-echo "RTEMS Release Sources, v0.1"
+. ${release_top}/rtems-release-version
+echo "RTEMS Release Sources, v${rtems_release_version}"
 
 #
 # Defaults.
@@ -106,13 +106,18 @@ cd ${release}
     #
     # Fetch the source for RTEMS tools.
     #
-    echo "../source-builder/sb-set-builder --dry-run --with-download " \
-         "--without-error-report --without-release-url " \
-         "${rtems_pkgs}"
-    ../source-builder/sb-set-builder --dry-run --with-download \
-                                     --without-error-report \
-                                     --without-release-url \
-                                     ${rtems_pkgs}
+    if [ ${version} -lt 5 ]; then
+     echo "../source-builder/sb-set-builder --dry-run --with-download " \
+          "--without-error-report --without-release-url " \
+          "${rtems_pkgs}"
+     ../source-builder/sb-set-builder --dry-run --with-download \
+                                      --without-error-report \
+                                      --without-release-url \
+                                      ${rtems_pkgs}
+    else
+     echo "../source-builder/sb-get-sources ${rtems_pkgs}"
+     ../source-builder/sb-get-sources ${rtems_pkgs}
+    fi
     #
     # Remove the top level packages because they do not have a VERSION file.
     #
@@ -148,13 +153,18 @@ cd ${release}
     cd bare
      export_source="${export_source} bare"
      mkdir sources patches
-     echo "../source-builder/sb-set-builder --dry-run --with-download " \
-          "--without-error-report --without-release-url " \
-          "${bare_pkgs}"
-     ../source-builder/sb-set-builder --dry-run --with-download \
-                                      --without-error-report \
-                                      --without-release-url \
-                                      ${bare_pkgs}
+     if [ ${version} -lt 5 ]; then
+      echo "../source-builder/sb-set-builder --dry-run --with-download " \
+           "--without-error-report --without-release-url " \
+           "${bare_pkgs}"
+      ../source-builder/sb-set-builder --dry-run --with-download \
+                                       --without-error-report \
+                                       --without-release-url \
+                                       ${bare_pkgs}
+     else
+      echo "../source-builder/sb-get-sources ${bare_pkgs}"
+      ../source-builder/sb-get-sources ${bare_pkgs}
+     fi
      #
      # Remove the git, svn or cvs directory if empty.
      #

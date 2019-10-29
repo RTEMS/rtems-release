@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -33,8 +33,8 @@
 # This is the top level RTEMS release script. Supply the version and and the
 # release.
 #
-
-echo "RTEMS Release, v0.1"
+. ./rtems-release-version
+echo "RTEMS Release, v${rtems_release_version}"
 
 #
 # Global release top path.
@@ -79,13 +79,17 @@ build rtems-tools          ${version} ${revision}
 build rtems                ${version} ${revision} rtems-release-kernel
 build rtems-source-builder ${version} ${revision} rtems-release-rsb-version
 if [ ${rtems_examples} = yes ]; then
-  build examples-v2         ${version} ${revision}
+ if [ ${verison} -lt 5 ]; then
+  build examples-v2 ${version} ${revision}
   # Hack around the repo naming.
   mv ${release}/examples-v2-${release}.tar.${comp_ext} \
      ${release}/rtems-examples-v2-${release}.tar.${comp_ext}
+ else
+  build rtems-examples ${version} ${revision}
+ fi
 fi
 if [ ${rtems_libbsd} = yes ]; then
- build rtems-libbsd        ${version} ${revision}
+ build rtems-libbsd ${version} ${revision}
 fi
 
 #

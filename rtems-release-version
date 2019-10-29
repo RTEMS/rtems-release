@@ -1,7 +1,6 @@
-#! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
+# Copyright 2019 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -29,30 +28,4 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-#
-# The script collects the sources packages for RTEMS for a version. If
-# there are no packages set the variable to None.
-#
-
-rtems_pkgs="${version}/rtems-all"
-bare_pkgs=None
-
-if [ ${version} == 4.11 ]; then
- # RTEMS packages
- rtems_pkgs="${rtems_pkgs} ${version}/graphics/libjpeg"
- rtems_pkgs="${rtems_pkgs} ${version}/databases/sqlite"
- rtems_pkgs="${rtems_pkgs} ${version}/net-mgmt/net-snmp"
- rtems_pkgs="${rtems_pkgs} ${version}/net/ntp"
- rtems_pkgs="${rtems_pkgs} ${version}/net/protobuf"
- # Bare packages
- bare_pkgs="devel/dtc"
- bare_pkgs="${bare_pkgs} devel/qemu"
-elif [ ${version} -ge 5 ]; then
- # RTEMS packages
- rtems_pkgs="${rtems_pkgs} ${version}/rtems-packages"
- # Bare packages
- bare_pkgs="devel/qemu"
- bare_pkgs="${bare_pkgs} devel/qemu-couverture"
- bare_pkgs="${bare_pkgs} devel/sis"
- bare_pkgs="${bare_pkgs} devel/spike"
-fi
+rtems_release_version="5.0"

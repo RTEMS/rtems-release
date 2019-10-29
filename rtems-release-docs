@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -32,7 +32,8 @@
 #
 # This worker script to build the doco.
 #
-echo "RTEMS Documentation Release builder, v0.1"
+. ${release_top}/rtems-release-version
+echo "RTEMS Documentation Release builder, v${rtems_release_version}"
 
 #
 # Defaults.
@@ -66,8 +67,13 @@ git clone ${git_remote} ${git_local}
 cd ${git_local}
  echo "git fetch origin"
  git fetch origin
- echo "git archive --format=tar --prefix=${prefix}/ origin/${version}"
- git archive --format=tar --prefix=${prefix}/ origin/${version} | \
+ # Get the remote branch. If the release branch is not found use master.
+ remote_branch=$(git branch --remote | grep ${version} | tr -d "[:space:]")
+ if [ -z "${remote_branch}" ]; then
+  remote_branch="master"
+ fi
+ echo "git archive --format=tar --prefix=${prefix}/ ${remote_branch}"
+ git archive --format=tar --prefix=${prefix}/ ${remote_branch} | \
      ${comp} > ../${prefix}-unstamped.tar.${comp_ext}
  cd ..
 
@@ -81,12 +87,25 @@ cd ${prefix}
  #
  # This is a hack until I add support for the VERSION file created below.
  #
- cat wscript | sed -e "s/^version[[:space:]].*=.*$/version = '${release}'/g" > wscript.tmp
- rm -f wscript
- mv wscript.tmp wscript
  echo "Creating VERSION: ${release}"
- echo "[version]" > VERSION
- echo "release = ${release}" >> VERSION
+ if [ ${version} -le 5 ]; then
+   cat wscript | sed -e "s/^version[[:space:]].*=.*$/version = '${release}'/g" > wscript.tmp
+   rm -f wscript
+   mv wscript.tmp wscript
+ else
+  echo "[version]" > VERSION
+  echo "revision = ${release}" >> VERSION
+  d=$(date +%e)
+  case $d in
+   1?) d=${d}th ;;
+   *1) d=${d}st ;;
+   *2) d=${d}nd ;;
+   *3) d=${d}rd ;;
+   *)  d=${d}th ;;
+  esac
+  now=$(date +"%d${d} %B %Y")
+  echo "date = %{now}" >> VERSION
+ fi
  cd ..
 
 echo "tar cf - ${prefix}"

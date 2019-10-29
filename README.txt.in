@@ -8,8 +8,8 @@ The Real-Time Executive for Multiprocessor Systems or RTEMS is an open
 source Real Time Operating System (RTOS) that supports open standard
 application programming interfaces (API) such as POSIX. It is used in
 space flight, medical, networking and many more embedded devices using
-processor architectures including ARM, PowerPC, SPARC, Intel, Blackfin,
-MIPS, Microblaze and more.
+processor architectures including ARM, PowerPC, SPARC, Intel, RISCV,
+MIPS, NIOS-II, Microblaze and more.
 
 This directory contains the source code for the RTEMS @VERSION@ operating
 system and tools. Please refer to the RTEMS Developers Wiki for the release

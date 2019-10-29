@@ -32,7 +32,8 @@
 #
 # This worker script to build the doco.
 #
-echo "RTEMS Release Notes builder, v0.1"
+. ${release_top}/rtems-release-version
+echo "RTEMS Release Notes builder, v${rtems_release_version}"
 
 #
 # Defaults.

@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -32,8 +32,8 @@
 #
 # This script adds the hashes to the release packages to the RSB.
 #
-
-echo "RTEMS Release RSB Versioning, v0.1"
+. ${release_top}/rtems-release-version
+echo "RTEMS Release RSB Versioning, v${rtems_release_version}"
 
 #
 # Defaults.
