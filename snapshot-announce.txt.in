@@ -1,0 +1,17 @@
+RTEMS Release Build - @RELEASE@
+
+RTEMS @VERSION@ Release snapshot @RTEMS_SNAPSHOT@ is avaliable for testing.
+It can be found at:
+
+ https://ftp.rtems.org/pub/rtems/releases/@VERSION@/@VERSION@.@REVISION@/@RELEASE@
+
+Please test and report any issues to the user@rtems.org or devel@rtems.org
+mailing lists or please raise a ticket.
+
+If you are part of the RTEMS testing program please build on your preferred
+host posting build and BSP test results to build@rtems.org.
+
+This is a development release and may have errors and be unstable.
+
+Thanks
+Chris

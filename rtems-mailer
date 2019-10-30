@@ -1,0 +1,167 @@
+#! /usr/bin/env python
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2019 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# A tool to email a file. Taken from the mailer.py module in
+# rtems-tools's toolkit.
+#
+
+from __future__ import print_function
+
+import argparse
+import smtplib
+import sys
+
+class error(Exception):
+    def __init__(self, what):
+        self.set_output('error: ' + what)
+    def set_output(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return self.msg
+
+class mail:
+    def __init__(self, opts):
+        self.opts = opts
+
+    def from_address(self):
+
+        def _clean(l):
+            if '#' in l:
+                l = l[:l.index('#')]
+            if '\r' in l:
+                l = l[:l.index('r')]
+            if '\n' in l:
+                l = l[:l.index('\n')]
+            return l.strip()
+
+        addr = self.opts.mail_from
+        if addr is not None:
+            return addr
+        mailrc = None
+        if 'MAILRC' in os.environ:
+            mailrc = os.environ['MAILRC']
+        if mailrc is None and 'HOME' in os.environ:
+            mailrc = path.join(os.environ['HOME'], '.mailrc')
+        if mailrc is not None and path.exists(mailrc):
+            # set from="Joe Blow <joe@blow.org>"
+            try:
+                with open(mailrc, 'r') as mrc:
+                    lines = mrc.readlines()
+            except IOError as err:
+                raise error('error reading: %s' % (mailrc))
+            for l in lines:
+                l = _clean(l)
+                if 'from' in l:
+                    fa = l[l.index('from') + len('from'):]
+                    if '=' in fa:
+                        addr = fa[fa.index('=') + 1:].replace('"', ' ').strip()
+            if addr is not None:
+                return addr
+        if self._args_are_macros():
+            addr = self.opts.defaults.get_value('%{_sbgit_mail}')
+        else:
+            raise error('no valid from address for mail')
+        return addr
+
+    def smtp_host(self):
+        host = self.opts.smtp_host
+        if host is not None:
+            return host
+        return 'localhost'
+
+    def send(self, to_addr, subject, body):
+        from_addr = self.from_address()
+        msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n" % \
+            (from_addr, to_addr, subject) + body
+        try:
+            s = smtplib.SMTP(self.smtp_host())
+            s.sendmail(from_addr, [to_addr], msg)
+        except smtplib.SMTPException as se:
+            raise error('sending mail: %s' % (str(se)))
+        except socket.error as se:
+            raise error('sending mail: %s' % (str(se)))
+
+    def send_file_as_body(self, to_addr, subject, name, intro = None):
+        try:
+            with open(name, 'r') as f:
+                body = f.readlines()
+        except IOError as err:
+            raise error('error reading mail body: %s' % (name))
+        if intro is not None:
+            body = intro + body
+        self.send(to_addr, subject, ''.join(body))
+
+try:
+    ec = 0
+    notice = None
+
+    args = argparse.ArgumentParser(prog = 'rtems-mailer',
+                                   description = 'Tool to email a file to an specified SMTP host')
+    args.add_argument('-s', '--subject',
+                      help = 'Mail subject.',
+                      type = str, required = True, default = None)
+    args.add_argument('-t', '--to',
+                      help = 'Mail to, comma separated list.',
+                      type = str, required = True, default = None)
+    args.add_argument('-f', '--from',
+                      dest = 'mail_from',
+                      help = 'Mail from.',
+                      type = str, required = True, default = None)
+    args.add_argument('-S', '--smtp-host',
+                      help = 'SMTP host.',
+                      type = str, default = None)
+    args.add_argument('body',
+                      help = 'Email body.',
+                      type = str)
+
+    opts = args.parse_args()
+
+    m = mail(opts)
+    for to in opts.to.split(','):
+        m.send_file_as_body(to, opts.subject, opts.body)
+
+except error as err:
+    notice = str(err)
+    ec = 1
+except argparse.ArgumentError as ae:
+    notice = str(ae)
+    ec = 2
+except KeyboardInterrupt:
+    notice = 'abort: user terminated'
+    ec = 3
+except:
+    raise
+    notice = 'abort: unknown error'
+    ec = 1
+if notice is not None:
+    print(notice, file = sys.stderr)
+sys.exit(ec)

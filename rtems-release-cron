@@ -1,0 +1,153 @@
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2019 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+set -e
+
+#
+# Cron wrapper for releasing each month.
+#
+
+live=yes
+
+#
+# RTEMS release
+#
+rtems_major=5
+rtems_minor=0
+rtems_dot=0
+rtems_snapshot=$(date +"m%y%m")
+
+#
+# Email addresses
+#
+from="chrisj@rtems.org"
+if [ ${live} = yes ]; then
+ build_to="build@rtems.org"
+ announce_to="users@rtems.org,devel@rtems.org"
+ smtphost="--smtp-host=192.168.80.141"
+else
+ build_to="chrisj@rtems.org"
+ announce_to="chrisj@rtems.org"
+fi
+#
+# Announce template
+#
+announce="snapshot-announce.txt"
+
+#
+# Upload path
+#
+if [ ${live} = yes ]; then
+ upload_path="/data/ftp/pub/rtems/releases"
+else
+ upload_path="/xdata/ftp/pub/rtems/releases"
+fi
+
+#
+# The version and the revision
+#
+version=${rtems_major}
+revision=${rtems_minor}.${rtems_dot}
+snapshot=${rtems_minor}.${rtems_dot}-${rtems_snapshot}
+release="${version}.${snapshot}"
+
+#
+# Work in the release sandbox
+#
+release_top=$(dirname $0)
+cd ${release_top}
+
+#
+# Activate the virtualenv for building the documentation.
+#
+. ../release/bin/activate
+
+#
+# Clean the work
+#
+rm -rf ${release}
+
+. ${release_top}/rtems-release-version
+
+git_hash=$(git log --pretty=format:'%h' -n 1)
+
+#
+# Build log
+#
+BUILD_LOG=rtems-release-build-log-${rtems_snapshot}.txt
+
+#
+# The lock file, used to stop cron running this script on top of itself.
+#
+LOCK=.cron-lock-rtems-release
+
+if [ ! -f ${LOCK} ]; then
+ trap "rm -f ${LOCK} ${BUILD_LOG} ${announce}" EXIT
+ trap "rm -f ${LOCK} ${BUILD_LOG} ${announce}; exit 1" INT TERM STOP INFO USR1 USR2
+ touch ${LOCK}
+ echo "RTEMS Release Cron builder, v${rtems_release_version} (${git_hash})" > ${BUILD_LOG}
+ echo "" >> ${BUILD_LOG}
+ set +e
+ ./rtems-release ${version} ${snapshot} >> ${BUILD_LOG} 2>&1
+ ec=$?
+ ec=0
+ set -e
+ if [ $ec -eq 0 ]; then
+  result="PASS"
+ else
+  result="FAIL"
+ fi
+ subject="RTEMS Release Snapshot Build: ${release} - ${result}"
+ ${release_top}/rtems-mailer --to=${build_to} \
+                             --from=${from} \
+                             --subject="${subject}" \
+                             ${smtphost} \
+                             ${BUILD_LOG}
+ if [ $ec -eq 0 ]; then
+  if [ -d ${upload_path} ]; then
+   dstdir=${upload_path}/${rtems_major}/${rtems_major}.${revision}
+   mkdir -p ${destdir}
+   cp -r ${release} ${destdir}/
+   cat ${announce}.in | \
+       sed -e "s/@VERSION@/${version}/g" \
+	   -e "s/@SNAPSHOT@/${snapshot}/g" \
+	   -e "s/@RTEMS_SNAPSHOT@/${rtems_snapshot}/g" \
+	   -e "s/@RELEASE@/${release}/g" > ${announce}
+   now=$(date +"%d %b %Y")
+   subject="RTEMS Release Snapshot: ${release} (${now})"
+   ${release_top}/rtems-mailer --to=${announce_to} \
+                               --from=${from} \
+                               --subject="${subject}" \
+                               ${smtphost} \
+                               ${announce}
+  fi
+ fi
+fi
+
+exit 0
