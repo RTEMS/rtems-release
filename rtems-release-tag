@@ -29,6 +29,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+set -e
+
 #
 # This is the top level RTEMS release script. Supply the version and and the
 # release.

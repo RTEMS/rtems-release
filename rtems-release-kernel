@@ -29,6 +29,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+set -e
+
 #
 # This worker script bootstraps the RTEMS kernel.
 #

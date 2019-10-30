@@ -29,6 +29,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+set -e
+
 #
 # This script adds the hashes to the release packages to the RSB.
 #

@@ -29,6 +29,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+set -e
+
 #
 # The script collects the sources for all the tools.
 #
