@@ -47,14 +47,29 @@ rtems_snapshot=$(date +"m%y%m")
 # Email addresses
 #
 from="chrisj@rtems.org"
+
+#
+# If not live use dummy addresses.
+#
 if [ ${live} = yes ]; then
  build_to="build@rtems.org"
  announce_to="users@rtems.org,devel@rtems.org"
- smtphost="--smtp-host=192.168.80.141"
 else
  build_to="chrisj@rtems.org"
  announce_to="chrisj@rtems.org"
 fi
+
+#
+# Supported SMTP hosts.
+#
+case $(hostname) in
+ sync.rtems.org)
+  smtphost="--smtp-host=192.168.80.141"
+  ;;
+ *)
+  ;;
+esac
+
 #
 # Announce template
 #
@@ -66,7 +81,7 @@ announce="snapshot-announce.txt"
 if [ ${live} = yes ]; then
  upload_path="/data/ftp/pub/rtems/releases"
 else
- upload_path="/xdata/ftp/pub/rtems/releases"
+ upload_path="/data/ftp/pub/rtems/people/chrisj/releases"
 fi
 
 #
@@ -107,9 +122,14 @@ BUILD_LOG=rtems-release-build-log-${rtems_snapshot}.txt
 #
 LOCK=.cron-lock-rtems-release
 
+#
+# Clean up file list.
+#
+CLEANUP_FILES="${LOCK} ${BUILD_LOG} ${announce} ARCH-BSP.txt"
+
 if [ ! -f ${LOCK} ]; then
- trap "rm -f ${LOCK} ${BUILD_LOG} ${announce}" EXIT
- trap "rm -f ${LOCK} ${BUILD_LOG} ${announce}; exit 1" INT TERM STOP INFO USR1 USR2
+ trap "rm -f ${CLEANUP_FILES}" EXIT
+ trap "rm -f ${CLEANUP_FILES}; exit 1" INT TERM STOP INFO USR1 USR2
  touch ${LOCK}
  echo "RTEMS Release Cron builder, v${rtems_release_version} (${git_hash})" > ${BUILD_LOG}
  echo "" >> ${BUILD_LOG}
