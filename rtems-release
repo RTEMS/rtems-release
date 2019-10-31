@@ -81,7 +81,7 @@ build rtems-tools          ${version} ${revision}
 build rtems                ${version} ${revision} rtems-release-kernel
 build rtems-source-builder ${version} ${revision} rtems-release-rsb-version
 if [ ${rtems_examples} = yes ]; then
- if [ ${verison} -lt 5 ]; then
+ if [ ${version} -lt 5 ]; then
   build examples-v2 ${version} ${revision}
   # Hack around the repo naming.
   mv ${release}/examples-v2-${release}.tar.${comp_ext} \
