@@ -1,5 +1,5 @@
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015,2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -57,7 +57,15 @@ else
  worker=
 fi
 
-revision_no=$(echo ${revision} | sed -e 's/\-.*$//')
+if [ ${version} -lt 5 ]; then
+ revision_no=$(echo ${revision} | sed -e 's/\-.*$//')
+else
+ revision_no=$(echo ${revision} | sed -e 's/\..*$//')
+ even_odd=$(( ${revision_no} % 2 ))
+ if [ ${even_odd} -eq 0 ]; then
+  revision_no=$(expr ${revision_no} + 1)
+ fi
+fi
 release=${version}.${revision}
 prefix=${package}-${release}
 
