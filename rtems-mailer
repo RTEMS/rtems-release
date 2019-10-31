@@ -38,6 +38,7 @@ from __future__ import print_function
 
 import argparse
 import smtplib
+import socket
 import sys
 
 class error(Exception):
