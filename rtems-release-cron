@@ -92,7 +92,7 @@ fi
 #
 version=${rtems_major}
 revision=${rtems_minor}.${rtems_dot}
-snapshot=${rtems_minor}.${rtems_dot}-${rtems_snapshot}
+snapshot=${revision}-${rtems_snapshot}
 release="${version}.${snapshot}"
 
 #
