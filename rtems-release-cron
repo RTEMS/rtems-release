@@ -154,7 +154,7 @@ if [ ! -f ${LOCK} ]; then
                              ${BUILD_LOG}
  if [ $ec -eq 0 ]; then
   if [ -d ${upload_path} ]; then
-   dstdir=${upload_path}/${rtems_major}/${rtems_major}.${revision}
+   destdir=${upload_path}/${rtems_major}/${rtems_major}.${revision}
    mkdir -p ${destdir}
    cp -r ${release} ${destdir}/
    cat ${announce}.in | \
