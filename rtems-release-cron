@@ -34,6 +34,9 @@ set -e
 #
 
 live=yes
+if [ "${RTEMS_RELEASE_TESTING}" = "yes" ]; then
+ live=no
+fi
 
 #
 # RTEMS release
@@ -156,6 +159,7 @@ if [ ! -f ${LOCK} ]; then
    cp -r ${release} ${destdir}/
    cat ${announce}.in | \
        sed -e "s/@VERSION@/${version}/g" \
+	   -e "s/@REVISION@/${revision}/g" \
 	   -e "s/@SNAPSHOT@/${snapshot}/g" \
 	   -e "s/@RTEMS_SNAPSHOT@/${rtems_snapshot}/g" \
 	   -e "s/@RELEASE@/${release}/g" > ${announce}
