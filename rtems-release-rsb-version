@@ -67,6 +67,9 @@ echo "Release: ${release}"
 if [ \( $(echo "${release}" | sed -e 's/.*rc.*/yes/') = "yes" \) -o \
      \( $(echo "${release}" | sed -e 's/.*RC.*/yes/') = "yes" \) ]; then
  echo "release_path = ${rtems_release_url}/${version}/rc/${release}/sources" >> ${prefix}/VERSION
+elif [ \( $(echo "${release}" | sed -e 's/.*-m.*/yes/') = "yes" \) ]; then
+ revision=$(echo "${release}" | sed -e 's/-m.*//')
+ echo "release_path = ${rtems_release_url}/${version}/${revision}/${release}/sources" >> ${prefix}/VERSION
 else
  echo "release_path = ${rtems_release_url}/${version}/${release}/sources" >> ${prefix}/VERSION
 fi
