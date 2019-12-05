@@ -66,13 +66,17 @@ echo "Release: ${release}"
 #
 if [ \( $(echo "${release}" | sed -e 's/.*rc.*/yes/') = "yes" \) -o \
      \( $(echo "${release}" | sed -e 's/.*RC.*/yes/') = "yes" \) ]; then
- echo "release_path = ${rtems_release_url}/${version}/rc/${release}/sources" >> ${prefix}/VERSION
+ rp="${rtems_release_url}/${version}/rc/${release}"
+ rp="${rp},${rtems_release_url}/${version}/rc/${release}/sources"
 elif [ \( $(echo "${release}" | sed -e 's/.*-m.*/yes/') = "yes" \) ]; then
  revision=$(echo "${release}" | sed -e 's/-m.*//')
- echo "release_path = ${rtems_release_url}/${version}/${revision}/${release}/sources" >> ${prefix}/VERSION
+ rp="${rtems_release_url}/${version}/${revision}/${release}"
+ rp="${rp},${rtems_release_url}/${version}/${revision}/${release}/sources"
 else
- echo "release_path = ${rtems_release_url}/${version}/${release}/sources" >> ${prefix}/VERSION
+ rp="${rtems_release_url}/${version}/${release}"
+ rp="${rp},${rtems_release_url}/${version}/${release}/sources"
 fi
+echo "release_path = ${rp}" >> ${prefix}/VERSION
 
 checksum=sha512
 
