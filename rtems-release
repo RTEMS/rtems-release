@@ -49,10 +49,40 @@ export release_top=${PWD}
 . ${release_top}/rtems-release-defaults
 
 #
-# The version and revision.
+# Usage for this tool.
 #
+usage() {
+ echo "Usage: $0 [-u RSB-URL] version revision" 1>&2
+ echo " where:" 1>&2
+ echo "  version      : The version of RTEMS, eg 5" 1>&2
+ echo "  revision     : The revision, eg 0.0 or 0.0-myrev" 1>&2
+ echo "  -u [RSB-URL] : The primary download path the RSB uses (for testing)." 1>&2
+ exit 1
+}
+
+#
+# Option defaults
+#
+release_url=${rtems_release_url}
+
+#
+# Manage the command line.
+#
+while getopts ":u:" opt; do
+ case "${opt}" in
+  u)
+   release_url=${OPTARG}
+   ;;
+  *)
+   usage
+   ;;
+ esac
+done
+shift $((OPTIND-1))
+
+
 if [ $# -ne 2 ]; then
- echo "error: must be 2 arguments, version and revision."
+ echo "error: 2 arguments must be supplied, version and revision. See -h for help"
  exit 1
 fi
 version=$1
@@ -76,43 +106,43 @@ mkdir ${release}
 # Package the RSB, must be before the kernel. The kernel worker script uses the
 # RSB to create autoconf and automake so it can bootstrap the kernel.
 #
-build rtems-source-builder ${version} ${revision}
-build rtems-tools          ${version} ${revision}
-build rtems                ${version} ${revision} rtems-release-kernel
-build rtems-source-builder ${version} ${revision} rtems-release-rsb-version
+build rtems-source-builder ${version} ${revision} ${release_url}
+build rtems-tools          ${version} ${revision} ${release_url}
+build rtems                ${version} ${revision} ${release_url} rtems-release-kernel
+if [ ${rtems_libbsd} = yes ]; then
+ build rtems-libbsd ${version} ${revision} ${release_url}
+fi
+build rtems-source-builder ${version} ${revision} ${release_url} rtems-release-rsb-version
 if [ ${rtems_examples} = yes ]; then
  if [ ${version} -lt 5 ]; then
-  build examples-v2 ${version} ${revision}
+  build examples-v2 ${version} ${revision} ${release_url}
   # Hack around the repo naming.
   mv ${release}/examples-v2-${release}.tar.${comp_ext} \
      ${release}/rtems-examples-v2-${release}.tar.${comp_ext}
  else
-  build rtems-examples ${version} ${revision}
+  build rtems-examples ${version} ${revision} ${release_url}
  fi
-fi
-if [ ${rtems_libbsd} = yes ]; then
- build rtems-libbsd ${version} ${revision}
 fi
 
 #
 # Documentation.
 #
 if [ ${rtems_docs} = yes ]; then
- ./rtems-release-docs rtems-docs ${version} ${revision}
+ ./rtems-release-docs rtems-docs ${version} ${revision} ${release_url}
 fi
 
 #
 # Release notes.
 #
 if [ ${rtems_release_notes} = yes ]; then
- ./rtems-release-notes rtems-release-notes ${version} ${revision}
+ ./rtems-release-notes rtems-release-notes ${version} ${revision} ${release_url}
 fi
 
 #
 # The sources is always last.
 #
 echo "Collect tools sources"
-./rtems-release-sources ${version} ${revision}
+./rtems-release-sources ${version} ${revision} ${release_url}
 
 #
 # Create the README.txt

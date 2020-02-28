@@ -39,20 +39,21 @@ top=${PWD}
 #
 # The package, version and revision amd maybe a worker script.
 #
-if [ $# -lt 3 -o $# -gt 4 ]; then
-    echo "error: must be 3 or 4 arguments, the package, version," \
-	 "release and optionally a worker script."
+if [ $# -lt 4 -o $# -gt 5 ]; then
+    echo "error: must be 4 or 5 arguments, the package, version," \
+	 "release, release URL and optionally a worker script."
  exit 1
 fi
 package=$1
 version=$2
 revision=$3
-if [ $# -eq 4 ]; then
- if [ ! -x ${top}/$4 ]; then
+release_url=$4
+if [ $# -eq 5 ]; then
+ if [ ! -x ${top}/$5 ]; then
   echo "error: cannot find the worker: $4"
   exit 1
  fi
- worker=${top}/$4
+ worker=${top}/$5
 else
  worker=
 fi

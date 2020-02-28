@@ -45,12 +45,13 @@ echo "RTEMS Release Sources, v${rtems_release_version}"
 #
 # The version and revision.
 #
-if [ $# -ne 2 ]; then
- echo "error: must be 2 arguments, the version, and release."
+if [ $# -ne 3 ]; then
+ echo "error: must be 3 arguments, the version, release and release URL."
  exit 1
 fi
 version=$1
 revision=$2
+release_url=$3
 
 package=rtems-source-builder
 

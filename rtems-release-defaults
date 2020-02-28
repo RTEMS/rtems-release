@@ -66,6 +66,7 @@ rtems_readme=README.txt.in
 rtems_readme_release_notes=
 rtems_release_conf=
 rtems_release_url=https://ftp.rtems.org/pub/rtems/releases
+rtems_rsb_hash="rtems-tools rtems"
 
 #
 # The date stamp
@@ -79,4 +80,11 @@ export now
 if [ -f rtems-release-${version}-conf ]; then
  rtems_release_conf=rtems-release-${version}-conf
  . rtems-release-${version}-conf
+fi
+
+#
+# Conditional add libbsd for an RSB hash if enabled.
+#
+if [ ${rtems_libbsd} = yes ]; then
+ rtems_rsb_hash="${rtems_rsb_hash} rtems-libbsd"
 fi

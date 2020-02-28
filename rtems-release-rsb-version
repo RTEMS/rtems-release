@@ -43,17 +43,18 @@ echo "RTEMS Release RSB Versioning, v${rtems_release_version}"
 . ${release_top}/rtems-release-defaults
 
 #
-# The package, version and revision.
+# The package, version, revision and release URL.
 #
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
     echo "error: must be arguments, the package, version," \
-	 "release and the top directory."
+	 "release, release URL and the top directory."
  exit 1
 fi
 package=$1
 version=$2
 revision=$3
-toptop=$4
+release_url=$4
+toptop=$5
 
 release=${version}.${revision}
 prefix=${package}-${release}
@@ -66,15 +67,15 @@ echo "Release: ${release}"
 #
 if [ \( $(echo "${release}" | sed -e 's/.*rc.*/yes/') = "yes" \) -o \
      \( $(echo "${release}" | sed -e 's/.*RC.*/yes/') = "yes" \) ]; then
- rp="${rtems_release_url}/${version}/rc/${release}"
- rp="${rp},${rtems_release_url}/${version}/rc/${release}/sources"
+ rp="${release_url}/${version}/rc/${release}"
+ rp="${rp},${release_url}/${version}/rc/${release}/sources"
 elif [ \( $(echo "${release}" | sed -e 's/.*-m.*/yes/') = "yes" \) ]; then
  revision=$(echo "${release}" | sed -e 's/-m.*//')
- rp="${rtems_release_url}/${version}/${revision}/${release}"
- rp="${rp},${rtems_release_url}/${version}/${revision}/${release}/sources"
+ rp="${release_url}/${version}/${revision}/${release}"
+ rp="${rp},${release_url}/${version}/${revision}/${release}/sources"
 else
- rp="${rtems_release_url}/${version}/${release}"
- rp="${rp},${rtems_release_url}/${version}/${release}/sources"
+ rp="${release_url}/${version}/${release}"
+ rp="${rp},${release_url}/${version}/${release}/sources"
 fi
 echo "release_path = ${rp}" >> ${prefix}/VERSION
 
@@ -86,7 +87,7 @@ checksum=sha512
 #
 echo >> ${prefix}/VERSION
 echo "[hashes]" >> ${prefix}/VERSION
-for p in rtems-tools rtems
+for p in ${rtems_rsb_hash}
 do
   file=${p}-${release}.tar.xz
   hash=$(${checksum} -q ${toptop}/${release}/${file})

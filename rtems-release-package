@@ -128,7 +128,7 @@ cd ${prefix}
 # package the release.
 #
 if [ -n "${worker}" ]; then
- ${worker} ${package} ${version} ${revision} ${top}
+ ${worker} ${package} ${version} ${revision} ${release_url} ${top}
 fi
 
 #

@@ -43,17 +43,18 @@ echo "RTEMS Release RTEMS Kernel, v${rtems_release_version}"
 . ${release_top}/rtems-release-defaults
 
 #
-# The package, version and revision.
+# The package, version, revision and release URL.
 #
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
     echo "error: must be arguments, the package, version," \
-	 "release and the top directory."
+	 "release, release URL and the top directory."
  exit 1
 fi
 package=$1
 version=$2
 revision=$3
-toptop=$4
+release_url=$4
+toptop=$5
 
 release=${version}.${revision}
 prefix=${package}-${release}
