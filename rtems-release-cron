@@ -141,7 +141,6 @@ if [ ! -f ${LOCK} ]; then
  set +e
  ./rtems-release ${version} ${snapshot} >> ${BUILD_LOG} 2>&1
  ec=$?
- ec=0
  set -e
  if [ $ec -eq 0 ]; then
   result="PASS"
