@@ -99,8 +99,9 @@ Source Builder:
 
   cd
   mkdir -p development/rtems
+  cd development/rtems
   wget @RELEASE_URL@/sources/rtems-source-builder-@RELEASE@.tar.xz
-  tar jxf rtems-source-builder-@RELEASE@.tar.xz
+  tar Jxf rtems-source-builder-@RELEASE@.tar.xz
   cd rtems-source-builder-@RELEASE@/rtems
 
 To build the tools for the ARM architecture:
