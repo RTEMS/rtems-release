@@ -120,7 +120,7 @@ cd ${prefix}
  echo "Creating VERSION: ${release}"
  echo "[version]" > VERSION
  echo "revision = ${release}" >> VERSION
- cd ..   # ${prefix}
+ cd .. # ${prefix}
 
 #
 # Run the worker script if provided. It can perform any package

@@ -1,6 +1,6 @@
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2020 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -67,6 +67,18 @@ rtems_readme_release_notes=
 rtems_release_conf=
 rtems_release_url=https://ftp.rtems.org/pub/rtems/releases
 rtems_rsb_hash="rtems-tools rtems"
+
+#
+# RTEMS packages
+#
+rtems_packages="rtems-source-builder rtems rtems-tools rtems-libbsd"
+rtems_packages="${rtems_packages} rtems-examples rtems-docs"
+
+#
+# Where we collect the sources and docs.
+#
+sources="sources"
+docs="docs"
 
 #
 # The date stamp

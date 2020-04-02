@@ -209,12 +209,12 @@ cd ${release}
    #
    # Export the sources and patches.
    #
-   rm -rf ${top}/${release}/sources
-   mkdir ${top}/${release}/sources
+   rm -rf ${top}/${release}/${sources}
+   mkdir ${top}/${release}/${sources}
    for p in ${export_source}
    do
-    cp ${p}/sources/* ${top}/${release}/sources/
-    cp ${p}/patches/* ${top}/${release}/sources/
+    cp ${p}/sources/* ${top}/${release}/${sources}/
+    cp ${p}/patches/* ${top}/${release}/${sources}/
    done
    cd ..   # ${prefix}
   cd ..   # ${workspace}
@@ -222,16 +222,23 @@ cd ${release}
   rm -rf ${workspace}
 
   #
-  # Copy the stamped packages from the top level release directory to the
-  # sources directory. The RSB requires all source be in the `sources`
-  # directory under the release URL.
+  # Remove any copies from the sources, the top level ones are the correct
+  # version.
   #
-  for p in rtems-tools rtems
+  ls -1 ${sources}
+  for p in $(ls -1 | grep ${sources}/rtems-*.tar.${comp_ext})
   do
-   cp ${p}-${release}.tar.${comp_ext} sources/${p}-${release}.tar.${comp_ext}
+   echo "Removing ${p}"
+   rm -f ${p}
+  done
+  for p in ${rtems_packages}
+  do
+   if [ -e ${p}-${release}.tar.${comp_ext} ]; then
+    mv ${p}-${release}.tar.${comp_ext} ${sources}/${p}-${release}.tar.${comp_ext}
+   fi
   done
 
-  cd sources
+  cd ${sources}
    rm -f ${checksum}sum.txt
    for f in $(ls -1)
    do
@@ -240,10 +247,10 @@ cd ${release}
      echo "${csum} ${f}" >> ${checksum}sum.txt
     fi
    done
-   cd ..   # sources
+   cd ..   # ${sources}
   cd ..   # ${release}
 
-echo "Created: ${release}/sources/${checksum}sum.txt"
-echo "Created: ${release}/sources"
+echo "Created: ${release}/${sources}/${checksum}sum.txt"
+echo "Created: ${release}/${sources}"
 
 exit 0

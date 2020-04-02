@@ -151,6 +151,6 @@ else
  mv html rtems-doxygen-${release}
 fi
 tar cf - rtems-doxygen-${release} | \
-    ${comp} > ../rtems-doxygen-${release}.tar.${comp_ext}
+    ${comp} > ../rtems-${release}-doxygen.tar.${comp_ext}
 
 exit 0

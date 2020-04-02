@@ -91,7 +91,8 @@ cd ${prefix}
  #
  echo "Creating VERSION: ${release}"
  if [ ${version} -le 5 ]; then
-   cat wscript | sed -e "s/^version[[:space:]].*=.*$/version = '${release}'/g" > wscript.tmp
+   cat wscript | \
+    sed -e "s/^version[[:space:]].*=.*$/version = '${release}'/g" > wscript.tmp
    rm -f wscript
    mv wscript.tmp wscript
  else
@@ -127,10 +128,11 @@ cd ${prefix}
 #
 # Package the docs, PDF first.
 #
-mkdir ${top}/${release}/docs
+mkdir ${top}/${release}/${docs}
 cd install
  echo "Creating DOC all rtems-${release}-docs-all.tar.${comp_ext}"
- tar cf - * | ${comp} > ${top}/${release}/docs/rtems-${release}-docs-all.tar.${comp_ext}
+ tar cf - * | \
+  ${comp} > ${top}/${release}/${docs}/rtems-${release}-docs-all.tar.${comp_ext}
  for p in $(find . -name \*.pdf)
  do
   manual=$(echo $(basename $p) | sed -e "s/\\..*//")
@@ -140,20 +142,20 @@ cd install
   #
   echo "Creating PDF rtems-${release}-${manual}.pdf.${comp_ext}"
   ${comp} $p
-  mv $p.${comp_ext} ${top}/${release}/docs/rtems-${release}-${manual}.pdf.${comp_ext}
+  mv $p.${comp_ext} ${top}/${release}/${docs}/rtems-${release}-${manual}.pdf.${comp_ext}
   #
   # Create the single html manual
   #
   echo "Creating SingleHTML rtems-${release}-${manual}.html.${comp_ext}"
   mv ${base}/${manual}.html ${base}/rtems-${release}-${manual}.html
   ${comp} ${base}/rtems-${release}-${manual}.html
-  mv ${base}/rtems-${release}-${manual}.html.${comp_ext} ${top}/${release}/docs/.
+  mv ${base}/rtems-${release}-${manual}.html.${comp_ext} ${top}/${release}/${docs}/.
   #
   # Tar the multi-page html and install.
   #
   echo "Creating HTML rtems-${release}-${manual}-html.tar.${comp_ext}"
   tar cf - ${base}/${manual} | \
-      ${comp} > ${top}/${release}/docs/rtems-${release}-${manual}-html.tar.${comp_ext}
+      ${comp} > ${top}/${release}/${docs}/rtems-${release}-${manual}-html.tar.${comp_ext}
  done
  cd ..
 
@@ -162,7 +164,17 @@ cd install
 #
 . ${top}/rtems-release-package-end
 
-cd ${release}/docs
+cd ${release}/${docs}
+ #
+ # If doxygen information has been generate move it into the docs.
+ #
+ for p in ../rtems-${release}-doxygen.tar.${comp_ext}
+ do
+  if [ -e ${p} ]; then
+    mv ${p} .
+  fi
+ done
+
  rm -f ${checksum}sum.txt
  for f in $(ls -1)
  do
@@ -173,7 +185,7 @@ cd ${release}/docs
  done
  cd ..
 
-echo "Created: ${release}/docs/${checksum}sum.txt"
-echo "Created: ${release}/docs"
+echo "Created: ${release}/${docs}/${checksum}sum.txt"
+echo "Created: ${release}/${docs}"
 
 exit 0

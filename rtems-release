@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
+# Copyright 2015,2016,2019,2020 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -80,7 +80,6 @@ while getopts ":u:" opt; do
 done
 shift $((OPTIND-1))
 
-
 if [ $# -ne 2 ]; then
  echo "error: 2 arguments must be supplied, version and revision. See -h for help"
  exit 1
@@ -145,13 +144,28 @@ echo "Collect tools sources"
 ./rtems-release-sources ${version} ${revision} ${release_url}
 
 #
-# Create the README.txt
+# Create the README.txt.
 #
+# The initial stage is done in a few steps where the release files table is cut
+# out of the input template file and formatted using the column command and
+# inserted back.
+#
+escaped_release_url=$(echo ${release_url} | sed -e 's/\//\\\//g')
 cat ${rtems_readme} | \
-    sed -e "s/@RELEASE@/${release}/g" \
+    sed -e "s/@RELEASE_URL@/${escaped_release_url}/g" \
+	-e "s/@RELEASE@/${release}/g" \
 	-e "s/@VERSION@/${version}/g" \
 	-e "s/@REVISION@/${revision}/g" \
-	-e "s/@DATE@/${now}/g" > ${release}/README.txt
+	-e "s/@DATE@/${now}/g" > ${release}/README.1.txt
+cat ${release}/README.1.txt | \
+    sed -n '/^@TABLE-START@/,/^@TABLE-END@/p' | \
+    sed -e 's/@TABLE-START@//g' -e 's/@TABLE-END@//g' | \
+    column -s '|' -t | \
+    sed -e 's/$/\\/' > ${release}/README.2.txt
+cat ${release}/README.1.txt | \
+    sed -e "/@TABLE-START@/,/@TABLE-END@/c\\
+$(cat ${release}/README.2.txt)" > ${release}/README.txt
+rm -f ${release}/README.1.txt ${release}/README.2.txt
 if [ -n "${rtems_readme_release_notes}" ]; then
  echo >> ${release}/README.txt
  echo "Release Notes" >> ${release}/README.txt
