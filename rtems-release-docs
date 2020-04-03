@@ -138,11 +138,10 @@ cd install
   manual=$(echo $(basename $p) | sed -e "s/\\..*//")
   base=$(dirname $p)
   #
-  # Compress the PDF and move it out of the way.
+  # Move the PDF out of the way.
   #
-  echo "Creating PDF rtems-${release}-${manual}.pdf.${comp_ext}"
-  ${comp} $p
-  mv $p.${comp_ext} ${top}/${release}/${docs}/rtems-${release}-${manual}.pdf.${comp_ext}
+  echo "Creating PDF rtems-${release}-${manual}.pdf"
+  mv $p ${top}/${release}/${docs}/rtems-${release}-${manual}.pdf
   #
   # Create the single html manual
   #
