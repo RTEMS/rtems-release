@@ -84,7 +84,7 @@ export XPATH=$PATH
 export PATH=${top}/at/bin:$PATH
 
 #
-# Bootstrap RTEMS.
+# Bootstrap RTEMS, collect the BSPs, and update the README.
 #
 cd ${prefix}
  echo "Set the version in the build system.."
@@ -112,6 +112,13 @@ EOF
  echo "Generate ARCH-BSP.txt"
  ./rtems-bsps > ARCH-BSP.txt
  cp ARCH-BSP.txt ${toptop}
+ echo "Generate README"
+ cp README README.tmp
+ cat README.tmp | \
+  sed -e "s|docs\.rtems\.org\/branches\/master\/|docs\.rtems\.org\/releases\/rtems-docs-${release}\/|g" | \
+  sed -e "s|docs\.rtems\.org\/doxygen\/branches\/master\/|docs\.rtems\.org\/doxygen\/releases\/rtems-doxygen-${release}\/|g" | \
+  awk "/https:\/\/git\.rtems\.org\/rtems/{\$0=\$0\"?h=${version}\"}{print}" > README
+ rm -r README.tmp
  cd ..
 
 #
