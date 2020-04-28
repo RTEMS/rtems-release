@@ -90,7 +90,7 @@ cd ${prefix}
  # This is a hack until I add support for the VERSION file created below.
  #
  echo "Creating VERSION: ${release}"
- if [ ${version} -le 5 ]; then
+ if [ ${version} -lt 5 ]; then
    cat wscript | \
     sed -e "s/^version[[:space:]].*=.*$/version = '${release}'/g" > wscript.tmp
    rm -f wscript
@@ -107,7 +107,7 @@ cd ${prefix}
    *)  d=${d}th ;;
   esac
   now=$(date +"%d${d} %B %Y")
-  echo "date = %{now}" >> VERSION
+  echo "date = ${now}" >> VERSION
  fi
  cd ..
 
