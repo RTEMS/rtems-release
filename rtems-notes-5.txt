@@ -1,0 +1,106 @@
+= 5.1 Release Notes =
+
+== RTEMS Improvements
+
+In this section, we discuss public API level changes as well as improvements to
+the implementation of those API routines.
+
+Public API changes usually fall into one of the following categories:
+
+* Addition of new methods
+* Modifications to prototypes
+* Deletion of obsoleted methods
+
+Implementation improvements usually fall into one of the following categories:
+
+* Algorithm improvements in execution time or memory usage
+* Critical section reduction
+
+== API Changes
+
+* Most services use now statically allocated resources and no longer need
+  accounting in the application configuration.
+* The work area initialization (RTEMS Work Space and C Program Heap) changed.
+  BSPs must provide now a _Memory_Get() function.
+* POSIX timers and signals are now the only POSIX resources which are enabled
+  by the POSIX API.
+
+=== API Additions
+
+* Support for recording of high-frequency events in particular on SMP systems
+* Support for thread pinning (enables support for Epoch Based Reclamation; used
+  by libbsd)
+* Termios supports now generation of signals.
+* New fatal sources:
+ * RTEMS_FATAL_SOURCE_EXCEPTION
+ * RTEMS_FATAL_SOURCE_PANIC
+ * RTEMS_FATAL_SOURCE_SMP
+ * RTEMS_FATAL_SOURCE_INVALID_HEAP_FREE
+ * RTEMS_FATAL_SOURCE_HEAP
+
+== API Implementation Improvements
+
+* TBD
+
+== API Deprecations
+
+* rtems_iterate_over_all_threads().  Use rtems_task_iterate() instead.
+
+== API Removals
+
+* rtems_clock_get()
+
+== Configuration Changes
+
+* All configuration options are now documented.
+* Most resources are now statically allocated and no longer use the workspace.
+* New configuration options:
+ * CONFIGURE_DIRTY_MEMORY
+ * CONFIGURE_RECORD_EXTENSIONS_ENABLED
+ * CONFIGURE_RECORD_FATAL_DUMP_BASE64
+ * CONFIGURE_RECORD_FATAL_DUMP_BASE64_ZLIB
+ * CONFIGURE_RECORD_PER_PROCESSOR_ITEMS
+ * CONFIGURE_VERBOSE_SYSTEM_INITIALIZATION
+* Removed configuration options:
+ * CONFIGURE_HAS_OWN_CONFIGURATION_TABLE
+ * CONFIGURE_HAS_OWN_BDBUF_TABLE
+ * CONFIGURE_HAS_OWN_DEVICE_DRIVER_TABLE
+ * CONFIGURE_HAS_OWN_FILESYSTEM_TABLE
+ * CONFIGURE_HAS_OWN_INIT_TABLE
+ * CONFIGURE_HAS_OWN_MOUNT_TABLE
+ * CONFIGURE_HAS_OWN_MULTIPROCESSING_TABLE
+ * CONFIGURE_POSIX_HAS_OWN_INIT_THREAD_TABLE
+* The helper macro for the clustered scheduler configuration
+  RTEMS_SCHEDULER_EDF_SMP() has now only one parameter.
+
+== RTEMS Shell Improvements
+
+The following improvements were made to the RTEMS Shell:
+
+* TBD
+
+== General
+
+* Added support for the RISC-V 32-bit and 64-bit architecture.
+* Added support for the 64-bit PowerPC architecture using the ELFv2 ABI.
+* Synchronized support for Journalling Flash File System, Version 2 (JFFS2) with Linux 4.17.
+* Import of libfdt from device tree compiler project.
+
+== BSPs and Device Drivers
+
+* General
+ * TBD
+* New BSPs
+ * BSPs for ARM
+  * atsamv - Microchip (former Atmel) SAM V71 series
+  * xilinx-zynqmp - Xilinx Zynq UltraScale+ MPSoC platform
+ * BSPs for RISC-V
+  * riscv - Family of generic BSPs
+  * griscv - BSP based on the GRLIB
+* Significant updates to existing BSPs
+ * powerpc/qoriq: 64-bit support
+* Removal of obsoleted BSPs
+  * TBD
+* Drivers
+ * Drivers for getentropy()
+ * TBD
