@@ -1,5 +1,5 @@
 RTEMS Embedded Realtime Operating System
-----------------------------------------
+========================================
 
 Release: @RELEASE@
 Date   : @DATE@
@@ -15,7 +15,9 @@ This release directory contains the source code for the RTEMS @RELEASE@
 operating system and tools. All the documenation provided in HTML and PDF
 formats.
 
-The release note are contained in rtems-@RELEASE@-release-notes.pdf.
+The release note are contained in:
+
+ <@RELEASE_URL@/rtems-@RELEASE@-release-notes.pdf>
 
 Please drop by the Users mailing list (users@rtems.org) and let us know how
 you are using RTEMS. We love hearing about user's projects.
@@ -26,17 +28,19 @@ Regards
 The RTEMS Development Team.
 
 RTEMS Web Sites
-~~~~~~~~~~~~~~~
+---------------
 
-      Home: https://www.rtems.org/
-      Wiki: https://devel.rtems.org/
-      Docs: https://docs.rtems.org/
-       Bug: https://devel.rtems.org/query
-     Lists: https://lists.rtems.org/
-       GIT: https://git.rtems.org/
+ Home      : <https://www.rtems.org/>
+ Download  : <https://ftp.rtems.org/pub/rtems/releases>
+ Wiki      : <https://devel.rtems.org/>
+ Docs      : <https://docs.rtems.org/>
+ Bugs      : <https://devel.rtems.org/query>
+ Lists     : <https://lists.rtems.org/>
+ Developer : <https://devel.rtems.org/>
+ GIT       : <https://git.rtems.org/>
 
 Release Files
-~~~~~~~~~~~~~
+-------------
 
 @TABLE-START@
  - README.txt                              | This document.
@@ -55,35 +59,35 @@ Release Files
 @TABLE-END@
 
 RTEMS Documentation
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 The generated documentation can be found in the `docs` directory.
 
 The following manuals are available as compress HTML tar files or PDF:
 
  - RTEMS User Manual
-  - docs/rtems-docs-@RELEASE@-user.pdf
-  - docs/rtems-docs-@RELEASE@-user-html.tar.xz
+  - `docs/rtems-docs-@RELEASE@-user.pdf`
+  - `docs/rtems-docs-@RELEASE@-user-html.tar.xz`
 
  - RTEMS C User Manual
-  - docs/rtems-docs-@RELEASE@-c-user.pdf
-  - docs/rtems-docs-@RELEASE@-c-user-html.tar.xz
+  - `docs/rtems-docs-@RELEASE@-c-user.pdf`
+  - `docs/rtems-docs-@RELEASE@-c-user-html.tar.xz`
 
  - RTEMS POSIX User Manual
-  - docs/rtems-docs-@RELEASE@-posix-user.pdf
-  - docs/rtems-docs-@RELEASE@-posix-user-html.tar.xz
+  - `docs/rtems-docs-@RELEASE@-posix-user.pdf`
+  - `docs/rtems-docs-@RELEASE@-posix-user-html.tar.xz`
 
  - RTEMS Networking User Manual
-  - docs/rtems-docs-@RELEASE@-networking.pdf
-  - docs/rtems-docs-@RELEASE@-networking-html.tar.xz
+  - `docs/rtems-docs-@RELEASE@-networking.pdf`
+  - `docs/rtems-docs-@RELEASE@-networking-html.tar.xz`
 
  - RTEMS Shell User Manual
-  - docs/rtems-docs-@RELEASE@-shell.pdf
-  - docs/rtems-docs-@RELEASE@-shell-html.tar.xz
+  - `docs/rtems-docs-@RELEASE@-shell.pdf`
+  - `docs/rtems-docs-@RELEASE@-shell-html.tar.xz`
 
  - RTEMS Doxygen
-  - docs/rtems-docs-@RELEASE@-shell.pdf
-  - docs/rtems-docs-@RELEASE@-shell-html.tar.xz
+  - `docs/rtems-docs-@RELEASE@-shell.pdf`
+  - `docs/rtems-docs-@RELEASE@-shell-html.tar.xz`
 
 Quick Guide to Building
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,31 +95,31 @@ Quick Guide to Building
 For new user rhe Quick Start in the User Manual contains a details Quick Start
 guide. Download the User Manual:
 
-  @RELEASE_URL@/docs/rtems-docs-@RELEASE@-user.pdf
+  <@RELEASE_URL@/docs/rtems-docs-@RELEASE@-user.pdf>
 
 and follow the instructions in the Quick Start section. If are familiar with
 RTEMS or just want to get going the following steps will download the RTEMS
 Source Builder:
-
+```
   cd
   mkdir -p development/rtems
   cd development/rtems
   wget @RELEASE_URL@/sources/rtems-source-builder-@RELEASE@.tar.xz
   tar Jxf rtems-source-builder-@RELEASE@.tar.xz
   cd rtems-source-builder-@RELEASE@/rtems
-
+```
 To build the tools for the ARM architecture:
-
+```
   ../source-builder/sb-set-builder \
     --prefix=$HOME/development/rtems/@RELEASE@ \
     @VERSION@/rtems-arm
-
+```
 To build the tools, kernel and all packages for the Beagleboneblack:
-
+```
   ../source-builder/sb-set-builder \
     --prefix=$HOME/development/rtems/@RELEASE@ \
     @VERSION@/bsps/beagleboneblack
-
+```
 If you encounter a problem please post to the user@rtems.org mailing list. You
 can join the Users mailing at https://lists.rtems.org/.
 

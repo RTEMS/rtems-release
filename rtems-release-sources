@@ -222,8 +222,7 @@ cd ${release}
   rm -rf ${workspace}
 
   #
-  # Remove any copies from the sources, the top level ones are the correct
-  # version.
+  # Remove any copies from the sources.
   #
   ls -1 ${sources}
   for p in $(ls -1 | grep ${sources}/rtems-*.tar.${comp_ext})

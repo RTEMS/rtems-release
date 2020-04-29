@@ -1,7 +1,6 @@
-#! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015,2016,2019 Chris Johns (chrisj@rtems.org)
+# Copyright 2020 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -29,60 +28,25 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-set -e
+#
+# RTEMS Release Path
+#
 
 #
-# This script adds the hashes to the release packages to the RSB.
+# Create the release path. If an RC release use a subdirectory. If a monthly
+# snapshot use a release subdirectory.
 #
-. ${release_top}/rtems-release-version
-echo "RTEMS Release RSB Versioning, v${rtems_release_version}"
-
-#
-# Defaults.
-#
-. ${release_top}/rtems-release-defaults
-
-#
-# The package, version, revision and release URL.
-#
-if [ $# -ne 5 ]; then
-    echo "error: must be arguments, the package, version," \
-	 "release, release URL and the top directory."
- exit 1
+if [ \( $(echo "${release}" | sed -e 's/.*rc.*/yes/') = "yes" \) -o \
+     \( $(echo "${release}" | sed -e 's/.*RC.*/yes/') = "yes" \) ]; then
+ rp="${release_url}/${version}/rc/${release}"
+elif [ \( $(echo "${release}" | sed -e 's/.*-m.*/yes/') = "yes" \) ]; then
+ revision=$(echo "${release}" | sed -e 's/-m.*//')
+ rp="${release_url}/${version}/${revision}/${release}"
+else
+ rp="${release_url}/${version}/${release}"
 fi
-package=$1
-version=$2
-revision=$3
-release_url=$4
-toptop=$5
 
-release=${version}.${revision}
-prefix=${package}-${release}
+rtems_release_path=${rp}
+rtems_release_sources=${rp}/sources
 
-echo "Package: ${package}"
-echo "Release: ${release}"
-
-#
-# Get the release sources path and add it to the VERSION.
-#
-. ${release_top}/rtems-release-path
-echo "release_path = ${rtems_release_sources}" >> ${prefix}/VERSION
-
-checksum=sha512
-
-#
-# Add the hashes for the required packages in the RSB generated during an RTEMS
-# release.
-#
-echo >> ${prefix}/VERSION
-echo "[hashes]" >> ${prefix}/VERSION
-for p in ${rtems_rsb_hash}
-do
-  file=${p}-${release}.tar.xz
-  hash=$(${checksum} -q ${toptop}/${release}/${file})
-  echo "${file} = ${checksum} ${hash}" >> ${prefix}/VERSION
-done
-
-echo "RSB Versioning complete."
-
-exit 0
+escaped_release_path=$(echo ${rp} | sed -e 's/\//\\\//g')

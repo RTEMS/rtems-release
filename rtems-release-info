@@ -1,0 +1,72 @@
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2020 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# RTEMS Release Site Information
+#
+. ${release_top}/rtems-release-path
+
+#
+# Create the README.txt.
+#
+# The initial stage is done in a few steps where the release files table is cut
+# out of the input template file and formatted using the column command and
+# inserted back.
+#
+cat ${rtems_readme} | \
+    sed -e "s/@RELEASE_URL@/${escaped_release_path}/g" \
+	-e "s/@RELEASE@/${release}/g" \
+	-e "s/@VERSION@/${version}/g" \
+	-e "s/@REVISION@/${revision}/g" \
+	-e "s/@DATE@/${now}/g" > ${release}/README.1.txt
+cat ${release}/README.1.txt | \
+    sed -n '/^@TABLE-START@/,/^@TABLE-END@/p' | \
+    sed -e 's/@TABLE-START@//g' -e 's/@TABLE-END@//g' | \
+    column -s '|' -t | \
+    sed -e 's/$/\\/' > ${release}/README.2.txt
+cat ${release}/README.1.txt | \
+    sed -e "/@TABLE-START@/,/@TABLE-END@/c\\
+$(cat ${release}/README.2.txt)" > ${release}/README.3.txt
+cat ${release}/README.3.txt | \
+    sed -e "s/[\`\<\>]//g" -e 's/[[:space:]]*$//' > ${release}/README.txt
+rm -f ${release}/README.1.txt ${release}/README.2.txt ${release}/README.3.txt
+if [ -n "${rtems_readme_release_notes}" ]; then
+ echo >> ${release}/README.txt
+ echo "Release Notes" >> ${release}/README.txt
+ echo "~~~~~~~~~~~~~" >> ${release}/README.txt
+ echo >> ${release}/README.txt
+ echo "${rtems_readme_release_notes}" >> ${release}/README.txt
+fi
+echo >> ${release}/README.txt
+echo "RTEMS Architectures and BSPs" >> ${release}/README.txt
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> ${release}/README.txt
+echo >> ${release}/README.txt
+cat ARCH-BSP.txt >> ${release}/README.txt
+rm ARCH-BSP.txt
