@@ -32,11 +32,3 @@
 #
 # The script is the overridded configuration for 4.11.
 #
-rtems_readme_release_notes="$(cat <<- EOF
-- The rtems-libbsd package is experimental in this release.
-  You need to closely evaluate it's suitablility for production.
-
-- SMP support is experimental in this release and we recommend a
-  later release.
-EOF
-)"

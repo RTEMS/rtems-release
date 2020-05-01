@@ -35,4 +35,5 @@
 rtems_libbsd=no
 rtems_docs=no
 rtems_release_notes=no
+rtems_readme_release_notes=
 rtems_readme=README-4.10.txt.in

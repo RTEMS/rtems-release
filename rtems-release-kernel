@@ -110,8 +110,7 @@ EOF
  echo "Cleaning autom4te.cache"
  rm -rf $(find . -name autom4te.cache)
  echo "Generate ARCH-BSP.txt"
- ./rtems-bsps > ARCH-BSP.txt
- cp ARCH-BSP.txt ${toptop}
+ ./rtems-bsps -m > ${toptop}/ARCH-BSP.md
  echo "Generate README"
  cp README README.tmp
  cat README.tmp | \

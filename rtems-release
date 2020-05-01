@@ -49,6 +49,15 @@ export release_top=${PWD}
 . ${release_top}/rtems-release-defaults
 
 #
+# We need pandoc so generate an error early is not available.
+#
+if [ ! $(command -v pandoc) ]; then
+ echo "error: pandoc not found, please install" >&2
+ exit 1
+fi
+
+#
+#
 # Usage for this tool.
 #
 usage() {
@@ -89,6 +98,16 @@ revision=$2
 
 release=${version}.${revision}
 
+#
+# Does the release provide release notes?
+#
+if [ -f rtems-notes-${version}.txt ]; then
+ rtems_readme_release_notes=rtems-notes-${version}.txt
+fi
+
+#
+# This call lets us have smaller lines in this script.
+#
 build()
 {
  echo "Package: $1"
@@ -98,8 +117,11 @@ build()
 #
 # Clean the release directory away.
 #
-rm -rf ${release}
-mkdir ${release}
+if [ -e ${release} ]; then
+ echo "Removing existing release ${release}"
+ rm -rf ${release}
+ mkdir ${release}
+fi
 
 #
 # Package the RSB, must be before the kernel. The kernel worker script uses the
@@ -144,6 +166,11 @@ echo "Collect tools sources"
 ./rtems-release-sources ${version} ${revision} ${release_url}
 
 #
+# Make the contrib directory
+#
+mkdir -p ${release}/contrib/rtems-release
+
+#
 # Create the release information
 #
 echo "Create the release information"
@@ -153,23 +180,36 @@ echo "Create the release information"
 #
 # Copy these release scripts to a contrib directory.
 #
-mkdir -p ${release}/contrib/releasing
 for f in README.txt \
-	 README.txt.in \
+	 ${rtems_readme} \
+	 rtems-mailer \
          rtems-release \
+	 ${rtems_readme_release_notes} \
 	 ${rtems_release_conf} \
+	 rtems-release-cron \
 	 rtems-release-docs \
+	 rtems-release-defaults \
+	 rtems-release-info \
 	 rtems-release-kernel \
+	 rtems-release-notes \
+	 $(find rtems-release-notes-coverpage -type f) \
+	 rtems-release-notes.css \
          rtems-release-package \
          rtems-release-package-end \
          rtems-release-package-start \
+	 rtems-release-path \
 	 rtems-release-rsb-version \
          rtems-release-sources \
+	 rtems-release-tag \
+	 rtems-release-version \
 	 rtems-source-packages
 do
- cp ${f} ${release}/contrib/releasing/
+ if [ ! -e $(dirname ${f}) ]; then
+  mkdir -p $(dirname ${f})
+ fi
+ cp ${f} ${release}/contrib/rtems-release/
  csum=$(${checksum} -q ${f})
- echo "${csum} ${f}" >> ${release}/contrib/releasing/${checksum}sum.txt
+ echo "${csum} ${f}" >> ${release}/contrib/rtems-release/${checksum}sum.txt
 done
 
 #

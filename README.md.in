@@ -1,0 +1,164 @@
+**Home:**: <@RELEASE_URL@>  
+**Release:** @RELEASE@  
+**Date:** @DATE@  
+
+[RN-P]: rtems-@RELEASE@-release-notes.pdf
+
+The Real-Time Executive for Multiprocessor Systems or RTEMS is an open source
+Real Time Operating System (RTOS) that supports open standard application
+programming interfaces (API) such as POSIX. It is used in space flight,
+medical, networking and many more embedded devices using processor
+architectures including ARM, PowerPC, SPARC, Intel, RISCV, MIPS, NIOS-II,
+Microblaze and more (a full list is provided at the end).
+
+This release directory contains the source code for the RTEMS @RELEASE@
+operating system and tools. All the documenation provided in HTML and PDF
+formats.
+
+Please drop by the Users mailing list (users@rtems.org) and let us know how
+you are using RTEMS. We love hearing about user projects.
+
+Many thanks to everyone who helped create this release.
+
+Regards  
+*The RTEMS Development Team.*
+
+## RTEMS Web Sites
+
+--------- ------------------------------------------
+     Home <https://www.rtems.org/>
+ Download <https://ftp.rtems.org/pub/rtems/releases>
+     Wiki <https://devel.rtems.org/>
+     Docs <https://docs.rtems.org/>
+     Bugs <https://devel.rtems.org/query>
+    Lists <https://lists.rtems.org/>
+Developer <https://devel.rtems.org/>
+      GIT <https://git.rtems.org/>
+--------- ------------------------------------------
+
+## Release Files
+
+--------------------------------------------------------------------------------
+@RELEASE@                                     Top level directory
+------------------------------------          ----------------------------------
+[README.txt](README.txt), `index.html`        This document
+
+[contrib](contrib)                            Directory contains extra release
+                                              related files
+
+[docs](docs)                                  The generated RTEMS documentation
+
+[sources](souces)                             Source code for this release
+
+[rtems-@RELEASE@-release-notes.pdf][RN-P]     Detailed RTEMS Release notes
+
+[sha512sum.txt](sha512sum.txt)                The SHA512 checksums for this
+                                              directory
+-------------------------------------------------------------------------------
+
+[S-K]: sources/rtems-@RELEASE@.tar.xz
+[S-RSB]: sources/rtems-source-builder-@RELEASE@.tar.xz
+[S-T]: sources/rtems-tools-@RELEASE@.tar.xz
+[S-DOC]: sources/rtems-docs-@RELEASE@.tar.xz
+[S-BSD]: sources/rtems-libbsd-@RELEASE@.tar.xz
+[S-EX]: sources/rtems-examples-@RELEASE@.tar.xz
+
+
+Source Downloads                               | RTEMS Source Code
+-----------------------------------------------|---------------------------------------
+[rtems-@RELEASE@.tar.xz][S-K]                  | RTEMS kernel
+[rtems-source-builder-@RELEASE@.tar.xz][S-RSB] | RTEMS Source Builder
+[rtems-tools-@RELEASE@.tar.xz][S-T]            | RTEMS Tools
+[rtems-docs-@RELEASE@.tar.xz][S-DOC]           | RTEMS Documentation source
+[rtems-libbsd-@RELEASE@.tar.xz][S-BSD]         | RTEMS LibBSD
+[rtems-examples-@RELEASE@.tar.xz][S-EX]        | RTEMS Examples
+[sources](souces)                              | All source code for this release
+[sha512sum.txt](sha512sum.txt)                 | SHA512 checksums for this directory
+
+## RTEMS Documentation
+
+[D-U-P]: docs/rtems-@RELEASE@-user.pdf
+[D-U-H]: docs/rtems-@RELEASE@-user-html.tar.xz
+[D-C-P]: docs/rtems-@RELEASE@-c-user.pdf
+[D-C-H]: docs/rtems-@RELEASE@-c-user-html.tar.xz
+[D-P-P]: docs/rtems-@RELEASE@-posix-user.pdf
+[D-P-H]: docs/rtems-@RELEASE@-posix-user-html.tar.xz
+[D-E-P]: docs/rtems-@RELEASE@-eng.pdf
+[D-E-H]: docs/rtems-@RELEASE@-eng-html.tar.xz
+[D-N-P]: docs/rtems-@RELEASE@-networking.pdf
+[D-N-H]: docs/rtems-@RELEASE@-networking-html.tar.xz
+[D-S-P]: docs/rtems-@RELEASE@-shell.pdf
+[D-S-H]: docs/rtems-@RELEASE@-shell-html.tar.xz
+[D-O-H]: docs/rtems-@RELEASE@-doxygen-html.tar.xz
+
+The generated documentation can be found in the `docs` directory.
+
+The following manuals are available as compress HTML tar files or PDF:
+
+RTEMS User Manual
+  ~ * [docs/rtems-@RELEASE@-user.pdf][D-U-P]
+    * [docs/rtems-@RELEASE@-user-html.tar.xz][D-U-H]
+
+RTEMS C User Manual
+  ~ * [docs/rtems-@RELEASE@-c-user.pdf][D-C-P]
+    * [docs/rtems-@RELEASE@-c-user-html.tar.xz][D-C-H]
+
+RTEMS POSIX User Manual
+  ~ * [docs/rtems-@RELEASE@-posix-user.pdf][D-P-P]
+    * [docs/rtems-@RELEASE@-posix-user-html.tar.xz][D-P-H]
+
+RTEMS Software Engineering Manual
+  ~ * [docs/rtems-@RELEASE@-eng.pdf][D-E-P]
+    * [docs/rtems-@RELEASE@-eng-html.tar.xz][D-E-H]
+
+RTEMS Networking User Manual
+  ~ * [docs/rtems-@RELEASE@-networking.pdf][D-N-P]
+    * [docs/rtems-@RELEASE@-networking-html.tar.xz][D-N-H]
+
+RTEMS Shell User Manual
+  ~ * [docs/rtems-@RELEASE@-shell.pdf][D-S-P]
+    * [docs/rtems-@RELEASE@-shell-html.tar.xz][D-S-H]
+
+RTEMS Doxygen
+  ~ * [docs/rtems-@RELEASE@-doxygen.pdf][D-O-H]
+
+## Quick Guide to Building
+
+For new user rhe Quick Start in the User Manual contains a details Quick Start
+guide. Download the User Manual:
+
+  <@RELEASE_URL@/docs/rtems-docs-@RELEASE@-user.pdf>
+
+and follow the instructions in the Quick Start section. If are familiar with
+RTEMS or just want to get going the following steps will download the RTEMS
+Source Builder:
+
+~~~~~~~
+cd
+mkdir -p development/rtems
+cd development/rtems
+wget @RELEASE_URL@/sources/rtems-source-builder-@RELEASE@.tar.xz
+tar Jxf rtems-source-builder-@RELEASE@.tar.xz
+cd rtems-source-builder-@RELEASE@/rtems
+~~~~~~~
+
+To build the tools for the ARM architecture:
+
+~~~~~~~
+../source-builder/sb-set-builder \
+  --prefix=$HOME/development/rtems/@RELEASE@ \
+  @VERSION@/rtems-arm
+~~~~~~~
+
+To build the tools, kernel and all packages for the Beagleboneblack:
+
+~~~~~~~
+../source-builder/sb-set-builder \
+  --prefix=$HOME/development/rtems/@RELEASE@ \
+  @VERSION@/bsps/beagleboneblack
+~~~~~~~
+
+If you encounter a problem please post to the user@rtems.org mailing list. You
+can join the Users mailing at <https://lists.rtems.org/>.
+
+If you find a bug please raise a ticket at <https://devel.rtems.org/newticket>.

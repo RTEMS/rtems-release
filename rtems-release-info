@@ -34,39 +34,29 @@
 . ${release_top}/rtems-release-path
 
 #
-# Create the README.txt.
+# Create the README.md and from that README.txt and index.html
 #
-# The initial stage is done in a few steps where the release files table is cut
-# out of the input template file and formatted using the column command and
-# inserted back.
-#
-cat ${rtems_readme} | \
-    sed -e "s/@RELEASE_URL@/${escaped_release_path}/g" \
-	-e "s/@RELEASE@/${release}/g" \
-	-e "s/@VERSION@/${version}/g" \
-	-e "s/@REVISION@/${revision}/g" \
-	-e "s/@DATE@/${now}/g" > ${release}/README.1.txt
-cat ${release}/README.1.txt | \
-    sed -n '/^@TABLE-START@/,/^@TABLE-END@/p' | \
-    sed -e 's/@TABLE-START@//g' -e 's/@TABLE-END@//g' | \
-    column -s '|' -t | \
-    sed -e 's/$/\\/' > ${release}/README.2.txt
-cat ${release}/README.1.txt | \
-    sed -e "/@TABLE-START@/,/@TABLE-END@/c\\
-$(cat ${release}/README.2.txt)" > ${release}/README.3.txt
-cat ${release}/README.3.txt | \
-    sed -e "s/[\`\<\>]//g" -e 's/[[:space:]]*$//' > ${release}/README.txt
-rm -f ${release}/README.1.txt ${release}/README.2.txt ${release}/README.3.txt
-if [ -n "${rtems_readme_release_notes}" ]; then
- echo >> ${release}/README.txt
- echo "Release Notes" >> ${release}/README.txt
- echo "~~~~~~~~~~~~~" >> ${release}/README.txt
- echo >> ${release}/README.txt
- echo "${rtems_readme_release_notes}" >> ${release}/README.txt
-fi
+echo "
+## Architectures and BSPs
+" | \
+  cat ${rtems_readme} ${rtems_readme_release_notes} - ARCH-BSP.md | \
+  sed -e "s/@RELEASE_URL@/${escaped_release_path}/g" \
+      -e "s/@RELEASE@/${release}/g" \
+      -e "s/@VERSION@/${version}/g" \
+      -e "s/@REVISION@/${revision}/g" \
+      -e "s/@RTEMS_RELEASE_NOTES@/${release_notes}/g" \
+      -e "s/@DATE@/${now}/g" > ${release}/contrib/README.md
+rm ARCH-BSP.md
+
+title="RTEMS ${version} Embedded Realtime Operating System"
+
+pandoc_std_opts="-f markdown_phpextra+grid_tables+multiline_tables+simple_tables+auto_identifiers --section-divs"
+
+echo "${title}" > ${release}/README.txt
 echo >> ${release}/README.txt
-echo "RTEMS Architectures and BSPs" >> ${release}/README.txt
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> ${release}/README.txt
-echo >> ${release}/README.txt
-cat ARCH-BSP.txt >> ${release}/README.txt
-rm ARCH-BSP.txt
+pandoc ${release}/contrib/README.md \
+       ${pandoc_std_opts} -t plain >> ${release}/README.txt
+
+pandoc ${release}/contrib/README.md \
+       ${pandoc_std_opts} --toc -M title="${title}" -t html \
+       --include-in-header=rtems-release-notes.css > ${release}/index.html

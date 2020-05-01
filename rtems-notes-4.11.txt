@@ -1,6 +1,7 @@
+#! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015,2016,2020 Chris Johns (chrisj@rtems.org)
+# Copyright 2015-2017 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -29,75 +30,13 @@
 #
 
 #
-# RTEMS Release Defaults.
+# The script is the overridded configuration for 4.11.
 #
+rtems_readme_release_notes="$(cat <<- EOF
+- The rtems-libbsd package is experimental in this release.
+  You need to closely evaluate it's suitablility for production.
 
-#
-# Stop on any error
-#
-set -e
-
-#
-# Keep the top where we start.
-#
-top=${PWD}
-
-#
-# The default checksum.
-#
-checksum=sha512
-
-#
-# Default compression and options plus file suffix.
-#
-comp="xz --threads=0"
-comp_ext=xz
-comp_tar=J
-
-#
-# Defaults.
-#
-rtems_examples=yes
-rtems_libbsd=yes
-rtems_docs=yes
-rtems_docs_build=sphinx
-rtems_release_info_html=no
-rtems_release_notes=yes
-rtems_readme=README.md.in
-rtems_readme_release_notes=
-rtems_release_conf=
-rtems_release_url=https://ftp.rtems.org/pub/rtems/releases
-rtems_rsb_hash="rtems-tools rtems"
-
-#
-# RTEMS packages
-#
-rtems_packages="rtems-source-builder rtems rtems-tools rtems-libbsd"
-rtems_packages="${rtems_packages} rtems-examples rtems-docs"
-
-#
-# Where we collect the sources and docs.
-#
-sources="sources"
-docs="docs"
-
-#
-# The date stamp
-#
-now=$(date +"%d %B %Y")
-export now
-
-#
-# Version configuration. Overrides defaults.
-#
-if [ -f rtems-release-${version}-conf ]; then
- rtems_release_conf=rtems-release-${version}-conf
- . rtems-release-${version}-conf
-fi
-
-#
-# Conditional add libbsd for an RSB hash if enabled.
-#
-if [ ${rtems_libbsd} = yes ]; then
- rtems_rsb_hash="${rtems_rsb_hash} rtems-libbsd"
-fi
+- SMP support is experimental in this release and we recommend a
+  later release.
+EOF
+)"
