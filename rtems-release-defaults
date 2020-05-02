@@ -76,6 +76,17 @@ rtems_packages="rtems-source-builder rtems rtems-tools rtems-libbsd"
 rtems_packages="${rtems_packages} rtems-examples rtems-docs"
 
 #
+# RTEMS repositories
+#
+rtems_repos=""
+for r in ${rtems_packages}
+do
+  rtems_repos="${rtems_repos} "${r}.git
+done
+
+rtems_repos="${rtems_repos} rtems-release.git"
+
+#
 # Where we collect the sources and docs.
 #
 sources="sources"
