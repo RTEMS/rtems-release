@@ -1,0 +1,146 @@
+#! /bin/sh
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2020 Niteesh Babu <niteesh.gs@gmail.com>
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+set -e
+
+#
+# This is the top level RTEMS release script. Supply the version and and the
+# release.
+#
+. ./rtems-release-version
+echo "RTEMS Release, v${rtems_release_version}"
+
+#
+# Global release top path.
+#
+export release_top=${PWD}
+
+#
+# Usage for this tool.
+#
+usage() {
+ echo "Usage: $0 [-t] [-p] user version" 1>&2
+ echo " where:" 1>&2
+ echo "  user         : Your git user name" 1>&2
+ echo "  version      : The version of RTEMS, eg 5" 1>&2
+ echo "  -t           : Git protocol will be used for cloning (for testing)." 1>&2
+ echo "  -p           : Push the changes." 1>&2
+ exit 1
+}
+
+#
+# Defaults.
+#
+. ${release_top}/rtems-release-defaults
+
+#
+# Option defaults
+#
+clone_url=
+push=no
+
+#
+# Manage the command line.
+#
+while getopts "tp" opt; do
+ case "${opt}" in
+  t)
+   clone_url=git://git.rtems.org
+   ;;
+  p)
+   push=yes
+   ;;
+  *)
+   usage
+   ;;
+ esac
+done
+shift $((OPTIND-1))
+
+if [ $# -ne 2 ]; then
+ echo "error: 2 arguments must be supplied, your git user name, version. See -h for help"
+ exit 1
+fi
+user=$1
+version=$2
+
+#
+# Check if clone_url is empty.
+#
+if [ -z "${clone_url}" ]; then
+ clone_url=ssh://${user}@dispatch.rtems.org/data/git
+fi
+
+#
+# The branching workspace.
+#
+ws_branch=${version}-branched
+
+#
+# Version configuration. Overrides defaults.
+#
+if [ -f rtems-release-${version}-conf ]; then
+ rtems_release_conf=rtems-release-${version}-conf
+ . rtems-release-${version}-conf
+fi
+
+#
+# Clean the branched directory away.
+#
+rm -rf ${ws_branch}
+mkdir ${ws_branch}
+
+#
+# Clone and branch the repositories.
+#
+cd ${ws_branch}
+ for r in ${rtems_repos}
+ do
+  echo "git clone ${clone_url}/${r} ${r}"
+  git clone ${clone_url}/${r} ${r}
+  cd ${r}
+   echo "git checkout -b ${version} origin/master"
+   git checkout -b ${version} origin/master
+   cd ..
+ done
+
+ if [ ${push} = yes ]; then
+  for r in ${rtems_repos}
+  do
+   cd ${r}
+    echo "git push origin ${version}"
+    git push origin ${version}
+    cd ..
+  done
+ fi
+ cd ..
+
+exit 0
