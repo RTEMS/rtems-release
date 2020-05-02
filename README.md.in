@@ -124,7 +124,7 @@ RTEMS Doxygen
 
 ## Quick Guide to Building
 
-For new user rhe Quick Start in the User Manual contains a details Quick Start
+For new user the Quick Start in the User Manual contains a details Quick Start
 guide. Download the User Manual:
 
   <@RELEASE_URL@/docs/rtems-docs-@RELEASE@-user.pdf>

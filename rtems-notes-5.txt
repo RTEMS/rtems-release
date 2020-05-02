@@ -32,11 +32,11 @@ Implementation improvements usually fall into one of the following categories:
   by libbsd)
 * Termios supports now generation of signals.
 * New fatal sources:
- * `RTEMS_FATAL_SOURCE_EXCEPTION`
- * `RTEMS_FATAL_SOURCE_PANIC`
- * `RTEMS_FATAL_SOURCE_SMP`
- * `RTEMS_FATAL_SOURCE_INVALID_HEAP_FREE`
- * `RTEMS_FATAL_SOURCE_HEAP`
+  * `RTEMS_FATAL_SOURCE_EXCEPTION`
+  * `RTEMS_FATAL_SOURCE_PANIC`
+  * `RTEMS_FATAL_SOURCE_SMP`
+  * `RTEMS_FATAL_SOURCE_INVALID_HEAP_FREE`
+  * `RTEMS_FATAL_SOURCE_HEAP`
 
 #### API Implementation Improvements
 
@@ -55,21 +55,21 @@ Implementation improvements usually fall into one of the following categories:
 * All configuration options are now documented.
 * Most resources are now statically allocated and no longer use the workspace.
 * New configuration options:
- * `CONFIGURE_DIRTY_MEMORY`
- * `CONFIGURE_RECORD_EXTENSIONS_ENABLED`
- * `CONFIGURE_RECORD_FATAL_DUMP_BASE64`
- * `CONFIGURE_RECORD_FATAL_DUMP_BASE64_ZLIB`
- * `CONFIGURE_RECORD_PER_PROCESSOR_ITEMS`
- * `CONFIGURE_VERBOSE_SYSTEM_INITIALIZATION`
+  * `CONFIGURE_DIRTY_MEMORY`
+  * `CONFIGURE_RECORD_EXTENSIONS_ENABLED`
+  * `CONFIGURE_RECORD_FATAL_DUMP_BASE64`
+  * `CONFIGURE_RECORD_FATAL_DUMP_BASE64_ZLIB`
+  * `CONFIGURE_RECORD_PER_PROCESSOR_ITEMS`
+  * `CONFIGURE_VERBOSE_SYSTEM_INITIALIZATION`
 * Removed configuration options:
- * `CONFIGURE_HAS_OWN_CONFIGURATION_TABLE`
- * `CONFIGURE_HAS_OWN_BDBUF_TABLE`
- * `CONFIGURE_HAS_OWN_DEVICE_DRIVER_TABLE`
- * `CONFIGURE_HAS_OWN_FILESYSTEM_TABLE`
- * `CONFIGURE_HAS_OWN_INIT_TABLE`
- * `CONFIGURE_HAS_OWN_MOUNT_TABLE`
- * `CONFIGURE_HAS_OWN_MULTIPROCESSING_TABLE`
- * `CONFIGURE_POSIX_HAS_OWN_INIT_THREAD_TABLE`
+  * `CONFIGURE_HAS_OWN_CONFIGURATION_TABLE`
+  * `CONFIGURE_HAS_OWN_BDBUF_TABLE`
+  * `CONFIGURE_HAS_OWN_DEVICE_DRIVER_TABLE`
+  * `CONFIGURE_HAS_OWN_FILESYSTEM_TABLE`
+  * `CONFIGURE_HAS_OWN_INIT_TABLE`
+  * `CONFIGURE_HAS_OWN_MOUNT_TABLE`
+  * `CONFIGURE_HAS_OWN_MULTIPROCESSING_TABLE`
+  * `CONFIGURE_POSIX_HAS_OWN_INIT_THREAD_TABLE`
 * The helper macro for the clustered scheduler configuration
   `RTEMS_SCHEDULER_EDF_SMP()` has now only one parameter.
 
@@ -111,20 +111,20 @@ The following improvements were made to the RTEMS Shell:
 ## BSPs and Device Drivers
 
 * General
-  * BSP source code moved from `c/src/lib/libbsd` to `bsps` in the
+  * BSP source code moved from `c/src/lib/libbsp` to `bsps` in the
     source tree. The configure and some other related pieces are still
 	held in the original path.
 * New BSPs
   * BSPs for ARM
     * `atsamv` - Microchip (former Atmel) SAM V71 series
     * `xilinx-zynqmp` - Xilinx Zynq UltraScale+ MPSoC platform
- * BSPs for RISC-V
-   * `riscv` - Family of generic BSPs
-   * `griscv` - BSP based on the GRLIB
+  * BSPs for RISC-V
+    * `riscv` - Family of generic BSPs
+    * `griscv` - BSP based on the GRLIB
 * Significant updates to existing BSPs
   * `powerpc/qoriq`: 64-bit support
 * Removal of obsoleted BSPs
-  * `gdbsim`
+  * `gdbarmsim`
 * Drivers
   * Drivers for `getentropy()`
 
@@ -137,4 +137,4 @@ The following improvements were made to the RTEMS Shell:
 
 * RTEMS Trace addition of a new trace record support for target tracing.
 
-* RTEMS Bootimage, a tool to portability create SD card images.
+* RTEMS Bootimage, a tool to portably create SD card images.
