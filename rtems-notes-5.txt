@@ -36,9 +36,6 @@ Implementation improvements usually fall into one of the following categories:
 
 * Support for recording of high-frequency events in particular on SMP systems
 
-* Support for thread pinning (enables support for Epoch Based Reclamation; used
-  by libbsd)
-
 * Termios supports now generation of signals.
 
 * New fatal sources:
@@ -89,7 +86,13 @@ Implementation improvements usually fall into one of the following categories:
 
 * `rtems_get_processor_count()`.  Use `rtems_scheduler_get_processor_maximum()` instead.
 
-* proc_ptr
+* `boolean` is deprecated.  Use `bool` instead.
+
+* `single_precision` is deprecated.  Use `float` instead.
+
+* `double_precision` is deprecated.  Use `double` instead.
+
+* `proc_ptr` is deprecated.  Use a proper function pointer type.
 
 * rtems_context
 
@@ -97,9 +100,27 @@ Implementation improvements usually fall into one of the following categories:
 
 * region_information_block
 
-* rtems_thread_cpu_usage_t
+* `rtems_thread_cpu_usage_t` is deprecated. Use `struct timespec` instead.
 
-* rtems_rate_monotonic_period_time_t
+* `rtems_rate_monotonic_period_time_t` is deprecated. Use `struct timespec` instead.
+
+* `_Copyright_Notice` is deprecated.  Use `rtems_get_copyright_notice()` instead.
+
+* `_RTEMS_version` is deprecated.  Use `rtems_get_version_string()` instead.
+
+* `RTEMS_MAXIMUM_NAME_LENGTH` is deprecated. Use `sizeof(rtems_name)` instead.
+
+* `RTEMS_COMPILER_NO_RETURN_ATTRIBUTE` is deprecated. Use `RTEMS_NO_RETURN` instead.
+
+* `RTEMS_COMPILER_PURE_ATTRIBUTE` is deprecated. Use `RTEMS_PURE` instead.
+
+* `RTEMS_COMPILER_DEPRECATED_ATTRIBUTE` is deprecated. Use `RTEMS_DEPRECATED` instead.
+
+* `RTEMS_COMPILER_UNUSED_ATTRIBUTE` is deprecated. Use `RTEMS_UNUSED` instead.
+
+* `RTEMS_COMPILER_PACKED_ATTRIBUTE` is deprecated. Use `RTEMS_PACKED` instead.
+
+* Including <rtems/system.h> is deprecated.  This header file will be removed in RTEMS 6.
 
 #### API Removals
 
@@ -118,6 +139,9 @@ Implementation improvements usually fall into one of the following categories:
 
 * Implementation of the O(m) Independence-Preserving Protocol (OMIP).
 
+* Support for thread pinning (enables support for Epoch Based Reclamation; used
+  by libbsd)
+
 * The default SMP scheduler supports now EDF scheduling, one-to-one and
   one-to-all thread to processor affinities, and thread pinning.
 
@@ -135,6 +159,8 @@ Implementation improvements usually fall into one of the following categories:
 
 * New configuration options:
 
+    * `CONFIGURE_MAXIMUM_THREAD_NAME_SIZE`
+
     * `CONFIGURE_MINIMUM_POSIX_THREAD_STACK_SIZE`
 
     * `CONFIGURE_DIRTY_MEMORY`
@@ -150,6 +176,8 @@ Implementation improvements usually fall into one of the following categories:
     * `CONFIGURE_VERBOSE_SYSTEM_INITIALIZATION`
 
     * `CONFIGURE_IMFS_ENABLE_MKFIFO`
+
+    * `CONFIGURE_IMFS_DISABLE_MKNOD_FILE`
 
 * Renamed configuration options:
 
@@ -241,6 +269,8 @@ Obsoleted architectures:
 
 * Epiphany
 
+* PowerPC SPE
+
 ## BSPs and Device Drivers
 
 * General
@@ -283,11 +313,31 @@ Obsoleted architectures:
 
 * Obsoleted BSPs
 
-    * powerpc/mbx8xx
+    * `m68k/gen68302`
 
-    * m68k/gen68302
+    * `m68k/ods68302`
 
-    * m68k/ods68302
+    * `powerpc/brs5l`
+
+    * `powerpc/brs6l`
+
+    * `powerpc/dp2`
+
+    * `powerpc/mbx8xx`
+
+    * `powerpc/mpc5566evb_spe`
+
+    * `powerpc/mpc5643l_dpu`
+
+    * `powerpc/mpc5643l_evb`
+
+    * `powerpc/mpc5674f_ecu508_app`
+
+    * `powerpc/mpc5674f_ecu508_boot`
+
+    * `powerpc/mpc5674fevb_spe`
+
+    * `powerpc/mpc5674f_rsm6`
 
 * Drivers
 
