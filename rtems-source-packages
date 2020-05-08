@@ -52,6 +52,7 @@ elif [ ${version} -ge 5 ]; then
  rtems_pkgs="${rtems_pkgs} ${version}/rtems-packages"
  # Bare packages
  bare_pkgs="devel/qemu"
+ bare_pkgs="${bare_pkgs} devel/qemu4"
  bare_pkgs="${bare_pkgs} devel/qemu-couverture"
  bare_pkgs="${bare_pkgs} devel/sis"
  bare_pkgs="${bare_pkgs} devel/spike"
