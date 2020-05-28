@@ -100,6 +100,8 @@ Implementation improvements usually fall into one of the following categories:
 
 * rtems_extension
 
+* `rtems_io_lookup_name()` is deprecated. Use `stat()` instead.
+
 * region_information_block
 
 * `rtems_thread_cpu_usage_t` is deprecated. Use `struct timespec` instead.
