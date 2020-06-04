@@ -141,22 +141,34 @@ fi
 echo "Creating: Doxyfile"
 top_srcdir=$(echo ${prefix}/cpukit | sed -e 's/\//\\\//g')
 perl=$(which perl | sed -e 's/\//\\\//g')
-cat ${prefix}/cpukit/Doxyfile.in | \
-    sed -e "s/@PACKAGE_VERSION@/${release}/g" \
-	-e "s/@top_srcdir@/${top_srcdir}/g" \
-	-e "s/@PERL@/${perl}/g" \
-	-e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" \
-	-e "s/^HAVE_DOT[[:blank:]]/DOT_NUM_THREADS = 1\\
+if [ -f ${prefix}/cpukit/Doxyfile.in ]; then
+ cat ${prefix}/cpukit/Doxyfile.in | \
+  sed -e "s/@PACKAGE_VERSION@/${release}/g" \
+      -e "s/@top_srcdir@/${top_srcdir}/g" \
+      -e "s/@PERL@/${perl}/g" \
+      -e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" \
+      -e "s/^HAVE_DOT[[:blank:]]/DOT_NUM_THREADS = 1\\
 HAVE_DOT /g"> Doxyfile
-doxygen Doxyfile
+ doxygen Doxyfile
+elif [ ${prefix}/Doxygen ]; then
+ cat ${prefix}/Doxyfile | \
+  sed -e "s/^PROJECT_NUMBER[[:space:]].*=.*$/PROJECT_NUMBER = ${release}/g" \
+  > Doxyfile
+ cd ${prefix}
+  doxygen ../Doxyfile
+  cd ..
+else
+ echo "error: no doxygen configuration file found"
+ exit 1
+fi
 
 echo "Creating: rtems-doxygen-${release}.tar.${comp_ext}"
 if [ ${version} -lt 5 ]; then
  mv cpukit_doxy/html rtems-doxygen-${release}
 else
- mv html rtems-doxygen-${release}
+ cp -r ${prefix}/doc/html rtems-doxygen-${release}
 fi
 tar cf - rtems-doxygen-${release} | \
-    ${comp} > ../rtems-${release}-doxygen.tar.${comp_ext}
+    ${comp} > ../rtems-${release}-doxygen-html.tar.${comp_ext}
 
 exit 0

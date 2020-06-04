@@ -171,7 +171,7 @@ cd ${release}/${docs}
  #
  # If doxygen information has been generate move it into the docs.
  #
- for p in ../rtems-${release}-doxygen.tar.${comp_ext}
+ for p in ../rtems-${release}-doxygen-html.tar.${comp_ext}
  do
   if [ -e ${p} ]; then
     mv ${p} .
