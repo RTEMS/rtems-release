@@ -46,7 +46,11 @@ echo "RTEMS Documentation Release builder, v${rtems_release_version}"
 # Only build if sphinx-build is present on the system.
 #
 if [ "`command -v sphinx-build`"no = no ]; then
- echo "warning: documentation not built"
+ if [ ${rtems_docs_required} = yes ]; then
+  echo "error: cannot find sphinx to build documentation"
+ else
+  echo "warning: documentation not built"
+ fi
  exit 0
 fi
 
@@ -106,7 +110,7 @@ cd ${prefix}
    *3) d=${d}rd ;;
    *)  d=${d}th ;;
   esac
-  now=$(date +"%d${d} %B %Y")
+  now=$(date +"${d} %B %Y")
   echo "date = ${now}" >> VERSION
  fi
  cd ..

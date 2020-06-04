@@ -60,6 +60,7 @@ comp_tar=J
 rtems_examples=yes
 rtems_libbsd=yes
 rtems_docs=yes
+rtems_docs_required=yes
 rtems_docs_build=sphinx
 rtems_release_info_html=no
 rtems_release_notes=yes
