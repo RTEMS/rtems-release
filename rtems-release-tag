@@ -44,17 +44,55 @@ echo "RTEMS Release, v${rtems_release_version}"
 export release_top=${PWD}
 
 #
+# The user, version and revision.
+#
+#
+# Usage for this tool.
+#
+usage() {
+ echo "Usage: $0 [-t] [-p] user release version" 1>&2
+ echo " where:" 1>&2
+ echo "  user         : Your git user name" 1>&2
+ echo "  version      : The version of RTEMS, eg 5" 1>&2
+ echo "  revision     : The revision, eg 0.0 or 0.0-myrev" 1>&2
+ echo "  -p           : Push the changes." 1>&2
+ exit 1
+}
+
+#
 # Defaults.
 #
 . ${release_top}/rtems-release-defaults
 
 #
-# The user, version and revision.
+# Option defaults
 #
+clone_url=
+push=no
+
+#
+# Manage the command line.
+#
+while getopts "tp" opt; do
+ case "${opt}" in
+  t)
+   clone_url=git://git.rtems.org
+   ;;
+  p)
+   push=yes
+   ;;
+  *)
+   usage
+   ;;
+ esac
+done
+
+shift $((OPTIND-1))
 if [ $# -ne 3 ]; then
- echo "error: must be 3 arguments, your git user name, the release and version."
+ echo "error: must be 3 arguments, your git user name, version and the release. See -h for help"
  exit 1
 fi
+
 user=$1
 version=$2
 revision=$3
@@ -62,20 +100,11 @@ revision=$3
 release=${version}.${revision}
 
 #
-# Enable to push.
+# Check if clone_url is empty.
 #
-push=yes
-
-#
-# Repositories to tag.
-#
-rtems_repos="${rtems_repos} rtems-release.git"
-rtems_repos="${rtems_repos} rtems-source-builder.git"
-rtems_repos="${rtems_repos} rtems-tools.git"
-rtems_repos="${rtems_repos} rtems.git"
-rtems_repos="${rtems_repos} rtems-docs.git"
-rtems_repos="${rtems_repos} rtems-libbsd.git"
-rtems_repos="${rtems_repos} examples-v2.git"
+if [ -z "${clone_url}" ]; then
+ clone_url=ssh://${user}@dispatch.rtems.org/data/git
+fi
 
 #
 # The tagging workspace.
@@ -103,17 +132,11 @@ cd ${ws_tag}
  for r in ${rtems_repos}
  do
   ref=origin/${version}
-  #
-  # We tag master for the rtems-release.git repo. No branchs.
-  #
-  if [ ${r} = rtems-release.git ]; then
-   ref=master
-  fi
-  echo "git clone ssh://${user}@dispatch.rtems.org/data/git/${r} ${r}"
-  git clone ssh://${user}@dispatch.rtems.org/data/git/${r} ${r}
+  echo "git clone ${clone_url}/${r} ${r}"
+  git clone ${clone_url}/${r} ${r}
   cd ${r}
    echo "git tag ${release} ${ref}"
-   git  tag ${release} ${ref}
+   git tag ${release} ${ref}
    cd ..
  done
 
