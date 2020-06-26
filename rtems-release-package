@@ -68,8 +68,10 @@ stamped_tar=${prefix}-unstamped
 cd ${git_local}
  echo "git fetch origin"
  git fetch origin
+ # Map the branch name to a specific package branch name
+ branch=$(rtems_map_branch ${package} ${version})
  # Get the remote branch. If the release branch is not found use master.
- remote_branch=$(git branch --remote | grep ${version} | tr -d "[:space:]")
+ remote_branch=$(git branch --remote | grep "${branch}$" | tr -d "[:space:]")
  if [ -z "${remote_branch}" ]; then
   remote_branch="master"
  fi
