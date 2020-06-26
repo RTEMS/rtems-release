@@ -113,3 +113,8 @@ fi
 if [ ${rtems_libbsd} = yes ]; then
  rtems_rsb_hash="${rtems_rsb_hash} rtems-libbsd"
 fi
+
+#
+# Libbsd FreeBSD release version
+#
+rtems_libbsd_release=12

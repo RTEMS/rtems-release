@@ -82,8 +82,6 @@ fi
 
 workspace=ws-${package}
 
-checksum=sha512
-
 echo "Package: ${package}"
 echo "Release: ${release}"
 if [ ${rtems_git_repo} = yes ]; then
@@ -106,3 +104,20 @@ cd ${release}
 rm -rf ${workspace}
 mkdir ${workspace}
 cd ${workspace}
+
+#
+# Function to map branch names based on package.
+#
+rtems_map_branch()
+{
+ # $1=package
+ # $2=branch
+ case "$1" in
+  rtems-libbsd)
+   echo "$2-freebsd-${rtems_libbsd_release}"
+   ;;
+  *)
+   echo "$1"
+   ;;
+ esac
+}
