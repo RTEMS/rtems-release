@@ -178,6 +178,18 @@ cd ${release}/${docs}
   fi
  done
 
+ #
+ # Provide the documentation and doxygen available online in the release
+ #
+ mkdir html
+ cd html
+  tar Jxf ../rtems-${release}-docs-all.tar.${comp_ext}
+  mv rtems-docs-${release}/* .
+  rm -rf rtems-docs-${release}
+  tar Jxf ../rtems-${release}-doxygen-html.tar.${comp_ext}
+  mv rtems-doxygen-${release} doxygen
+  cd ..
+
  rm -f ${checksum}sum.txt
  for f in $(ls -1)
  do
