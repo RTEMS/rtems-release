@@ -84,50 +84,67 @@ Source Downloads                               | RTEMS Source Code
 
 ## RTEMS Documentation
 
+[D-O]:   docs/html
+[D-U-O]: docs/html/user
 [D-U-P]: docs/rtems-@RELEASE@-user.pdf
 [D-U-H]: docs/rtems-@RELEASE@-user-html.tar.xz
+[D-C-O]: docs/html/c-user
 [D-C-P]: docs/rtems-@RELEASE@-c-user.pdf
 [D-C-H]: docs/rtems-@RELEASE@-c-user-html.tar.xz
+[D-P-O]: docs/html/posix-users
 [D-P-P]: docs/rtems-@RELEASE@-posix-users.pdf
 [D-P-H]: docs/rtems-@RELEASE@-posix-users-html.tar.xz
+[D-E-O]: docs/html/eng
 [D-E-P]: docs/rtems-@RELEASE@-eng.pdf
 [D-E-H]: docs/rtems-@RELEASE@-eng-html.tar.xz
+[D-N-O]: docs/html/networking
 [D-N-P]: docs/rtems-@RELEASE@-networking.pdf
 [D-N-H]: docs/rtems-@RELEASE@-networking-html.tar.xz
+[D-S-O]: docs/html/shell
 [D-S-P]: docs/rtems-@RELEASE@-shell.pdf
 [D-S-H]: docs/rtems-@RELEASE@-shell-html.tar.xz
+[D-O-O]: docs/html/doxygen
 [D-O-H]: docs/rtems-@RELEASE@-doxygen-html.tar.xz
 
-The generated documentation can be found in the `docs` directory.
+[Online RTEMS @RELEASE@ Documentation][D-O]
 
-The following manuals are available as compress HTML tar files or PDF:
+The generated documentation packages can be found in the `docs` directory.
+
+The following manuals are available as compressed HTML tar files or PDF:
 
 RTEMS User Manual
-  ~ * [docs/rtems-@RELEASE@-user.pdf][D-U-P]
+  ~ * [docs/html/user][D-U-O]
+    * [docs/rtems-@RELEASE@-user.pdf][D-U-P]
     * [docs/rtems-@RELEASE@-user-html.tar.xz][D-U-H]
 
 RTEMS C User Manual
-  ~ * [docs/rtems-@RELEASE@-c-user.pdf][D-C-P]
+  ~ * [docs/html/c-user][D-C-O]
+    * [docs/rtems-@RELEASE@-c-user.pdf][D-C-P]
     * [docs/rtems-@RELEASE@-c-user-html.tar.xz][D-C-H]
 
 RTEMS POSIX User Manual
-  ~ * [docs/rtems-@RELEASE@-posix-users.pdf][D-P-P]
+  ~ * [docs/html/posix-users][D-P-O]
+    * [docs/rtems-@RELEASE@-posix-users.pdf][D-P-P]
     * [docs/rtems-@RELEASE@-posix-users-html.tar.xz][D-P-H]
 
 RTEMS Software Engineering Manual
-  ~ * [docs/rtems-@RELEASE@-eng.pdf][D-E-P]
+  ~ * [docs/html/eng][D-E-O]
+    * [docs/rtems-@RELEASE@-eng.pdf][D-E-P]
     * [docs/rtems-@RELEASE@-eng-html.tar.xz][D-E-H]
 
 RTEMS Networking User Manual
-  ~ * [docs/rtems-@RELEASE@-networking.pdf][D-N-P]
+  ~ * [docs/html/networking][D-N-O]
+    * [docs/rtems-@RELEASE@-networking.pdf][D-N-P]
     * [docs/rtems-@RELEASE@-networking-html.tar.xz][D-N-H]
 
 RTEMS Shell User Manual
-  ~ * [docs/rtems-@RELEASE@-shell.pdf][D-S-P]
+  ~ * [docs/html/shell][D-S-O]
+    * [docs/rtems-@RELEASE@-shell.pdf][D-S-P]
     * [docs/rtems-@RELEASE@-shell-html.tar.xz][D-S-H]
 
 RTEMS Doxygen
-  ~ * [docs/rtems-@RELEASE@-doxygen-html.tar.xz][D-O-H]
+  ~ * [docs/html/doxygen][D-O-O]
+    * [docs/rtems-@RELEASE@-doxygen-html.tar.xz][D-O-H]
 
 ## Quick Guide to Building
 
