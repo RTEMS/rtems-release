@@ -35,13 +35,17 @@ set -e
 # This is the top level RTEMS release script. Supply the version and and the
 # release.
 #
-. ./rtems-release-version
-echo "RTEMS Release, v${rtems_release_version}"
 
 #
 # Global release top path.
 #
-export release_top=${PWD}
+export release_top=$(realpath $(dirname $0))
+cd ${release_top}
+
+#
+# Defaults.
+#
+. ${release_top}/rtems-release-defaults
 
 #
 # Usage for this tool.
@@ -56,11 +60,7 @@ usage() {
  exit 1
 }
 
-#
-# Defaults.
-#
-. ${release_top}/rtems-release-defaults
-
+. ./rtems-release-version
 #
 # Option defaults
 #
@@ -91,6 +91,8 @@ if [ $# -ne 2 ]; then
 fi
 user=$1
 version=$2
+
+echo "] RTEMS Release Branch, v${version}"
 
 #
 # Check if clone_url is empty.

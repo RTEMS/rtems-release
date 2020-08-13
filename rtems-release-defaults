@@ -38,6 +38,18 @@
 set -e
 
 #
+# Required to be set.
+#
+version="not-set"
+revision="not-set"
+release="not-set"
+
+#
+# The master branch release
+#
+master_version=6
+
+#
 # Keep the top where we start.
 #
 top=${PWD}
@@ -94,27 +106,12 @@ sources="sources"
 docs="docs"
 
 #
+# Libbsd FreeBSD release version
+#
+rtems_libbsd_release=12
+
+#
 # The date stamp
 #
 now=$(date +"%d %B %Y")
 export now
-
-#
-# Version configuration. Overrides defaults.
-#
-if [ -f rtems-release-${version}-conf ]; then
- rtems_release_conf=rtems-release-${version}-conf
- . rtems-release-${version}-conf
-fi
-
-#
-# Conditional add libbsd for an RSB hash if enabled.
-#
-if [ ${rtems_libbsd} = yes ]; then
- rtems_rsb_hash="${rtems_rsb_hash} rtems-libbsd"
-fi
-
-#
-# Libbsd FreeBSD release version
-#
-rtems_libbsd_release=12

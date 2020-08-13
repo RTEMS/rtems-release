@@ -34,13 +34,16 @@ set -e
 #
 # This worker script to build the doco.
 #
-. ${release_top}/rtems-release-version
-echo "RTEMS Documentation Release builder, v${rtems_release_version}"
 
 #
 # Defaults.
 #
 . ${release_top}/rtems-release-defaults
+
+# Common package start.
+#
+title="RTEMS Documentation Release builder"
+. ./rtems-release-package-start
 
 #
 # Only build if sphinx-build is present on the system.
@@ -55,10 +58,6 @@ if [ "`command -v sphinx-build`"no = no ]; then
 fi
 
 #
-# Common package start.
-#
-. ./rtems-release-package-start
-
 #
 # The workspace pwd
 #
@@ -73,11 +72,8 @@ git clone ${git_remote} ${git_local}
 cd ${git_local}
  echo "git fetch origin"
  git fetch origin
- # Get the remote branch. If the release branch is not found use master.
- remote_branch=$(git branch --remote | grep ${version} | tr -d "[:space:]")
- if [ -z "${remote_branch}" ]; then
-  remote_branch="master"
- fi
+ # Map the branch name to a specific package and release branch name
+ remote_branch=$(rtems_map_branch ${package} ${version})
  echo "git archive --format=tar --prefix=${prefix}/ ${remote_branch}"
  git archive --format=tar --prefix=${prefix}/ ${remote_branch} | \
      ${comp} > ../${prefix}-unstamped.tar.${comp_ext}
@@ -93,7 +89,7 @@ cd ${prefix}
  #
  # This is a hack until I add support for the VERSION file created below.
  #
- echo "Creating VERSION: ${release}"
+ echo "] Creating VERSION: ${release}"
  if [ ${version} -lt 5 ]; then
    cat wscript | \
     sed -e "s/^version[[:space:]].*=.*$/version = '${release}'/g" > wscript.tmp
@@ -118,7 +114,7 @@ cd ${prefix}
 echo "tar cf - ${prefix}"
 tar cf - ${prefix} | ${comp} > ../${prefix}.tar.${comp_ext}
 
-echo "Created: ${release}/${prefix}.tar.${comp_ext}"
+echo "] Created: ${release}/${prefix}.tar.${comp_ext}"
 
 #
 # Build the docs.
@@ -134,7 +130,7 @@ cd ${prefix}
 #
 mkdir ${top}/${release}/${docs}
 cd install
- echo "Creating DOC all rtems-${release}-docs-all.tar.${comp_ext}"
+ echo "] Creating DOC all rtems-${release}-docs-all.tar.${comp_ext}"
  tar cf - * | \
   ${comp} > ${top}/${release}/${docs}/rtems-${release}-docs-all.tar.${comp_ext}
  for p in $(find . -name \*.pdf)
@@ -144,19 +140,19 @@ cd install
   #
   # Move the PDF out of the way.
   #
-  echo "Creating PDF rtems-${release}-${manual}.pdf"
+  echo "] Creating PDF rtems-${release}-${manual}.pdf"
   mv $p ${top}/${release}/${docs}/rtems-${release}-${manual}.pdf
   #
   # Create the single html manual
   #
-  echo "Creating SingleHTML rtems-${release}-${manual}.html.${comp_ext}"
+  echo "] Creating SingleHTML rtems-${release}-${manual}.html.${comp_ext}"
   mv ${base}/${manual}.html ${base}/rtems-${release}-${manual}.html
   ${comp} ${base}/rtems-${release}-${manual}.html
   mv ${base}/rtems-${release}-${manual}.html.${comp_ext} ${top}/${release}/${docs}/.
   #
   # Tar the multi-page html and install.
   #
-  echo "Creating HTML rtems-${release}-${manual}-html.tar.${comp_ext}"
+  echo "] Creating HTML rtems-${release}-${manual}-html.tar.${comp_ext}"
   tar cf - ${base}/${manual} | \
       ${comp} > ${top}/${release}/${docs}/rtems-${release}-${manual}-html.tar.${comp_ext}
  done
@@ -200,7 +196,7 @@ cd ${release}/${docs}
  done
  cd ..
 
-echo "Created: ${release}/${docs}/${checksum}sum.txt"
-echo "Created: ${release}/${docs}"
+echo "] Created: ${release}/${docs}/${checksum}sum.txt"
+echo "] Created: ${release}/${docs}"
 
 exit 0

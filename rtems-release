@@ -35,28 +35,18 @@ set -e
 # This is the top level RTEMS release script. Supply the version and and the
 # release.
 #
-. ./rtems-release-version
-echo "RTEMS Release, v${rtems_release_version}"
 
 #
 # Global release top path.
 #
-export release_top=${PWD}
+export release_top=$(realpath $(dirname $0))
+cd ${release_top}
 
 #
 # Defaults.
 #
 . ${release_top}/rtems-release-defaults
 
-#
-# We need pandoc so generate an error early is not available.
-#
-if [ ! $(command -v pandoc) ]; then
- echo "error: pandoc not found, please install" >&2
- exit 1
-fi
-
-#
 #
 # Usage for this tool.
 #
@@ -93,10 +83,21 @@ if [ $# -ne 2 ]; then
  echo "error: 2 arguments must be supplied, version and revision. See -h for help"
  exit 1
 fi
+
 version=$1
 revision=$2
 
-release=${version}.${revision}
+. ./rtems-release-version
+
+echo "RTEMS Release, v${release}"
+
+#
+# We need pandoc so generate an error early is not available.
+#
+if [ ! $(command -v pandoc) ]; then
+ echo "error: pandoc not found, please install" >&2
+ exit 1
+fi
 
 #
 # Does the release provide release notes?
@@ -110,7 +111,7 @@ fi
 #
 build()
 {
- echo "Package: $1"
+ echo "] Package: $1"
  ./rtems-release-package $*
 }
 
@@ -118,7 +119,7 @@ build()
 # Clean the release directory away.
 #
 if [ -e ${release} ]; then
- echo "Removing existing release ${release}"
+ echo "] Removing existing release ${release}"
  rm -rf ${release}
  mkdir ${release}
 fi
@@ -162,7 +163,7 @@ fi
 #
 # The sources is always last.
 #
-echo "Collect tools sources"
+echo "] Collect tools sources"
 ./rtems-release-sources ${version} ${revision} ${release_url}
 
 #
@@ -173,7 +174,7 @@ mkdir -p ${release}/contrib/rtems-release
 #
 # Create the release information
 #
-echo "Create the release information"
+echo "] Create the release information"
 . ${release_top}/rtems-release-info
 
 #

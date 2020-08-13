@@ -28,4 +28,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-rtems_release_version="5.0"
+if [ ${version} = "not-set" ]; then
+ echo "error: version not set"
+ exit 1
+fi
+
+if [ ${revision} = "not-set" ]; then
+ echo "error: revision not set"
+ exit 1
+fi
+
+release=${version}.${revision}
+
+#
+# Version configuration. Overrides defaults.
+#
+if [ -f rtems-release-${version}-conf ]; then
+ rtems_release_conf=rtems-release-${version}-conf
+ . rtems-release-${version}-conf
+fi

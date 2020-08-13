@@ -34,8 +34,6 @@ set -e
 #
 # The script collects the sources for all the tools.
 #
-. ${release_top}/rtems-release-version
-echo "RTEMS Release Sources, v${rtems_release_version}"
 
 #
 # Defaults.
@@ -55,20 +53,22 @@ release_url=$3
 
 package=rtems-source-builder
 
-release=${version}.${revision}
+. ./rtems-release-version
+
 prefix=${package}-${release}
 
 checksum=sha512
 
 workspace=ws-${package}
 
+echo "] RTEMS Release Sources, v${release}"
+echo "] Package: ${package}"
+echo "] Release: ${release}"
+
 #
 # Source the source packages to package (haha)
 #
 . rtems-source-packages
-
-echo "Package: ${package}"
-echo "Release: ${release}"
 
 if [ ! -e ${release} ]; then
  mkdir ${release}
@@ -195,7 +195,7 @@ cd ${release}
          cd ${g}
           hash=$(git status | grep '^HEAD detached at ' | sed 's/^HEAD detached at //')
           prefix=$(echo ${g}-${hash} | sed 's/\./\-/')
-          echo "Packaging GIT repo: ${g} to ${prefix}"
+          echo "] Packaging GIT repo: ${g} to ${prefix}"
           git archive --format=tar --prefix=${prefix}/ ${hash} | \
 	      ${comp} > ../../${prefix}.tar.${comp_ext}
           cd ..  # ${g}
@@ -227,7 +227,7 @@ cd ${release}
   ls -1 ${sources}
   for p in $(ls -1 | grep ${sources}/rtems-*.tar.${comp_ext})
   do
-   echo "Removing ${p}"
+   echo "] Removing ${p}"
    rm -f ${p}
   done
   for p in ${rtems_packages}
@@ -249,7 +249,7 @@ cd ${release}
    cd ..   # ${sources}
   cd ..   # ${release}
 
-echo "Created: ${release}/${sources}/${checksum}sum.txt"
-echo "Created: ${release}/${sources}"
+echo "] Created: ${release}/${sources}/${checksum}sum.txt"
+echo "] Created: ${release}/${sources}"
 
 exit 0
