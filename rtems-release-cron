@@ -35,18 +35,29 @@ set -e
 # Cron wrapper for releasing each month.
 #
 
+#
+# Global release top path.
+#
+#
+# Work in the release sandbox
+#
+export release_top=$(realpath $(dirname $0))
+cd ${release_top}
+
+if [ $# -ne 2 ]; then
+ echo "error: 2 arguments must be supplied, version and revision. See -h for help"
+ exit 1
+fi
+
+version=$1
+revision=$2
+
+. ./rtems-release-version
+
 live=yes
 if [ "${RTEMS_RELEASE_TESTING}" = "yes" ]; then
  live=no
 fi
-
-#
-# RTEMS release
-#
-rtems_major=5
-rtems_minor=0
-rtems_dot=0
-rtems_snapshot=$(date +"m%y%m")
 
 #
 # Email addresses
@@ -92,16 +103,7 @@ fi
 #
 # The version and the revision
 #
-version=${rtems_major}
-revision=${rtems_minor}.${rtems_dot}
-snapshot=${revision}-${rtems_snapshot}
-release="${version}.${snapshot}"
-
-#
-# Work in the release sandbox
-#
-release_top=$(dirname $0)
-cd ${release_top}
+release=${release}-$(date +"m%y%m")
 
 #
 # Activate the virtualenv for building the documentation.
@@ -112,8 +114,6 @@ cd ${release_top}
 # Clean the work
 #
 rm -rf ${release}
-
-. ${release_top}/rtems-release-version
 
 git_hash=$(git log --pretty=format:'%h' -n 1)
 
@@ -136,7 +136,7 @@ if [ ! -f ${LOCK} ]; then
  trap "rm -f ${CLEANUP_FILES}" EXIT
  trap "rm -f ${CLEANUP_FILES}; exit 1" INT TERM STOP INFO USR1 USR2
  touch ${LOCK}
- echo "RTEMS Release Cron builder, v${rtems_release_version} (${git_hash})" > ${BUILD_LOG}
+ echo "] RTEMS Release Cron builder, v${release} (${git_hash})" > ${BUILD_LOG}
  echo "" >> ${BUILD_LOG}
  set +e
  ./rtems-release ${version} ${snapshot} >> ${BUILD_LOG} 2>&1

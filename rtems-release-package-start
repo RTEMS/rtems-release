@@ -58,10 +58,8 @@ else
  worker=
 fi
 
-if [ ${version} -lt 5 ]; then
- revision_no=$(echo ${revision} | sed -e 's/\-.*$//')
-else
- revision_no=$(echo ${revision} | sed -e 's/\..*$//')
+revision_no=$(echo ${revision} | sed -e 's/\-.*$//')
+if [ ${version} -ge 5 ]; then
  even_odd=$(( ${revision_no} % 2 ))
  if [ ${even_odd} -eq 0 ]; then
   revision_no=$(expr ${revision_no} + 1)
@@ -82,10 +80,13 @@ fi
 
 workspace=ws-${package}
 
-echo "Package: ${package}"
-echo "Release: ${release}"
+. ${release_top}/rtems-release-version
+
+echo "] ${title}, v${release}"
+echo "] Package: ${package}"
+echo "] Release: ${release}"
 if [ ${rtems_git_repo} = yes ]; then
- echo "Repo   : ${git_remote}"
+ echo "] Repo   : ${git_remote}"
 fi
 
 if [ ! -e ${release} ]; then
@@ -106,18 +107,24 @@ mkdir ${workspace}
 cd ${workspace}
 
 #
-# Function to map branch names based on package.
+# Function to map package and version to branch names.
 #
 rtems_map_branch()
 {
  # $1=package
- # $2=branch
+ # $2=version
  case "$1" in
   rtems-libbsd)
-   echo "$2-freebsd-${rtems_libbsd_release}"
+   branch="$2-freebsd-${rtems_libbsd_release}"
    ;;
   *)
-   echo "$1"
+   branch="$2"
    ;;
  esac
+ # Get the remote branch. If the release branch is not found use release's master.
+ remote_branch=$(git branch --remote | grep "${branch}$" | tr -d "[:space:]")
+ if [ -z "${remote_branch}" ]; then
+  remote_branch="master"
+ fi
+ echo ${remote_branch}
 }

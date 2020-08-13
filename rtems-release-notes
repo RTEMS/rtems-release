@@ -32,10 +32,8 @@
 set -e
 
 #
-# This worker script to build the doco.
+# This worker script to build the release notes.
 #
-. ${release_top}/rtems-release-version
-echo "RTEMS Release Notes builder, v${rtems_release_version}"
 
 #
 # Defaults.
@@ -62,6 +60,7 @@ fi
 # Common package start. No git repo the data source is Trac.
 #
 rtems_git_repo=no
+title="RTEMS Release Notes builder"
 . ./rtems-release-package-start
 
 #
@@ -72,7 +71,7 @@ ws_pwd=${PWD}
 #
 # The release notes are all held in the wiki
 #
-release_pages="https://devel.rtems.org/wiki/Release/"
+release_pages="https://devel.rtems.org/wiki/Release"
 
 #
 # Set up the wkhtmltopdf defaults.
@@ -81,7 +80,7 @@ page_options="--print-media-type --zoom 0.8"
 header="--header-right [page]/[toPage] --header-font-size 10"
 footer="--footer-left [webpage] --footer-font-size 10"
 
-echo "Creating release notes"
+echo "] Creating release notes"
 
 rel_html=""
 rel_html_line="<div>@RELEASE@</div>"
@@ -94,7 +93,7 @@ do
 done
 rel_html=$(echo ${rel_html} | sed -e 's/\./\\\./g' -e  's/\//\\\//g')
 
-echo "Create the coverpage"
+echo "] Create the coverpage"
 cp ${top}/rtems-release-notes-coverpage/* .
 cat rtems-release-notes-coverpage.html.in | \
     sed -e "s/@RELEASE@/${release}/g" \
@@ -115,7 +114,7 @@ do
   even_odd=$(( ${rev} % 2 ))
   if [ ${version} -lt 5 -o ${even_odd} -ne 0 ]; then
    rel=${version}.${rev}
-   echo "Creating the ${rel} PDF"
+   echo "] Creating the ${rel} PDF"
    wkhtmltopdf --user-style-sheet file://${ws_pwd}/trac-rtems-style.html \
                -L 5mm -R 5mm \
                ${release_pages}/${version}/${version}.${rev} \
@@ -130,7 +129,7 @@ done
 
 gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=../rtems-${release}-release-notes.pdf cp.pdf ${pdfs}
 
-echo "Created: ${release}/rtems-${release}-release-notes.pdf cp.pdf"
+echo "] Created: ${release}/rtems-${release}-release-notes.pdf cp.pdf"
 
 #
 # Comman package end.

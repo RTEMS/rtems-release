@@ -32,12 +32,6 @@
 set -e
 
 #
-# This script adds the hashes to the release packages to the RSB.
-#
-. ${release_top}/rtems-release-version
-echo "RTEMS Release RSB Versioning, v${rtems_release_version}"
-
-#
 # Defaults.
 #
 . ${release_top}/rtems-release-defaults
@@ -56,11 +50,20 @@ revision=$3
 release_url=$4
 toptop=$5
 
-release=${version}.${revision}
+. ${release_top}/rtems-release-version
+
 prefix=${package}-${release}
 
-echo "Package: ${package}"
-echo "Release: ${release}"
+echo "] RTEMS Release RSB Versioning, v${release}"
+echo "] Package: ${package}"
+echo "] Release: ${release}"
+
+#
+# Conditional add libbsd for an RSB hash if enabled.
+#
+if [ ${rtems_libbsd} = yes ]; then
+ rtems_rsb_hash="${rtems_rsb_hash} rtems-libbsd"
+fi
 
 #
 # Get the release sources path and add it to the VERSION.
@@ -83,6 +86,6 @@ do
   echo "${file} = ${checksum} ${hash}" >> ${prefix}/VERSION
 done
 
-echo "RSB Versioning complete."
+echo "] RSB Versioning complete."
 
 exit 0

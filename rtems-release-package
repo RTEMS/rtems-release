@@ -34,8 +34,6 @@ set -e
 #
 # This script packages a package in a tar file.
 #
-. ${release_top}/rtems-release-version
-echo "RTEMS Release Package, v${rtems_release_version}"
 
 #
 # Defaults.
@@ -45,6 +43,7 @@ echo "RTEMS Release Package, v${rtems_release_version}"
 #
 # Common package start.
 #
+title="RTEMS Release Package"
 . ./rtems-release-package-start
 
 #
@@ -68,24 +67,23 @@ stamped_tar=${prefix}-unstamped
 cd ${git_local}
  echo "git fetch origin"
  git fetch origin
- # Map the branch name to a specific package branch name
- branch=$(rtems_map_branch ${package} ${version})
- # Get the remote branch. If the release branch is not found use master.
- remote_branch=$(git branch --remote | grep "${branch}$" | tr -d "[:space:]")
- if [ -z "${remote_branch}" ]; then
-  remote_branch="master"
- fi
+ # Map the branch name to a specific package and release branch name
+ remote_branch=$(rtems_map_branch ${package} ${version})
+ echo "] Package ${package} ${version}: ${remote_branch}"
  git_submodules=$(git submodule | cut -w -f 2)
  if [ -n "${git_submodules}" ]; then
-  echo "git submodules found ...."
+  echo "] git submodules found ...."
+  echo "git submodules init"
   git submodule init
+  echo "git checkout ${remote_branch}"
+  git checkout ${remote_branch}
   for s in ${git_submodules}
   do
    ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
    if [ "${ok}" != "no" ]; then
     echo "git submodule update ${s}"
     git submodule update ${s}
-    treeish=$(git ls-tree ${remote_branch} ${s} | cut -w -f 3)
+    treeish=$(git ls-tree HEAD ${s} | cut -w -f 3)
     cd ${s}
      echo "git archive --format=tar --prefix=${prefix}/${s}/ ${treeish}"
      git archive --format=tar --prefix=${prefix}/${s}/ ${treeish} > \
@@ -95,6 +93,8 @@ cd ${git_local}
     echo "git submodule ${s} excluded"
    fi
   done
+  echo "git checkout master"
+  git checkout master
  fi
  echo "git archive --format=tar --prefix=${prefix}/ ${remote_branch}"
  git archive --format=tar --prefix=${prefix}/ ${remote_branch} > \
@@ -119,7 +119,7 @@ if [ -n "${git_submodules}" ]; then
 fi
 
 cd ${prefix}
- echo "Creating VERSION: ${release}"
+ echo "] Creating VERSION: ${release}"
  echo "[version]" > VERSION
  echo "revision = ${release}" >> VERSION
  cd .. # ${prefix}
@@ -130,6 +130,8 @@ cd ${prefix}
 # package the release.
 #
 if [ -n "${worker}" ]; then
+ wk_name=$(basename ${worker})
+ echo "] Worker: ${wk_name}"
  ${worker} ${package} ${version} ${revision} ${release_url} ${top}
 fi
 
@@ -139,7 +141,7 @@ fi
 echo "tar cf - ${prefix}"
 tar cf - ${prefix} | ${comp} > ../${prefix}.tar.${comp_ext}
 
-echo "Created: ${release}/${prefix}.tar.${comp_ext}"
+echo "] Created: ${release}/${prefix}.tar.${comp_ext}"
 
 #
 # Comman package end.
