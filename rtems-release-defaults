@@ -111,6 +111,12 @@ docs="docs"
 rtems_libbsd_release=12
 
 #
+# Common email addresses
+#
+email_build_to="build@rtems.org"
+email_announce_to="users@rtems.org,devel@rtems.org"
+
+#
 # The date stamp
 #
 now=$(date +"%d %B %Y")

@@ -1,0 +1,244 @@
+#! /bin/sh
+#
+# RTEMS Tools Project (http://www.rtems.org/)
+# Copyright 2020 Chris Johns (chrisj@rtems.org)
+# All rights reserved.
+#
+# This file is part of the RTEMS Tools package in 'rtems-tools'.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+set -e
+
+#
+# Test a release
+#
+
+#
+# Global release top path.
+#
+#
+# Work in the release sandbox
+#
+export release_top=$(realpath $(dirname $0))
+
+#
+# Top
+#
+top=$PWD
+
+#
+# Defaults.
+#
+. ${release_top}/rtems-release-defaults
+
+release_url="${rtems_release_url}"
+build_email="no"
+build_from="none"
+build_to="${email_build_to}"
+smtphost=
+
+#
+# Usage for this tool.
+#
+usage() {
+ echo "Usage: $0 [-u RELEASE-URL] version revision" 1>&2
+ echo " where:" 1>&2
+ echo "  version          : The version of RTEMS, eg 5" 1>&2
+ echo "  revision         : The revision, eg 0.0 or 0.0-myrev" 1>&2
+ echo "  -u [RELEASE-URL] : The path to download the RSB (default: ${rtems_release_url})." 1>&2
+ echo "  -e               : Email the build results." 1>&2
+ echo "  -F [FROM]        : The FROM email address." 1>&2
+ echo "  -T [TO]          : The TO email address (default: ${email_build_to}." 1>&2
+ echo "  -s [SMTP-HOST]   : The STMP host to send the mail via." 1>&2
+ exit 1
+}
+
+#
+# Option defaults
+#
+release_url=${rtems_release_url}
+
+#
+# Manage the command line.
+#
+while getopts ":u:eF:T:s:" opt; do
+ case "${opt}" in
+  u)
+   release_url=${OPTARG}
+   ;;
+  e)
+   build_email="yes"
+   ;;
+  F)
+   build_from=${OPTARG}
+   ;;
+  T)
+   build_to=${OPTARG}
+   ;;
+  s)
+   smtphost=${OPTARG}
+   ;;
+  *)
+   usage
+   ;;
+ esac
+done
+shift $((OPTIND-1))
+
+if [ $# -ne 2 ]; then
+ echo "error: 2 arguments must be supplied, version and revision. See -h for help" 1>&2
+ exit 1
+fi
+
+if [ ${build_email} = yes ]; then
+ if [ ${build_from} = "none" ]; then
+  echo "error: no FROM email address provided. See -h for help" 1>&2
+  exit 1
+ fi
+fi
+
+version=$1
+revision=$2
+
+. ${release_top}/rtems-release-version
+
+bsets=
+bsets="${bsets} ${version}/rtems-sparc"
+bsets="${bsets} ${version}/rtems-arm"
+bsets="${bsets} ${version}/rtems-powerpc"
+bsets="${bsets} ${version}/rtems-i386"
+bsets="${bsets} ${version}/rtems-riscv"
+bsets="${bsets} bsps/beagleboneblack"
+bsets="${bsets} bsps/xilinx_zynq_zedboard"
+bsets="${bsets} bsps/pc"
+bsets="${bsets} bsps/erc32"
+bsets="${bsets} bsps/imx7"
+
+#
+# Is this an RC or snapshot build in the default RTEMS release path?
+#
+if [ ${release_url} = ${rtems_release_url} -a \
+     $(echo ${revision} | sed 's/.*-.*/yes/') = yes ]; then
+ release_url=${release_url}/${version}
+ if [ $(echo ${revision} | sed 's/.*-rc.*/yes/') = yes ]; then
+  release_url=${release_url}/rc/${release}
+ else
+  revision_number=$(echo ${revision} | sed 's/-.*//')
+  release_url=${release_url}/${revision_number}/${release}
+ fi
+fi
+
+echo "RTEMS Release Testing, v${release}"
+echo
+echo "URL: ${release_url}"
+
+email_body="${top}/email-body.txt"
+rm -f ${email_body}
+touch ${email_body}
+
+email()
+{
+ echo "$*" >> ${email_body}
+}
+email_attach()
+{
+ cat $1 >> ${email_body}
+}
+
+email  "RTEMS Release Testing, v${release}"
+email
+email "URL:  ${release_url}"
+email "Host: $(uname -a)"
+email "Date: $(date)"
+email
+
+#
+# Clean the build directory.
+#
+if [ -e ${release} ]; then
+ echo "] Removing existing ${release} build" 1>&2
+ rm -rf ${release}
+fi
+mkdir ${release}
+
+cd ${release}
+ rsb="rtems-source-builder-${release}"
+ rsb_tar="${rsb}.tar.xz"
+ if [ ! -z $(command -v wget) ]; then
+  echo "wget ${release_url}/sources/${rsb_tar}"
+  wget ${release_url}/sources/${rsb_tar}
+ else
+  if [ ! -z $(command -v curl) ]; then
+    echo "curl ${release_ur}/sources/${rsb_tar} > ${rsb_tar}"
+    curl ${release_url}/sources/${rsb_tar} > ${rsb_tar}
+  else
+   echo "error: cannot find wget or curl; please install" 1>&2
+   exit 1
+  fi
+ fi
+ echo "tar Jxf ${rsb_tar}"
+ tar Jxf ${rsb_tar}
+ cd ${rsb}/rtems
+ email "Build Sets"
+ email "=========="
+ result="PASSED"
+ touch ${top}/rsb_out.txt
+ for bset in ${bsets}
+ do
+  email
+  echo "../source-builder/sb-set-builder --no-install --log=$(basename ${bset}).txt ${bset}"
+  rm -f rsb-report-*
+  set +e
+  ../source-builder/sb-set-builder --no-install --log=$(basename ${bset}) ${bset} > rsb_out.txt 2>&1
+  ec=$?
+  set -e
+  cat rsb_out.txt >> ${top}/rsb_out.txt
+  if [ ${ec} -eq 0 ]; then
+   email "${bset}: PASS"
+  else
+   result="FAIL"
+   email "${bset}: FAIL"
+   email "RSB Output:"
+   email_attach rsb_out.txt
+   if [ -e rsb-report-* ]; then
+    email "RSB Error Report:"
+    email_attach rsb-report-*
+   else
+    email "RSB Error Report: not-found"
+   fi
+  fi
+ done
+ if [ ${build_email} = yes ]; then
+  subject="RTEMS Release Test: ${release} - ${result}"
+  ${release_top}/rtems-mailer --to=${build_to} \
+                              --from=${build_from} \
+                              --subject="${subject}" \
+                              ${smtphost} \
+                              ${email_body}
+ fi
+ cd ..
+ echo "Build Finished"
+
+exit 0
