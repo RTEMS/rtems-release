@@ -130,11 +130,18 @@ bsets="${bsets} ${version}/rtems-arm"
 bsets="${bsets} ${version}/rtems-powerpc"
 bsets="${bsets} ${version}/rtems-i386"
 bsets="${bsets} ${version}/rtems-riscv"
-bsets="${bsets} bsps/beagleboneblack"
-bsets="${bsets} bsps/xilinx_zynq_zedboard"
-bsets="${bsets} bsps/pc"
-bsets="${bsets} bsps/erc32"
-bsets="${bsets} bsps/imx7"
+
+#
+# The BSP were moved after 5.
+#
+if [ ${version} -eq 5 ]; then
+ bsp_ver="5/"
+fi
+bsets="${bsets} ${bsp_ver}bsps/beagleboneblack"
+bsets="${bsets} ${bsp_ver}bsps/xilinx_zynq_zedboard"
+bsets="${bsets} ${bsp_ver}bsps/pc"
+bsets="${bsets} ${bsp_ver}bsps/erc32"
+bsets="${bsets} ${bsp_ver}bsps/imx7"
 
 #
 # Is this an RC or snapshot build in the default RTEMS release path?
@@ -208,10 +215,10 @@ cd ${release}
  for bset in ${bsets}
  do
   email
-  echo "../source-builder/sb-set-builder --no-install --log=$(basename ${bset}).txt ${bset}"
+  echo "../source-builder/sb-set-builder --prefix=${top}/build --log=$(basename ${bset}).txt ${bset}"
   rm -f rsb-report-*
   set +e
-  ../source-builder/sb-set-builder --no-install --log=$(basename ${bset}) ${bset} > rsb_out.txt 2>&1
+  ../source-builder/sb-set-builder --prefix=${top}/build --log=$(basename ${bset}) ${bset} > rsb_out.txt 2>&1
   ec=$?
   set -e
   cat rsb_out.txt >> ${top}/rsb_out.txt
