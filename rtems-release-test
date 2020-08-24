@@ -146,14 +146,17 @@ bsets="${bsets} ${bsp_ver}bsps/imx7"
 #
 # Is this an RC or snapshot build in the default RTEMS release path?
 #
-if [ ${release_url} = ${rtems_release_url} -a \
-     $(echo ${revision} | sed 's/.*-.*/yes/') = yes ]; then
+if [ ${release_url} = ${rtems_release_url} ]; then
  release_url=${release_url}/${version}
- if [ $(echo ${revision} | sed 's/.*-rc.*/yes/') = yes ]; then
-  release_url=${release_url}/rc/${release}
+ if [ $(echo ${revision} | sed 's/.*-.*/yes/') = yes ]; then
+  if [ $(echo ${revision} | sed 's/.*-rc.*/yes/') = yes ]; then
+   release_url=${release_url}/rc/${release}
+  else
+   revision_number=$(echo ${revision} | sed 's/-.*//')
+   release_url=${release_url}/${revision_number}/${release}
+  fi
  else
-  revision_number=$(echo ${revision} | sed 's/-.*//')
-  release_url=${release_url}/${revision_number}/${release}
+  release_url=${release_url}/${release}
  fi
 fi
 
