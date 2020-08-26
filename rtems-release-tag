@@ -37,6 +37,12 @@ set -e
 #
 
 #
+# Global release top path.
+#
+export release_top=$(realpath $(dirname $0))
+cd ${release_top}
+
+#
 # Defaults.
 #
 . ${release_top}/rtems-release-defaults
