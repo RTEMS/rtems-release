@@ -25,7 +25,17 @@ Implementation improvements usually fall into one of the following categories:
 
 #### API Additions
 
-* TBD
+* `RTEMS_ALIGN_UP()`
+
+* `RTEMS_ALIGN_DOWN()`
+
+* `rtems_task_config`
+
+* `rtems_task_construct()`
+
+* `RTEMS_TASK_STORAGE_SIZE`
+
+* `RTEMS_TASK_STORAGE_ALIGNMENT`
 
 #### API Implementation Improvements
 
@@ -93,7 +103,9 @@ Implementation improvements usually fall into one of the following categories:
 
 * New configuration options:
 
-    * TBD
+    * `CONFIGURE_MAXIMUM_THREAD_LOCAL_STORAGE_SIZE`
+
+    * `CONFIGURE_MINIMUM_TASKS_WITH_USER_PROVIDED_STORAGE`
 
 * Renamed configuration options:
 
