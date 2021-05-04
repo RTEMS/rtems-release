@@ -39,7 +39,19 @@ Implementation improvements usually fall into one of the following categories:
 
 #### API Implementation Improvements
 
-* TBD
+* Zero size allocation results are now consistent accross directives, for
+  example `malloc( 0 )` and `posix_memalign( &p, align, 0 )` return now a
+  unique pointer (or `NULL` if the heap is empty).  In POSIX, zero size memory
+  allocations are implementation-defined behaviour.  The implementation has two
+  options:
+
+  * https://pubs.opengroup.org/onlinepubs/9699919799/functions/malloc.html
+
+  * https://pubs.opengroup.org/onlinepubs/9699919799/functions/posix_memalign.html
+
+  Linux and FreeBSD return a unique pointer for zero size memory allocations.
+  This approach is now also used in RTEMS as well throughout the memory
+  allocation directives
 
 #### API Deprecations
 
