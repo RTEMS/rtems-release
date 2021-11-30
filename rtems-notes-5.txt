@@ -1,3 +1,12 @@
+## RTEMS 5.2 Release Notes
+
+### API Changes
+
+#### API Additions
+
+* NTP support
+	* Addition of NTP update second handler via _Timecounter_Set_NTP_update_second() from <rtems/score/timecounter.h>
+
 ## RTEMS 5.1 Release Notes
 
 ### RTEMS Improvements
