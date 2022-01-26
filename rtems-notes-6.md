@@ -43,6 +43,9 @@ Implementation improvements usually fall into one of the following categories:
 * If `rtems_task_delete()` is called from within interrupt context, then it
   returns now `RTEMS_CALLED_FROM_ISR`.
 
+* The rate monotonic period statistics are no longer affected by
+  `rtems_cpu_usage_reset()`.
+
 #### API Additions
 
 * `RTEMS_ALIGN_UP()`
