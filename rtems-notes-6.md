@@ -21,7 +21,27 @@ Implementation improvements usually fall into one of the following categories:
 
 ### API Changes
 
-* TBD
+* If the processor set is not large enough to contain the processor set of
+  the scheduler, then `rtems_scheduler_get_processor_set()` returns
+  `RTEMS_INVALID_SIZE` instead of `RTEMS_INVALID_NUMBER`.
+
+* If the processor set is not large enough to contain the processor
+  affinity set of the task, then `rtems_task_get_affinity()` returns
+  `RTEMS_INVALID_SIZE` instead of `RTEMS_INVALID_NUMBER`.
+
+* If time-of-day argument is `NULL`, then `rtems_timer_fire_when()`,
+  `rtems_timer_server_fire_when(), and `rtems_task_wake_when()` return
+  `RTEMS_INVALID_ADDRESS` instead of `RTEMS_INVALID_CLOCK`.
+
+* The time-of-day arguments in `rtems_timer_fire_when()`,
+  `rtems_timer_server_fire_when(), and `rtems_task_wake_when()` were
+  constified.
+
+* If the entry point is `NULL`, then `rtems_task_start()` returns now
+  `RTEMS_INVALID_ADDRESS`.
+
+* If `rtems_task_delete()` is called from within interrupt context, then it
+  returns now `RTEMS_CALLED_FROM_ISR`.
 
 #### API Additions
 
@@ -29,15 +49,99 @@ Implementation improvements usually fall into one of the following categories:
 
 * `RTEMS_ALIGN_DOWN()`
 
-* `rtems_task_config`
+* `rtems_get_build_label()`
+
+* `rtems_get_target_hash()`
+
+* `rtems_interrupt_clear()`
+
+* `rtems_interrupt_entry_initialize()`
+
+* `RTEMS_INTERRUPT_ENTRY_INITIALIZER()`
+
+* `rtems_interrupt_entry_install()`
+
+* `rtems_interrupt_entry_remove()`
+
+* `rtems_interrupt_get_affinity()`
+
+* `rtems_interrupt_get_attributes()`
+
+* `rtems_interrupt_handler_install()`
+
+* `rtems_interrupt_handler_iterate()`
+
+* `rtems_interrupt_handler_remove()`
+
+* `rtems_interrupt_is_pending()`
+
+* `rtems_interrupt_raise()`
+
+* `rtems_interrupt_raise_on()`
+
+* `rtems_interrupt_server_action_prepend()`
+
+* `rtems_interrupt_server_create()`
+
+* `rtems_interrupt_server_delete()`
+
+* `rtems_interrupt_server_entry_destroy()`
+
+* `rtems_interrupt_server_entry_initialize()`
+
+* `rtems_interrupt_server_entry_move()`
+
+* `rtems_interrupt_server_entry_submit()`
+
+* `rtems_interrupt_server_handler_install()`
+
+* `rtems_interrupt_server_handler_iterate()`
+
+* `rtems_interrupt_server_handler_remove()`
+
+* `rtems_interrupt_server_initialize()`
+
+* `rtems_interrupt_server_move()`
+
+* `rtems_interrupt_server_request_destroy()`
+
+* `rtems_interrupt_server_request_initialize()`
+
+* `rtems_interrupt_server_request_set_vector()`
+
+* `rtems_interrupt_server_request_submit()`
+
+* `rtems_interrupt_server_resume()`
+
+* `rtems_interrupt_server_set_affinity()`
+
+* `rtems_interrupt_server_suspend()`
+
+* `rtems_interrupt_set_affinity()`
+
+* `rtems_interrupt_vector_disable()`
+
+* `rtems_interrupt_vector_enable()`
+
+* `rtems_interrupt_vector_is_enabled()`
+
+* `RTEMS_MESSAGE_QUEUE_BUFFER()`
+
+* `rtems_message_queue_construct()`
+
+* `RTEMS_PARTITION_ALIGNMENT`
 
 * `rtems_task_construct()`
 
-* `RTEMS_TASK_STORAGE_SIZE`
+* `RTEMS_TASK_STORAGE_SIZE()`
 
 * `RTEMS_TASK_STORAGE_ALIGNMENT`
 
 #### API Implementation Improvements
+
+* The Classic API signal processing was reworked to avoid possible infinite
+  recursions.  It is still strongly recommended to use the `RTEMS_NO_ASR` task
+  mode for the signal handler.
 
 * Zero size allocation results are now consistent accross directives, for
   example `malloc( 0 )` and `posix_memalign( &p, align, 0 )` return now a
@@ -57,37 +161,9 @@ Implementation improvements usually fall into one of the following categories:
 
 * `rtems_iterate_over_all_threads()`.  Use `rtems_task_iterate()` instead.
 
-* `rtems_get_current_processor()`.  Use `rtems_scheduler_get_processor()` instead.
-
-* `rtems_get_processor_count()`.  Use `rtems_scheduler_get_processor_maximum()` instead.
-
-* `boolean` is deprecated.  Use `bool` instead.
-
-* `single_precision` is deprecated.  Use `float` instead.
-
-* `double_precision` is deprecated.  Use `double` instead.
-
-* `proc_ptr` is deprecated.  Use a proper function pointer type.
-
-* rtems_context
-
-* rtems_context_fp
-
-* rtems_extension
-
-* `rtems_io_lookup_name()` is deprecated. Use `stat()` instead.
-
-* region_information_block
-
-* `rtems_thread_cpu_usage_t` is deprecated. Use `struct timespec` instead.
-
-* `rtems_rate_monotonic_period_time_t` is deprecated. Use `struct timespec` instead.
-
 * `_Copyright_Notice` is deprecated.  Use `rtems_get_copyright_notice()` instead.
 
 * `_RTEMS_version` is deprecated.  Use `rtems_get_version_string()` instead.
-
-* `RTEMS_MAXIMUM_NAME_LENGTH` is deprecated. Use `sizeof(rtems_name)` instead.
 
 * `RTEMS_COMPILER_NO_RETURN_ATTRIBUTE` is deprecated. Use `RTEMS_NO_RETURN` instead.
 
@@ -99,15 +175,55 @@ Implementation improvements usually fall into one of the following categories:
 
 * `RTEMS_COMPILER_PACKED_ATTRIBUTE` is deprecated. Use `RTEMS_PACKED` instead.
 
-* Including <rtems/system.h> is deprecated.  This header file will be removed in RTEMS 6.
-
 #### API Removals
 
-* TBD
+* The obsoleted header file <rtems/system.h> was removed.
+
+* The never implemented `rtems_interrupt_cause()` directive was removed.
+
+* Support for the RTEMS thread model used by GCC versions prior to 6.1 was
+  removed (for example `rtems_gxx_once()`).
+
+* The obsoleted `rtems_get_current_processor()` directive was removed.  Use
+  `rtems_scheduler_get_processor()` instead.
+
+* The obsoleted `rtems_get_processor_count()` directive was removed.  Use
+  `rtems_scheduler_get_processor_maximum()` instead.
+
+* The obsoleted `boolean` type was removed.  Use `bool` instead.
+
+* The obsoleted `single_precision` type was removed.  Use `float` instead.
+
+* The obsoleted `double_precision` type was removed.  Use `double` instead.
+
+* The obsoleted `proc_ptr` type was removed.  Use a proper function pointer
+  type.
+
+* The obsoleted `rtems_context` type was removed.
+
+* The obsoleted `rtems_context_fp` type was removed.
+
+* The obsoleted `rtems_extension` type was removed.  Use `void` instead.
+
+* The obsoleted `rtems_io_lookup_name()` type was removed. Use `stat()`
+  instead.
+
+* The obsoleted `region_information_block` was removed.  Use
+  `Heap_Information_block` instead.
+
+* The obsoleted `rtems_thread_cpu_usage_t` type was removed. Use
+  `struct timespec` instead.
+
+* The obsoleted `rtems_rate_monotonic_period_time_t` type was removed. Use
+  `struct timespec` instead.
+
+* The obsoleted `RTEMS_MAXIMUM_NAME_LENGTH` define was removed. Use
+  `sizeof(rtems_name)` instead.
 
 ### SMP Support Improvements
 
-* TBD
+* The SMP scheduler framework was reworked to fix potential data corruption
+  issues and priority group ordering violations.
 
 ### Configuration Changes
 
@@ -139,7 +255,7 @@ The following improvements were made to the RTEMS Shell:
 
 ## Architectures
 
-Removed obsolete architectures:
+Removed obsoleted architectures:
 
 * Epiphany
 
@@ -157,9 +273,11 @@ Obsoleted architectures:
 
 * New BSPs
 
-    * BSPs for ARCH
+    * `arm/fvp`
 
-        * `BSP` - TBD
+    * `arm/imxrt`
+
+    * `arm/stm32h7`
 
 * Significant updates to existing BSPs
 
@@ -167,13 +285,13 @@ Obsoleted architectures:
 
 * Removal of obsoleted BSPs
 
-    * `ARCH/BSP`
-
     * `powerpc/brs5l`
 
     * `powerpc/brs6l`
 
     * `powerpc/dp2`
+
+    * `powerpc/haleakala`
 
     * `powerpc/mpc5566evb_spe`
 
@@ -203,8 +321,11 @@ Obsoleted architectures:
 
 ## Newlib Changes
 
-* TBD
+* Add `futimens()` and `utimensat()`
 
 ## Ecosystem
 
-* TBD
+* Improved GCOV support for RTEMS and embedded systems in general.  See GCC
+  options `-fprofile-info-section` and `-fprofile-update=atomic`.  The
+  `libgcov` provides now the `__gcov_info_to_gcda()` function to dump the GCOV
+  information.
