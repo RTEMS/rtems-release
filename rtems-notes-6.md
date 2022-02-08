@@ -46,6 +46,14 @@ Implementation improvements usually fall into one of the following categories:
 * The rate monotonic period statistics are no longer affected by
   `rtems_cpu_usage_reset()`.
 
+* Termios
+  * `txTaskCharsDequeued` has been added to `struct rtems_termios_tty`. With
+    that the size of the structure changed. Libraries and applications that use
+    the structure should be recompiled.
+  * The `l_start` line discipline function now receives the number of characters
+    that have been sent. It is save to ignore the extra parameter for
+    applications that don't need it.
+
 #### API Additions
 
 * `RTEMS_ALIGN_UP()`
