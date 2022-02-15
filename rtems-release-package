@@ -106,14 +106,14 @@ if [ ! -f ${stamped_tar}.tar ]; then
  exit 1
 fi
 echo "tar xf ${stamped_tar}.tar"
-tar Jxf ${stamped_tar}.tar
+tar xf ${stamped_tar}.tar
 if [ -n "${git_submodules}" ]; then
  for s in ${git_submodules}
  do
    ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
    if [ "${ok}" != "no" ]; then
     echo "tar xf ${stamped_tar}-${s}.tar"
-    tar Jxf ${stamped_tar}-${s}.tar
+    tar xf ${stamped_tar}-${s}.tar
    fi
  done
 fi
