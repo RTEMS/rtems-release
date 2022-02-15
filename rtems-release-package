@@ -70,7 +70,7 @@ cd ${git_local}
  # Map the branch name to a specific package and release branch name
  remote_branch=$(rtems_map_branch ${package} ${version})
  echo "] Package ${package} ${version}: ${remote_branch}"
- git_submodules=$(git submodule | cut -w -f 2)
+ git_submodules=$(git submodule | awk '{print $2}')
  if [ -n "${git_submodules}" ]; then
   echo "] git submodules found ...."
   echo "git submodules init"
@@ -83,7 +83,7 @@ cd ${git_local}
    if [ "${ok}" != "no" ]; then
     echo "git submodule update ${s}"
     git submodule update ${s}
-    treeish=$(git ls-tree HEAD ${s} | cut -w -f 3)
+    treeish=$(git ls-tree HEAD ${s} | awk '{print $3}')
     cd ${s}
      echo "git archive --format=tar --prefix=${prefix}/${s}/ ${treeish}"
      git archive --format=tar --prefix=${prefix}/${s}/ ${treeish} > \
