@@ -58,13 +58,7 @@ else
  worker=
 fi
 
-revision_no=$(echo ${revision} | sed -e 's/\-.*$//')
-if [ ${version} -ge 5 ]; then
- even_odd=$(( ${revision_no} % 2 ))
- if [ ${even_odd} -eq 0 ]; then
-  revision_no=$(expr ${revision_no} + 1)
- fi
-fi
+revision_no=$(echo ${revision} | sed -e 's/\-.*$//' -e 's/\..*//')
 release=${version}.${revision}
 prefix=${package}-${release}
 

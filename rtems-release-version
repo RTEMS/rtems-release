@@ -43,7 +43,7 @@ release=${version}.${revision}
 #
 # Version configuration. Overrides defaults.
 #
-if [ -f rtems-release-${version}-conf ]; then
- rtems_release_conf=rtems-release-${version}-conf
- . rtems-release-${version}-conf
+if [ -f ${release_top}/rtems-release-${version}-conf ]; then
+ rtems_release_conf=${release_top}/rtems-release-${version}-conf
+ . ${release_top}/rtems-release-${version}-conf
 fi
