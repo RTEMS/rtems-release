@@ -32,3 +32,4 @@
 #
 # The script is the overridded configuration for 4.11.
 #
+rtems_waf=no

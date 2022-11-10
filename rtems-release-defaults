@@ -69,6 +69,7 @@ comp_tar=J
 #
 # Defaults.
 #
+rtems_waf=yes
 rtems_examples=yes
 rtems_libbsd=yes
 rtems_docs=yes
