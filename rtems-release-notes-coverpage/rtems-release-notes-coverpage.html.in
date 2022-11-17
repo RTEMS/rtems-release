@@ -8,10 +8,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <script type="text/javascript" src="jquery.min.js"></script>
+  <!-- Bootstrap's CSS) -->
   <link rel="stylesheet" href="bootstrap.min.css" media="print"/>
-  <script type="text/javascript" src="bootstrap.min.js"></script>
   <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
   <!--[if lt IE 9]>
   <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -48,7 +46,7 @@
    </div>
    <footer class="footer">
      <div class="container">
-       Copyright 2018 RTEMS Project
+       Copyright @TEAR@ RTEMS Project
      </div>
    </footer>
  </body>

@@ -8,12 +8,12 @@ html {
 
 body {
   color: #444;
-  font-family: Georgia, Palatino, 'Palatino Linotype', Times, 'Times New Roman', serif;
+  font-family: BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
   font-size: 12px;
   line-height: 1.7;
   padding: 1em;
-  margin: auto;
-  max-width: 60em;
+  margin: 1%;
+  max-width: 95%;
   background: #fefefe;
 }
 
@@ -35,45 +35,71 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 125%;
   margin-top: 1.5em;
   font-weight: normal;
+  text-align: left;
 }
 h4, h5, h6 { font-weight: bold; }
 h1 { font-size: 1.7em; }
 h2 { font-size: 1.4em;
      padding-top: 15px;
      box-shadow: 0px 15px 10px -15px rgba(0, 0, 0, .2) inset; }
-h3 { font-size: 1.2em; }
-h4 { font-size: 0.9em; }
-h5 { font-size: 0.7em; }
-h6 { font-size: 0.7em; }
+h3 { font-size: 1.4em; }
+h4, h5, h6 {
+  font-size: 1.0em;
+  line-height: 90%;
+  padding: 0, 0, 0, 0;
+}
+
+h1.title {
+  font-size: 35px;
+}
+
+h1.title::before {
+  content:url(http://devel.rtems.org/images/logo.png);
+  vertical-align: top;
+}
 
 blockquote {
-  color: #666666;
+  color: #555555;
   margin: 0;
   padding-left: 3em;
   border-left: 0.5em #EEE solid;
 }
 
+blockquote.citation {
+  line-height: 1.2em;
+  margin: 0.3em 0;
+  padding-left: 0.5em;
+  border-left: 3px #418041 solid;
+  border-top: 5px;
+};
+
 hr {
-  display: block;
-  height: 2px;
-  border: 0;
+  height: 0;
+  background: #fefefe;
   border-top: 1px solid #aaa;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #888;
   margin: 1em 0;
   padding: 0;
 }
 
+/*
 pre, code, kbd, samp {
+}
+*/
+
+pre {
   color: #000;
   font-family: monospace, monospace;
   _font-family: 'courier new', monospace;
-  font-size: 0.98em;
-}
-
-pre {
+  font-size: 0.87em;
   white-space: pre;
   white-space: pre-wrap;
   word-wrap: break-word;
+  line-height: 1em;
+}
+
+pre.blockquote-code {
+  color: #555555;
 }
 
 b, strong { font-weight: bold; }
@@ -92,6 +118,20 @@ mark {
   font-style: italic;
   font-weight: bold;
 }
+
+div.line-block {
+  line-height: 1em;
+  margin: 1em 0;
+  padding: 0 0 0 1em;
+};
+
+div.code {
+  line-height: 1em;
+  margin: 0.3em 0;
+  padding-left: 0.5em;
+  border-left: 3px #ddd solid;
+  border-top: 5px;
+};
 
 sub, sup {
   font-size: 75%;
@@ -161,26 +201,50 @@ figcaption {
   margin: 0 0 .8em;
 }
 
+div.topic {
+  padding-top: 1em;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+div.message {
+  color: #000;
+  font-family: monospace, monospace;
+  _font-family: 'courier new', monospace;
+  font-size: 0.87em;
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1em;
+}
+
 table {
-  margin-bottom: 2em;
-  border-bottom: 1px solid #ddd;
-  border-right: 1px solid #ddd;
+  margin-bottom: 1em;
   border-spacing: 0;
   border-collapse: collapse;
+  line-height: 1em;
 }
 
 table th {
-  padding: .2em 1em;
+  padding: .2em 0.6em;
   background-color: #eee;
-  border-top: 1px solid #ddd;
-  border-left: 1px solid #ddd;
 }
 
 table td {
-  padding: .2em 1em;
-  border-top: 1px solid #ddd;
-  border-left: 1px solid #ddd;
+  padding: .2em 0.6em;
   vertical-align: top;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tfoot {
+  display: table-row-group;
+}
+
+table tr {
+  page-break-inside: avoid;
 }
 
 .author {

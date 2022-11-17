@@ -36,6 +36,10 @@
 #
 # Create the README.md and from that README.txt and index.html
 #
+rep_len=$(echo "@RELEASE@@R_SP@" | wc -c)
+rev_len=$(echo "${release}" | wc -c)
+sp_len=$(expr ${rep_len} - ${rev_len} - 7)
+r_sp=$(head -c ${sp_len} < /dev/zero | tr '\0' ' ')
 echo "
 ## Architectures and BSPs
 " | \
@@ -45,6 +49,7 @@ echo "
       -e "s/@VERSION@/${version}/g" \
       -e "s/@REVISION@/${revision}/g" \
       -e "s/@RTEMS_RELEASE_NOTES@/${release_notes}/g" \
+      -e "s/@R_SP@/${r_sp}/g" \
       -e "s/@DATE@/${now}/g" > ${release}/contrib/README.md
 rm ARCH-BSP.md
 

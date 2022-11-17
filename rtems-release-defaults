@@ -118,7 +118,13 @@ email_build_to="build@rtems.org"
 email_announce_to="users@rtems.org,devel@rtems.org"
 
 #
+# Pandoc options
+#
+pandoc_std_opts="-f markdown_phpextra+grid_tables+multiline_tables+simple_tables+auto_identifiers+line_blocks+inline_code_attributes+fancy_lists+backtick_code_blocks --section-divs"
+
+#
 # The date stamp
 #
 now=$(date +"%d %B %Y")
-export now
+now_year=$(date +"%Y")
+export now now_year

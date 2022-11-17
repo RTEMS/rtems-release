@@ -85,7 +85,7 @@ fi
 cd ${release}
  rm -rf ${workspace}
  mkdir ${workspace}
- cd ${workspace}
+cd ${workspace}
 
   echo "tar ${comp_tar}xf ../${prefix}.tar.${comp_ext}"
   tar ${comp_tar}xf ../${prefix}.tar.${comp_ext}
@@ -95,79 +95,59 @@ cd ${release}
   # actual sourced used.
   #
   cd ${prefix}
-   cd rtems
-    export_source=rtems
-    mkdir sources patches
-    #
-    # Copy in any source not present on the server. If these are not copied in
-    # the RSB does not find them.
-    #
-    for p in rtems-tools rtems
-    do
-     cp ${top}/${release}/${p}-${release}.tar.${comp_ext} sources/
-    done
-    #
-    # Fetch the source for RTEMS tools.
-    #
-    if [ ${version} -lt 5 ]; then
-     echo "../source-builder/sb-set-builder --dry-run --with-download " \
-          "--without-error-report --without-release-url " \
-          "${rtems_pkgs}"
-     ../source-builder/sb-set-builder --dry-run --with-download \
-                                      --without-error-report \
-                                      --without-release-url \
-                                      ${rtems_pkgs}
-    else
-     echo "../source-builder/sb-get-sources ${rtems_pkgs}"
-     ../source-builder/sb-get-sources ${rtems_pkgs}
-    fi
-    #
-    # Remove the top level packages because they do not have a VERSION file.
-    #
-    # These packages may or will be referencing git so remove those as well.
-    #
-    for p in rtems-tools rtems
-    do
-     rm sources/${p}-${release}.tar.${comp_ext}
-     rm -rf sources/git/${p}.git
-    done
-    #
-    # Remove the git, svn or cvs directory if empty.
-    #
-    for d in git svn cvs
-    do
-     if [ -e sources/${d} ]; then
-      find sources/${d} -type d -empty -delete
-     fi
-    done
-    #
-    # If git, svn or cvs exist the release fails.
-    #
-    if [ -d sources/git -o -d sources/svn -o -d sources/cvs ]; then
-     echo "error: ${release} contains repositories and cannot be released."
-     exit 1
-    fi
-    cd ..    # rtems
-
-   #
-   # Fetch the source for 3rd party packages tools.
-   #
-   if [ -n "${bare_pkgs}" -a "${bare_pkgs}" != "None" ]; then
-    cd bare
-     export_source="${export_source} bare"
+  if [ ${version} -lt 5 ]; then
+   srcs="rtems bare"
+  else
+   srcs="rtems"
+  fi
+  export_source=
+   for src in ${srcs}
+   do
+    cd ${src}
+     export_source="${export_source} ${src}"
      mkdir sources patches
+     #
+     # Copy in any source not present on the server. If these are not copied in
+     # the RSB does not find them.
+     #
+     if [ ${src} = rtems ]; then
+      for p in rtems-tools rtems
+      do
+       cp ${top}/${release}/${p}-${release}.tar.${comp_ext} sources/
+      done
+     fi
+     #
+     # Fetch the source for RTEMS tools.
+     #
+     # RTEMS 5 and later use the RSB's get source tool
+     #
      if [ ${version} -lt 5 ]; then
+      if [ ${src} = rtems ]; then
+       pkgs=${rtems_pkgs}
+      elif [ ${src} = base ]; then
+       pkgs=${base_pkgs}
+      fi
       echo "../source-builder/sb-set-builder --dry-run --with-download " \
            "--without-error-report --without-release-url " \
-           "${bare_pkgs}"
+           "${pkgs}"
       ../source-builder/sb-set-builder --dry-run --with-download \
                                        --without-error-report \
                                        --without-release-url \
-                                       ${bare_pkgs}
+                                       ${pkgs}
      else
-      echo "../source-builder/sb-get-sources ${bare_pkgs}"
-      ../source-builder/sb-get-sources ${bare_pkgs}
+      echo "../source-builder/sb-get-sources "
+      ../source-builder/sb-get-sources --stop-on-error
      fi
+     #
+     # Remove the top level packages because they do not have a VERSION file.
+     #
+     # These packages may or will be referencing git so remove those as well.
+     #
+     for p in rtems-kernel rtems-libbsd rtems-tools rtems
+     do
+      rm -f $(find sources -name ${p}-\*.tar.\*)
+      rm -rf sources/git/${p}.git
+     done
      #
      # Remove the git, svn or cvs directory if empty.
      #
@@ -178,7 +158,7 @@ cd ${release}
       fi
      done
      #
-     # If svn or cvs exist the release fails. Git is ok.
+     # If svn or cvs exist the release fails.
      #
      if [ -d sources/svn -o -d sources/cvs ]; then
       echo "error: ${release} contains repositories and cannot be released."
@@ -204,8 +184,9 @@ cd ${release}
        rm -rf git
        cd ..   # source
      fi
-     cd ..   # ${bare}
-   fi
+     cd ..    # rtems
+   done
+
    #
    # Export the sources and patches.
    #

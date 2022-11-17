@@ -188,13 +188,13 @@ if [ -f ${prefix}/cpukit/Doxyfile.in ]; then
       -e "s/^INPUT[[:space:]].*=.*$/INPUT = ${top_srcdir}/g" \
       -e "s/^HAVE_DOT[[:blank:]]/DOT_NUM_THREADS = 1\\
 HAVE_DOT /g"> Doxyfile
- doxygen Doxyfile
+ doxygen -q Doxyfile
 elif [ ${prefix}/Doxygen ]; then
  cat ${prefix}/Doxyfile | \
   sed -e "s/^PROJECT_NUMBER[[:space:]].*=.*$/PROJECT_NUMBER = ${release}/g" \
   > Doxyfile
  cd ${prefix}
-  doxygen ../Doxyfile
+  doxygen -q ../Doxyfile
   cd ..
 else
  echo "error: no doxygen configuration file found"
