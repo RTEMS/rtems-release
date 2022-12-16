@@ -128,43 +128,43 @@ fi
 # Package the RSB, must be before the kernel. The kernel worker script uses the
 # RSB to create autoconf and automake so it can bootstrap the kernel.
 #
-# build rtems-source-builder ${version} ${revision} ${release_url}
-# build rtems-tools          ${version} ${revision} ${release_url}
-# build rtems                ${version} ${revision} ${release_url} rtems-release-kernel
-# if [ ${rtems_libbsd} = yes ]; then
-#  build rtems-libbsd ${version} ${revision} ${release_url}
-# fi
-# build rtems-source-builder ${version} ${revision} ${release_url} rtems-release-rsb-version
-# if [ ${rtems_examples} = yes ]; then
-#  if [ ${version} -lt 5 ]; then
-#   build examples-v2 ${version} ${revision} ${release_url}
-#   # Hack around the repo naming.
-#   mv ${release}/examples-v2-${release}.tar.${comp_ext} \
-#      ${release}/rtems-examples-v2-${release}.tar.${comp_ext}
-#  else
-#   build rtems-examples ${version} ${revision} ${release_url}
-#  fi
-# fi
+build rtems-source-builder ${version} ${revision} ${release_url}
+build rtems-tools          ${version} ${revision} ${release_url}
+build rtems                ${version} ${revision} ${release_url} rtems-release-kernel
+if [ ${rtems_libbsd} = yes ]; then
+ build rtems-libbsd ${version} ${revision} ${release_url}
+fi
+build rtems-source-builder ${version} ${revision} ${release_url} rtems-release-rsb-version
+if [ ${rtems_examples} = yes ]; then
+ if [ ${version} -lt 5 ]; then
+  build examples-v2 ${version} ${revision} ${release_url}
+  # Hack around the repo naming.
+  mv ${release}/examples-v2-${release}.tar.${comp_ext} \
+     ${release}/rtems-examples-v2-${release}.tar.${comp_ext}
+ else
+  build rtems-examples ${version} ${revision} ${release_url}
+ fi
+fi
 
-# #
-# # Documentation.
-# #
-# if [ ${rtems_docs} = yes ]; then
-#  ./rtems-release-docs rtems-docs ${version} ${revision} ${release_url}
-# fi
+#
+# Documentation.
+#
+if [ ${rtems_docs} = yes ]; then
+ ./rtems-release-docs rtems-docs ${version} ${revision} ${release_url}
+fi
 
-# #
-# # Release notes.
-# #
-# if [ ${rtems_release_notes} = yes ]; then
-#  ./rtems-release-notes rtems-release-notes ${version} ${revision} ${release_url}
-# fi
+#
+# Release notes.
+#
+if [ ${rtems_release_notes} = yes ]; then
+ ./rtems-release-notes rtems-release-notes ${version} ${revision} ${release_url}
+fi
 
-# #
-# # The sources is always last.
-# #
-# echo "] Collect tools sources"
-# ./rtems-release-sources ${version} ${revision} ${release_url}
+#
+# The sources is always last.
+#
+echo "] Collect tools sources"
+./rtems-release-sources ${version} ${revision} ${release_url}
 
 #
 # Make the contrib directory
