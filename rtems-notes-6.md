@@ -274,7 +274,7 @@ Removed obsoleted architectures:
 
 Obsoleted architectures:
 
-* TBD
+* SPARC64
 
 ## BSPs and Device Drivers
 
