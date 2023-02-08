@@ -275,6 +275,7 @@ Removed obsoleted architectures:
 Obsoleted architectures:
 
 * SPARC64
+* SuperH (sh)
 
 ## BSPs and Device Drivers
 
