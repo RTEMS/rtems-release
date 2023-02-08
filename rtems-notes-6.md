@@ -274,6 +274,7 @@ Removed obsoleted architectures:
 
 Obsoleted architectures:
 
+* V850
 * SPARC64
 * SuperH (sh)
 
