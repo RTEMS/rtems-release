@@ -262,7 +262,8 @@ The following improvements were made to the RTEMS Shell:
 
 ## General
 
-* TBD
+* The obsolete libmisc/serdbg was removed. Use libdebugger instead. This functionality
+  was not built as part of the 5 release series in anticipation of its removal.
 
 ## Architectures
 
