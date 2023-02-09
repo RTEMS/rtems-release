@@ -1,6 +1,6 @@
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015,2016,2020 Chris Johns (chrisj@rtems.org)
+# Copyright 2023 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -29,92 +29,31 @@
 #
 
 #
-# RTEMS Release Defaults.
+# RTEMS packages
 #
+rtems_packages="rtems-source-builder rtems rtems-tools"
+rtems_packages="${rtems_packages} rtems-examples rtems-docs"
 
 #
-# Stop on any error
+# RTEMS 5 and later
 #
-set -e
+if [ ${version} -ge 5 ]; then
+  rtems_packages="${rtems_packages} rtems-libbsd"
+fi
 
 #
-# Required to be set.
+# RTEMS 6 and later
 #
-version="not-set"
-revision="not-set"
-release="not-set"
+if [ ${version} -ge 6 ]; then
+  rtems_packages="${rtems_packages} rtems_waf rtems-net-legacy rtems-lwip"
+fi
 
 #
-# The master branch release
+# RTEMS repositories
 #
-master_version=6
-
-#
-# Keep the top where we start.
-#
-top=${PWD}
-
-#
-# The default checksum.
-#
-checksum=sha512
-
-#
-# Default compression and options plus file suffix.
-#
-comp="xz --threads=0"
-comp_ext=xz
-comp_tar=J
-
-#
-# Defaults.
-#
-rtems_waf=yes
-rtems_examples=yes
-rtems_libbsd=yes
-rtems_docs=yes
-rtems_docs_required=yes
-rtems_docs_build=sphinx
-rtems_release_info_html=no
-rtems_release_notes=yes
-rtems_readme=README.md.in
-rtems_readme_release_notes=
-rtems_release_conf=
-rtems_release_url=https://ftp.rtems.org/pub/rtems/releases
-rtems_rsb_hash="rtems-tools rtems"
-rtems_packages=
 rtems_repos=
-
-#
-# Where we collect the sources and docs.
-#
-sources="sources"
-docs="docs"
-
-#
-# Libbsd FreeBSD release version
-#
-rtems_libbsd_release=12
-
-#
-# Common email addresses
-#
-email_build_to="build@rtems.org"
-email_announce_to="users@rtems.org,devel@rtems.org"
-
-#
-# Pandoc options
-#
-pandoc_std_opts="-f markdown_phpextra+grid_tables+multiline_tables+simple_tables+auto_identifiers+line_blocks+inline_code_attributes+fancy_lists+backtick_code_blocks --section-divs"
-
-#
-# The date stamp
-#
-now=$(date +"%d %B %Y")
-now_year=$(date +"%Y")
-export now now_year
-
-#
-# Generate the package and repo lists
-#
-. ${release_top}/rtems-release-package-lists
+for r in ${rtems_packages}
+do
+  rtems_repos="${rtems_repos} "${r}.git
+done
+rtems_repos="${rtems_repos} rtems-release.git"
