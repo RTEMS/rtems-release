@@ -66,6 +66,7 @@ usage() {
  echo "  version      : The version of RTEMS, eg 5" 1>&2
  echo "  revision     : The revision, eg 0.0 or 0.0-myrev" 1>&2
  echo "  -p           : Push the changes." 1>&2
+ echo "  -f           : Force is repo tagged." 1>&2
  exit 1
 }
 
@@ -74,17 +75,21 @@ usage() {
 #
 clone_url=
 push=no
+forced=no
 
 #
 # Manage the command line.
 #
-while getopts "tp" opt; do
+while getopts "tpf" opt; do
  case "${opt}" in
   t)
    clone_url=git://git.rtems.org
    ;;
   p)
    push=yes
+   ;;
+  f)
+   forced=yes
    ;;
   *)
    usage
@@ -137,14 +142,22 @@ mkdir ${ws_tag}
 # Clone and tag the repositories.
 #
 cd ${ws_tag}
+ echo "Tagging Repos: ${rtems_repos}"
  for r in ${rtems_repos}
  do
   ref=origin/${version}
   echo "git clone ${clone_url}/${r} ${r}"
   git clone ${clone_url}/${r} ${r}
   cd ${r}
-   echo "git tag ${release} ${ref}"
-   git tag ${release} ${ref}
+   if [ "$(git tag | grep ${release})" = "${release}" ]; then
+    echo "already tagged: ${release} ${ref}"
+    if [ ${forced} = no ]; then
+     exit 1
+    fi
+   else
+    echo "git tag ${release} ${ref}"
+    git tag ${release} ${ref}
+   fi
    cd ..
  done
 
