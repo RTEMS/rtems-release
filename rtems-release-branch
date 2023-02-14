@@ -60,7 +60,9 @@ usage() {
  exit 1
 }
 
-. ./rtems-release-version
+. ${release_top}/rtems-release-package-lists
+. ${release_top}/rtems-release-version
+
 #
 # Option defaults
 #

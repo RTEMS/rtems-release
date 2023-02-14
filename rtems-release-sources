@@ -53,7 +53,8 @@ release_url=$3
 
 package=rtems-source-builder
 
-. ./rtems-release-version
+. ${release_top}/rtems-release-package-lists
+. ${release_top}/rtems-release-version
 
 prefix=${package}-${release}
 

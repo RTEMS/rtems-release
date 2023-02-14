@@ -113,8 +113,3 @@ pandoc_std_opts="-f markdown_phpextra+grid_tables+multiline_tables+simple_tables
 now=$(date +"%d %B %Y")
 now_year=$(date +"%Y")
 export now now_year
-
-#
-# Generate the package and repo lists
-#
-. ${release_top}/rtems-release-package-lists

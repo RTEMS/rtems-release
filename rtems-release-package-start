@@ -48,6 +48,10 @@ package=$1
 version=$2
 revision=$3
 release_url=$4
+
+. ${release_top}/rtems-release-package-lists
+. ${release_top}/rtems-release-version
+
 if [ $# -eq 5 ]; then
  if [ ! -x ${top}/$5 ]; then
   echo "error: cannot find the worker: $4"

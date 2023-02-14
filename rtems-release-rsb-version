@@ -50,6 +50,7 @@ revision=$3
 release_url=$4
 toptop=$5
 
+. ${release_top}/rtems-release-package-lists
 . ${release_top}/rtems-release-version
 
 prefix=${package}-${release}

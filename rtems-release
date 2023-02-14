@@ -87,6 +87,7 @@ fi
 version=$1
 revision=$2
 
+. ${release_top}/rtems-release-package-lists
 . ${release_top}/rtems-release-version
 
 echo "RTEMS Release, v${release}"

@@ -102,7 +102,8 @@ user=$1
 version=$2
 revision=$3
 
-. ./rtems-release-version
+. ${release_top}/rtems-release-package-lists
+. ${release_top}/rtems-release-version
 
 echo "] RTEMS Release Tag, v${release}"
 
