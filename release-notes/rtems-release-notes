@@ -195,6 +195,7 @@ class rtems_gitlab:
         return milestone
 
     def __init__(self, milestone: str) -> None:
+        self.base = os.path.dirname(__file__)
         self.milestone = milestone
         self.milestones = {}
         self.rtems_group = None
@@ -338,7 +339,8 @@ class rtems_gitlab:
     def _setup_sphinx(self, out: str) -> None:
         if not os.path.exists(out):
             os.mkdir(out)
-        shutil.copytree('sphinx', out, dirs_exist_ok=True)
+        sphinx_dir = os.path.join(self.base, 'sphinx')
+        shutil.copytree(sphinx_dir, out, dirs_exist_ok=True)
 
     def _setup_notes(self, out: str, notes: str) -> None:
         if not os.path.exists(out):
@@ -664,7 +666,7 @@ class rtems_gitlab:
             'sphinx-build',
             '-M',
             'html',
-            'out',
+            out,
             'build',
             '-j',
             'auto',
@@ -838,6 +840,7 @@ if __name__ == '__main__':
             if raise_error:
                 raise
             print('error: ' + str(e), file=sys.stderr)
+            ec = 1
         except KeyboardInterrupt:
             print('warning: abort: user terminated', file=sys.stderr)
             ec = 1

@@ -465,6 +465,10 @@ class generator:
             line = transform_url(self, line, url)
             return line
 
+        if md is None:
+            self.write()
+            return
+
         self.indent_push()
 
         if self.md_trace:

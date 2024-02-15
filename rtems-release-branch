@@ -131,8 +131,8 @@ cd ${ws_branch}
   echo "git clone ${clone_url}/${r} ${r}"
   git clone ${clone_url}/${r} ${r}
   cd ${r}
-   echo "git checkout -b ${version} origin/master"
-   git checkout -b ${version} origin/master
+   echo "git checkout -b ${version} origin/main"
+   git checkout -b ${version} origin/main
    cd ..
  done
 

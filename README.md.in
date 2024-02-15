@@ -8,8 +8,9 @@
 
 --------------------------------------------------------------------------------
 
-[RN-H]: rtems-@RELEASE@-release-notes.html
+[RN-H]: rtems-@RELEASE@-release-notes
 [RN-P]: rtems-@RELEASE@-release-notes.pdf
+[RN-J]: rtems-@RELEASE@-release-notes.json.xz
 
 The Real-Time Executive for Multiprocessor Systems or RTEMS is an open source
 Real Time Operating System (RTOS) that supports open standard application
@@ -36,15 +37,16 @@ Regards
      Home <https://www.rtems.org/>
  Download <https://ftp.rtems.org/pub/rtems/releases>
      Docs <https://docs.rtems.org/>
-    Lists <https://lists.rtems.org/>
 Developer <https://gitlab.rtems.org/>
+  Discord <https://www.rtems.org/discord>
+    Lists <https://lists.rtems.org/>
 --------- ------------------------------------------
 
 ## Release Files
 
------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 @RELEASE@                                  @R_SP@ Top level directory
------------------------------------------- ----------------------------------
+------------------------------------------ --------------------------------------
 [README.txt](README.txt), `index.html`     This document
 
 [contrib](contrib)                         Directory contains extra release
@@ -54,16 +56,19 @@ Developer <https://gitlab.rtems.org/>
 
 [sources](sources)                         Source code for this release
 
-[rtems-@RELEASE@-release-notes.html][RN-H] @R_SP@ Detailed HTML RTEMS Release notes
+[rtems-@RELEASE@-release-notes][RN-H]  @R_SP@  HTML RTEMS Release notes
 
-[rtems-@RELEASE@-release-notes.pdf][RN-P]  @R_SP@ Detailed PDF RTEMS Release notes
+[rtems-@RELEASE@-release-notes.pdf][RN-P]  @R_SP@ PDF RTEMS Release notes
+
+[rtems-@RELEASE@-release-notes.json.xz][RN-J]  @R_SP@ RTEMS Release notes data (JSON)
 
 [sha512sum.txt](sha512sum.txt)             The SHA512 checksums for this
                                            directory
------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 
-[S-K]: sources/rtems-@RELEASE@.tar.xz
 [S-RSB]: sources/rtems-source-builder-@RELEASE@.tar.xz
+[S-DEPLOY]: sources/rtems-deployment-@RELEASE@.tar.xz
+[S-K]: sources/rtems-@RELEASE@.tar.xz
 [S-T]: sources/rtems-tools-@RELEASE@.tar.xz
 [S-DOC]: sources/rtems-docs-@RELEASE@.tar.xz
 [S-BSD]: sources/rtems-libbsd-@RELEASE@.tar.xz
@@ -75,6 +80,7 @@ Source Downloads                               | RTEMS Source Code
 -----------------------------------------------|---------------------------------------
 [rtems-@RELEASE@.tar.xz][S-K]                  | RTEMS kernel
 [rtems-source-builder-@RELEASE@.tar.xz][S-RSB] | RTEMS Source Builder
+[rtems-deployment-@RELEASE@.tar.xz][S-DEPLOY]  | RTEMS Deployment
 [rtems-tools-@RELEASE@.tar.xz][S-T]            | RTEMS Tools
 [rtems-docs-@RELEASE@.tar.xz][S-DOC]           | RTEMS Documentation source
 [rtems-libbsd-@RELEASE@.tar.xz][S-BSD]         | RTEMS LibBSD

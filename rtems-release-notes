@@ -68,79 +68,27 @@ title="RTEMS Release Notes builder"
 #
 ws_pwd=${PWD}
 
-echo "] Creating release notes"
+echo "] Creating release notes for ${release}"
 echo "] Generate release notes markdown"
 
+rn_name=rtems-${release}-release-notes
+
 #
-# The release notes are taken directly from Trac
+# The release notes are taken directly from Gitlab
 #
 ${top}/release-notes/rtems-release-notes \
-      --release ${release} \
-      --notes "${top}/notes/rtems-notes-%s.md" \
-      --output rtems-${release}-release-notes.md
-
-echo "] Generate release notes HTML"
-
-#
-# Convert to HTML
-#
-pandoc rtems-${release}-release-notes.md \
-       ${pandoc_std_opts} \
-       -t html --self-contained --markdown-headings=atx \
-       -M title="RTEMS ${release} Embedded Realtime Operating System" \
-       --include-in-header=${top}/rtems-release-notes.css \
-       -o rtems-${release}-release-notes.html
+      --config=../../../config.ini \
+      --fetch \
+      --write ${rn_name}.json \
+      --milestone ${version}.${revision_no}
 
 #
-# Set up the wkhtmltopdf defaults.
+# Move the HTML into the release
 #
-page_options="--print-media-type --zoom 0.8"
-header="--header-right [page]/[toPage] --header-font-size 10"
-footer="--footer-left [webpage] --footer-font-size 10"
-
-rel_html=""
-rel_html_line="<div>@RELEASE@</div>"
-rev=1
-while [ ${rev} -le ${revision_no} ]
-do
-  rel=${version}.${rev}
-  rel_html="$(echo ${rel_html_line} | sed -e "s/@RELEASE@/${rel}/g")${rel_html}"
-  rev=$(expr ${rev} + 1)
-done
-rel_html=$(echo ${rel_html} | sed -e 's/\./\\\./g' -e  's/\//\\\//g')
-
-echo "] Create the coverpage"
-
-cp ${top}/rtems-release-notes-coverpage/* .
-cat rtems-release-notes-coverpage.html.in | \
-    sed -e "s/@RELEASE@/${release}/g" \
-	-e "s/@VERSION@/${version}/g" \
-	-e "s/@REVISION@/${revision}/g" \
-	-e "s/@DATE@/${now}/g" \
-	-e "s/@YEAR@/${year}/g" \
-	-e "s/@REVISIONS@/${rel_html}/g" > rtems-release-notes-coverpage.html
-wkhtmltopdf file://${ws_pwd}/rtems-release-notes-coverpage.html \
-	    --enable-local-file-access \
-	    --disable-smart-shrinking \
-	    ${page_options} \
-	    --no-header-line \
-	    --no-footer-line cp.pdf
-
-echo "] Creating the ${release} PDF"
-wkhtmltopdf --user-style-sheet file://${ws_pwd}/trac-rtems-style.html \
-            -L 5mm -R 5mm \
-            file://${ws_pwd}/rtems-${release}-release-notes.html \
-            ${page_options} \
-            --header-left "RTEMS ${release} Release Notes" ${header} \
-            --enable-local-file-access \
-            ${footer} \
-            p${release}.pdf
-
-gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=../rtems-${release}-release-notes.pdf cp.pdf p${release}.pdf
-
-cp ${ws_pwd}/rtems-${release}-release-notes.html ../rtems-${release}-release-notes.html
-
-echo "] Created: ${release}/rtems-${release}-release-notes.html ${release}/rtems-${release}-release-notes.pdf"
+mv build/html ../${rn_name}
+mv build/latex/rtems-release-notes-${version}.${revision_no}.pdf ../${rn_name}.pdf
+mv ${rn_name}.json ../${rn_name}.json
+xz ../${rn_name}.json
 
 #
 # Comman package end.

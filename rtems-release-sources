@@ -80,6 +80,8 @@ else
  fi
 fi
 
+top_packages="rtems-kernel rtems-libbsd rtems-tools rtems-examples rtems"
+
 #
 # Work in a package specific directory in the release directory.
 #
@@ -96,29 +98,15 @@ cd ${workspace}
   # actual sourced used.
   #
   cd ${prefix}
-  if [ ${version} -lt 5 ]; then
    srcs="rtems bare"
-  else
-   srcs="rtems"
-  fi
-  export_source=
+   export_source=
    for src in ${srcs}
    do
     cd ${src}
      export_source="${export_source} ${src}"
      mkdir sources patches
      #
-     # Copy in any source not present on the server. If these are not copied in
-     # the RSB does not find them.
-     #
-     if [ ${src} = rtems ]; then
-      for p in rtems-tools rtems
-      do
-       cp ${top}/${release}/${p}-${release}.tar.${comp_ext} sources/
-      done
-     fi
-     #
-     # Fetch the source for RTEMS tools.
+     # Fetch the source for RTEMS configs in the RSB.
      #
      # RTEMS 5 and later use the RSB's get source tool
      #
@@ -144,7 +132,7 @@ cd ${workspace}
      #
      # These packages may or will be referencing git so remove those as well.
      #
-     for p in rtems-kernel rtems-libbsd rtems-tools rtems
+     for p in ${top_packages}
      do
       rm -f $(find sources -name ${p}-\*.tar.\*)
       rm -rf sources/git/${p}.git
@@ -200,6 +188,22 @@ cd ${workspace}
    done
    cd ..   # ${prefix}
   cd ..   # ${workspace}
+
+  #
+  # Copy in any source not present on the server. If these are not copied in
+  # the RSB does not find them.
+  #
+  for p in ${top_packages}
+  do
+   f="${top}/${release}/${p}-${release}.tar.${comp_ext}"
+   if [ -f $f ]; then
+    mv $f ${top}/${release}/${sources}/
+   fi
+  done
+  f="${top}/${release}/rtems-${release}.tar.${comp_ext}"
+  if [ -f $f ]; then
+   mv $f ${top}/${release}/${sources}/
+  fi
 
   rm -rf ${workspace}
 

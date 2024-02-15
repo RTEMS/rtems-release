@@ -44,7 +44,8 @@ if [ $# -lt 4 -o $# -gt 5 ]; then
 	 "release, release URL and optionally a worker script."
  exit 1
 fi
-package=$1
+package=$(basename $1)
+package_git_path=$(dirname $1)
 version=$2
 revision=$3
 release_url=$4
@@ -71,7 +72,7 @@ if [ -z "${rtems_git_repo}" ]; then
 fi
 
 if [ ${rtems_git_repo} = yes ]; then
- git_remote=git://git.rtems.org/${package}.git
+ git_remote=https://gitlab.rtems.org/${package_git_path}/${package}.git
  git_local=${package}-release-${release}.git
  git_submodules_excludes="freebsd-org"
 fi
@@ -119,10 +120,10 @@ rtems_map_branch()
    branch="$2"
    ;;
  esac
- # Get the remote branch. If the release branch is not found use release's master.
+ # Get the remote branch. If the release branch is not found use release's main.
  remote_branch=$(git branch --remote | grep "${branch}$" | tr -d "[:space:]")
  if [ -z "${remote_branch}" ]; then
-  remote_branch="master"
+  remote_branch="main"
  fi
  echo ${remote_branch}
 }

@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2017 Chris Johns (chrisj@rtems.org)
+# Copyright 2015-2024 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -32,4 +32,7 @@
 #
 # The script is the overridded configuration for 4.11.
 #
+rtems_deployment=no
 rtems_waf=no
+rtems_net_legacy=no
+rtems_net_services=no

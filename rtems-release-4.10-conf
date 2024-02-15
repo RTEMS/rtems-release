@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015-2016 Chris Johns (chrisj@rtems.org)
+# Copyright 2015-2024 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -32,8 +32,11 @@
 #
 # The script is the defaults for 4.10.
 #
+rtems_deployment=no
 rtems_waf=no
 rtems_libbsd=no
+rtems_net_legacy=no
+rtems_net_services=no
 rtems_docs=no
 rtems_release_notes=no
 rtems_readme_release_notes=

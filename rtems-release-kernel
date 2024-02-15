@@ -44,8 +44,8 @@ set -e
 # The package, version, revision and release URL.
 #
 if [ $# -ne 5 ]; then
-    echo "error: must be arguments, the package, version," \
-	 "release, release URL and the top directory."
+ echo "error: must be arguments, the package, version," \
+      "release, release URL and the top directory."
  exit 1
 fi
 package=$1
@@ -106,16 +106,9 @@ cd ${prefix}
   # Waf build system. Update RTEMS version and collect the BSPs
   #
   echo "] RTEMS Build System: waf"
-  f="spec/build/cpukit/optvermaj.yml"
-  echo "] Update ${f}"
-  sed -i "s/- get-string-command-line:.*/- get-string-command-line: '${version}'/" ${f}
-  f="spec/build/cpukit/optvermin.yml"
-  echo "] Update ${f}"
-  minor=$(echo ${revision} | sed 's/-.*//')
-  sed -i "s/- set-value:.*/- set-value: '${minor}'/" ${f}
-  f="spec/build/cpukit/optverrev.yml"
-  echo "] Update ${f}"
-  sed -i "s/- set-value:.*/- set-value: '0'/" ${f}
+  f="VERSION"
+  echo "] Creating ${f}: ${release}"
+  echo -e "[RTEMS_VERSION]\nRTEMS_VERSION_CONTROL_KEY = ${release}" > ${f}
  else
   #
   # Autoconf build system. Bootstrap RTEMS
@@ -150,10 +143,10 @@ EOF
  echo "] Generate ARCH-BSP.txt"
  ./rtems-bsps -m > ${toptop}/ARCH-BSP.md
  echo "] Generate README"
- cp README README.tmp
+ pandoc README.md -t plain -o README.tmp
  cat README.tmp | \
-  sed -e "s|docs\.rtems\.org\/branches\/master\/|docs\.rtems\.org\/releases\/rtems-docs-${release}\/|g" | \
-  sed -e "s|docs\.rtems\.org\/doxygen\/branches\/master\/|docs\.rtems\.org\/doxygen\/releases\/rtems-doxygen-${release}\/|g" | \
+  sed -e "s|docs\.rtems\.org\/branches\/main\/|docs\.rtems\.org\/releases\/rtems-docs-${release}\/|g" | \
+  sed -e "s|docs\.rtems\.org\/doxygen\/branches\/main\/|docs\.rtems\.org\/doxygen\/releases\/rtems-doxygen-${release}\/|g" | \
   awk "/https:\/\/git\.rtems\.org\/rtems/{\$0=\$0\"?h=${version}\"}{print}" > README
  rm -r README.tmp
  cd ..
@@ -168,12 +161,14 @@ if [ ${rtems_autoconf} = yes ]; then
 fi
 
 #
-# Only build doxygen output if present on the system.
+# Build doxygen output and error command is not present.
 #
+set -e
 if [ "`command -v doxygen`"no = no ]; then
- echo "warning: doxygen not built: doxygen not found"
- exit 0
+ echo "error: doxygen not built: doxygen not found"
+ exit 1
 fi
+set +e
 
 #
 # Doxygen

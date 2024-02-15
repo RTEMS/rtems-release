@@ -63,7 +63,9 @@ systems.
    # npm install inliner
    ```
 
-4. PDF Release notes require the same set up as RTEMS
+5. Install `pandoc` for Markdown
+
+6. PDF Release notes require the same set up as RTEMS
    Documentation. Please refer to the documentation in the
    `rtems-docs` repository and follow the set up procedure for PDF it
    has.

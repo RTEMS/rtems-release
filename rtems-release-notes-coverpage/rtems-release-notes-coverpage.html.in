@@ -46,7 +46,7 @@
    </div>
    <footer class="footer">
      <div class="container">
-       Copyright @TEAR@ RTEMS Project
+       Copyright @YEAR@ RTEMS Project
      </div>
    </footer>
  </body>

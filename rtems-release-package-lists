@@ -31,21 +31,27 @@
 #
 # RTEMS packages
 #
-rtems_packages="rtems-source-builder rtems rtems-tools"
-rtems_packages="${rtems_packages} rtems-examples rtems-docs"
+rtems_packages="rtems-source-builder rtems/rtos/rtems"
+rtems_packages="rtems-source-builder rtems/rtos/rtems-examples"
+rtems_packages="rtems-source-builder rtems/tools/rtems-tools"
+rtems_packages="rtems-source-builder rtems/docsrtems-docs"
 
 #
 # RTEMS 5 and later
 #
 if [ ${version} -ge 5 ]; then
-  rtems_packages="${rtems_packages} rtems-libbsd"
+  rtems_packages="${rtems_packages} rtems/pkg/rtems-libbsd"
 fi
 
 #
 # RTEMS 6 and later
 #
 if [ ${version} -ge 6 ]; then
-  rtems_packages="${rtems_packages} rtems_waf rtems-net-legacy rtems-lwip"
+  rtems_packages="${rtems_packages} rtems/tools/rtems-deployment"
+  rtems_packages="${rtems_packages} rtems/tools/rtems_waf"
+  rtems_packages="${rtems_packages} rtems/pkg/rtems-net-legacy"
+  rtems_packages="${rtems_packages} rtems/pkg/rtems-lwip"
+  rtems_packages="${rtems_packages} rtems/pkg/rtems-net-services"
 fi
 
 #
@@ -56,4 +62,4 @@ for r in ${rtems_packages}
 do
   rtems_repos="${rtems_repos} "${r}.git
 done
-rtems_repos="${rtems_repos} rtems-release.git"
+rtems_repos="${rtems_repos} rtems/rtos/rtems-release.git"

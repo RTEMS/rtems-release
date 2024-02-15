@@ -60,6 +60,18 @@ usage() {
 }
 
 #
+# Check for commands
+#
+set +e
+ > /dev/null
+has_pandoc=$?
+if [ "command -v pandoc"no = no ]; then
+ echo "error: no pandoc installed"
+ exit 1
+fi
+set -e
+
+#
 # Option defaults
 #
 release_url=${rtems_release_url}
@@ -126,32 +138,44 @@ if [ -e ${release} ]; then
 fi
 
 #
+# Package paths
+#
+pkg_rtems_source_builder=rtems/tools/rtems-source-builder
+pkg_rtems_deployment=rtems/tools/rtems-deployment
+pkg_rtems_tools=rtems/tools/rtems-tools
+pkg_rtems=rtems/rtos/rtems
+pkg_rtems_libbsd=rtems/pkg/rtems-libbsd
+pkg_rtems_net_legacy=rtems/pkg/rtems-net-legacy
+pkg_rtems_net_services=rtems/pkg/rtems-net-services
+pkg_rtems_examples=rtems/rtos/rtems-examples
+pkg_rtems_docs=rtems/docs/rtems-docs
+
+#
 # Package the RSB, must be before the kernel. The kernel worker script uses the
 # RSB to create autoconf and automake so it can bootstrap the kernel.
 #
-build rtems-source-builder ${version} ${revision} ${release_url}
-build rtems-tools          ${version} ${revision} ${release_url}
-build rtems                ${version} ${revision} ${release_url} rtems-release-kernel
+build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url}
+build ${pkg_rtems_tools}          ${version} ${revision} ${release_url}
+build ${pkg_rtems}                ${version} ${revision} ${release_url} rtems-release-kernel
 if [ ${rtems_libbsd} = yes ]; then
- build rtems-libbsd ${version} ${revision} ${release_url}
+ build ${pkg_rtems_libbsd} ${version} ${revision} ${release_url}
 fi
-build rtems-source-builder ${version} ${revision} ${release_url} rtems-release-rsb-version
+if [ ${rtems_net_legacy} = yes ]; then
+ build ${pkg_rtems_libbsd} ${version} ${revision} ${release_url}
+fi
+build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url} rtems-release-rsb-version
+if [ ${rtems_deployment} = yes ]; then
+ build ${pkg_rtems_deployment} ${version} ${revision} ${release_url}
+fi
 if [ ${rtems_examples} = yes ]; then
- if [ ${version} -lt 5 ]; then
-  build examples-v2 ${version} ${revision} ${release_url}
-  # Hack around the repo naming.
-  mv ${release}/examples-v2-${release}.tar.${comp_ext} \
-     ${release}/rtems-examples-v2-${release}.tar.${comp_ext}
- else
-  build rtems-examples ${version} ${revision} ${release_url}
- fi
+ build ${pkg_rtems_examples} ${version} ${revision} ${release_url}
 fi
 
 #
 # Documentation.
 #
 if [ ${rtems_docs} = yes ]; then
- ./rtems-release-docs rtems-docs ${version} ${revision} ${release_url}
+ ./rtems-release-docs ${pkg_rtems_docs} ${version} ${revision} ${release_url}
 fi
 
 #
@@ -182,7 +206,7 @@ echo "] Create the release information"
 #
 # Copy these release scripts to a contrib directory.
 #
-for f in README.txt \
+for f in README.md \
 	 ${rtems_readme} \
 	 rtems-mailer \
          rtems-release \

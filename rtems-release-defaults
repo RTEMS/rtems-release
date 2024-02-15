@@ -45,9 +45,9 @@ revision="not-set"
 release="not-set"
 
 #
-# The master branch release
+# The main branch release
 #
-master_version=6
+main_version=6
 
 #
 # Keep the top where we start.
@@ -69,9 +69,12 @@ comp_tar=J
 #
 # Defaults.
 #
+rtems_deplayment=yes
 rtems_waf=yes
 rtems_examples=yes
 rtems_libbsd=yes
+rtems_net_legacy=yes
+rtems_net_services=yes
 rtems_docs=yes
 rtems_docs_required=yes
 rtems_docs_build=sphinx

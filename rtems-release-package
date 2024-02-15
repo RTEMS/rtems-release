@@ -93,8 +93,8 @@ cd ${git_local}
     echo "git submodule ${s} excluded"
    fi
   done
-  echo "git checkout master"
-  git checkout master
+  echo "git checkout main"
+  git checkout main
  fi
  echo "git archive --format=tar --prefix=${prefix}/ ${remote_branch}"
  git archive --format=tar --prefix=${prefix}/ ${remote_branch} > \
