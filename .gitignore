@@ -10,3 +10,6 @@ ARCH-BSP.txt
 *-branched
 __pycache__
 .rng-cache
+*.json
+out
+build

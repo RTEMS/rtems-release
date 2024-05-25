@@ -1,0 +1,26 @@
+h2 {
+    font-size: 1.6em;
+    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+}
+
+h3 {
+    font-size: 1.3em;
+}
+
+table.docutils {
+    margin-left: 0;
+}
+
+.table-wrapper {
+    margin-top: .1rem;
+    margin-bottom: .1rem;
+}
+
+table.rrn-detail-table.docutils {
+    table-layout: fixed;
+}
+table.rrn-detail-table.docutils td {
+    vertical-align: top;
+    white-space: normal;
+}

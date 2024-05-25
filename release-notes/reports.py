@@ -1,7 +1,6 @@
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2018 Danxue Huang (danxue.huang@gmail.com)
-# Copyright 2022 Chris Johns (chris@contemporary.software)
+# Copyright 2024 Chris Johns (chris@contemporary.software)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -30,352 +29,389 @@
 #
 
 import datetime
+import hashlib
 import os
 import re
 import time
-import threading
 import sys
+import urllib
 
-from markdown_generator import MarkdownGenerator
-import reraise
-
-heading_base = 2
-
-
-class ticket(object):
-
-    def __init__(self, fmt, ticket):
-        self.generator = MarkdownGenerator()
-        self.format = fmt
-        self.ticket = ticket
-        self.thread = None
-        self.result = None
-
-    def _format_contents(self):
-        ticket_meta = self.ticket['meta']
-        ticket_link = self.ticket.get('comment_attachment',
-                                      {}).get('link', None)
-        summary = ticket_meta.get('summary', None)
-        ticket_meta.pop('description', None)
-        ticket_meta.pop('summary', None)
-        if ticket_link is not None:
-            ticket_id_link = \
-                self.generator.gen_hyperlink(self.ticket_id(), '#t' + self.ticket_id())
-            tlink = self.generator.gen_bold(ticket_id_link) + \
-                ' - ' + self.generator.gen_bold(summary)
-            self.generator.gen_heading(tlink,
-                                       heading_base + 1,
-                                       anchor='t' + self.ticket_id())
-        for k in ['Created', 'Modified', 'Blocked By']:
-            ticket_meta[k] = self.ticket['ticket'][k]
-        meta_keys = [k.capitalize() for k in ticket_meta.keys()]
-        meta_vals = [v for v in ticket_meta.values()]
-        order = [
-            'Id', 'Reporter', 'Created', 'Modified', 'Owner', 'Type',
-            'Component', 'Status', 'Resolution', 'Version', 'Milestone',
-            'Priority', 'Severity', 'Keywords', 'Cc', 'Blocking', 'Blocked by'
-        ]
-        meta_table = []
-        for c in range(0, len(order)):
-            i = meta_keys.index(order[c])
-            if meta_keys[i] in ['Created', 'Modified']:
-                dt = datetime.datetime.strptime(meta_vals[i],
-                                                '%m/%d/%y %H:%M:%S')
-                ds = dt.strftime('%d %B %Y %H:%M:%S')
-                if ds[0] == '0':
-                    ds = ds[1:]
-                meta_vals[i] = ds
-            meta_table += [[
-                self.generator.gen_bold(meta_keys[i]), meta_vals[i]
-            ]]
-        meta_table = [[
-            self.generator.gen_bold('Link'),
-            self.generator.gen_hyperlink(ticket_link, ticket_link)
-        ]] + meta_table
-        self.generator.gen_table(None, meta_table, align=['right', 'left'])
-
-    def _description(self, description):
-        description = description.replace('\r\n', '\n')
-
-        #
-        # The code blocks needs to be reviewed
-        #
-        if self.ticket_id() == '3384':
-            description = re.sub('%s}}}', '%s}\n}\n}', description)
-
-        if self.format == 'markdown':
-            description = re.sub(r'{{{(.*)}}}', r'`\1`', description)
-        else:
-            description = re.sub(r'{{{(.*)}}}', r':code:`\1`', description)
-
-        if self.format == 'rst':
-            description = re.sub(r'(>+) ---', r'\1 \-\-\-', description)
-
-        description = re.sub(r'{{{!(.*)\n', '{{{\n', description)
-        description = re.sub(r'}}}}', '}\n}}}', description)
-        description = re.sub(r'{{{[ \t]+\n', '{{{\n', description)
-        description = re.sub(r'{{{([#$])', '{{{\n#', description)
-        description = description.replace('{{{\n', '```\n')
-        description = description.replace('\n}}}', '\n```')
-        description = re.sub(
-            r"^[ \t]*#([ \t]*define|[ \t]*include|[ \t]*endif|[ \t]*ifdef|" \
-            "[ \t]*ifndef|[ \t]*if|[ \t]*else)(.*)$",
-            r"`#\1\2`",
-            description,
-            flags=re.MULTILINE)
-
-        if self.format == 'markdown':
-            description = re.sub(r'{{{(?!\n)', '`', description)
-            description = re.sub(r'(?!\n)}}}', '`', description)
-        else:
-            description = re.sub(r'{{{(?!\n)', ':code:`', description)
-            description = re.sub(r'(?!\n)}}}', '`', description)
-
-        # Two lines after the opening (and after the ending)
-        # back-ticks misses up with the text area rendering.
-        description = re.sub('```\n\n', '```\n', description)
-        description = re.sub('\n\n```', '\n```', description)
-
-        # For ticket 2624 where the opening three curly braces are not
-        # on a separate line.
-        description = re.sub(r'```(?!\n)', '```\n', description)
-        description = re.sub(r'(?!\n)```', '\n```', description)
-
-        # For ticket 2993 where the defective closing curly brackets
-        # miss up with text area rendering.
-        description = re.sub('}}:', '```\n', description)
-
-        # Ticket 3771 has code that's not written in a code block,
-        # which is interpretted by the Markdown generator as headers
-        # (#define)... Hence, we fix that manually.
-
-        if self.ticket_id() == '3771':
-            description = re.sub('`#define',
-                                 '```\n#define',
-                                 description,
-                                 count=1)
-            description = re.sub('Problem facing on writing',
-                                 '```\nProblem facing on writing',
-                                 description,
-                                 count=1)
-            description = re.sub(r'[ ]{8,}', ' ', description)
-
-        if self.format == 'rst':
-            description = description.replace('=', '\\=')
-            description = description.replace('\n', '\n\n')
-            description = re.sub(r'^(#+)', '', description, flags=re.MULTILINE)
-
-        return description
-
-    def _format_description(self):
-        if 'description' not in self.ticket['comment_attachment']:
-            return
-        description = self.ticket['comment_attachment']['description']
-        self.generator.gen_raw_text(self.generator.gen_bold('Description'))
-        self.generator.gen_line('')
-        self.generator.gen_line_block(self._description(description))
-        self.generator.gen_line('')
-
-    def _meta_label(self, label):
-        if label == 'attachment':
-            label = 'attach'
-        return label
-
-    def _format_comments(self):
-        if 'comments' not in self.ticket['comment_attachment']:
-            return
-        comments = self.ticket['comment_attachment']['comments']
-        if len(comments) == 0:
-            return
-        self.generator.gen_line('')
-        cnt = 0
-        bold = self.generator.gen_bold
-        for comment in comments:
-            cnt += 1
-            self.generator.gen_line(
-                self.generator.gen_topic('Comment ' + str(cnt)))
-            self.generator.gen_line('')
-            if not comment['creator']:
-                creator = 'none'
-            else:
-                creator = comment['creator']
-            ul = [bold(creator) + ', ' + comment['published']]
-            for m in comment['meta']:
-                ul += [bold(self._meta_label(m[0]) + ':') + ' ' + m[1]]
-            self.generator.gen_raw(self.generator.gen_ordered_lists(ul))
-            self.generator.gen_line('')
-            self.generator.gen_line_block(
-                self._description(comment['description']))
-            self.generator.gen_line('')
-
-    def _format_attachments(self):
-        if 'attachments' not in self.ticket['comment_attachment']:
-            return
-        attachments = self.ticket['comment_attachment']['attachments']
-        if len(attachments) == 0:
-            return
-        self.generator.gen_heading('Attachments:', heading_base + 2)
-        cnt = 0
-        tab = []
-        bold = self.generator.gen_bold
-        for attachment in attachments:
-            cnt += 1
-            tab += [[
-                bold(str(cnt)),
-                bold('%s, %s' %
-                     (attachment['creator'], attachment['published']))
-            ]]
-            for m in attachment['meta']:
-                tab += [['', bold(self._meta_label(m[0])) + ': ' + m[1]]]
-            if len(attachment['description']) != 0:
-                tab += [['', attachment['description']]]
-        if len(tab) != 0:
-            self.generator.gen_line('')
-            self.generator.gen_table(None, tab)
-            self.generator.gen_line('')
-
-    def _runner(self):
-        try:
-            self.formatter()
-        except KeyboardInterrupt:
-            pass
-        except:
-            self.result = sys.exc_info()
-
-    def formatter(self):
-        self._format_contents()
-        self._format_description()
-        self._format_attachments()
-        self._format_comments()
-
-    def ticket_id(self):
-        return self.ticket['ticket']['id']
-
-    def run(self):
-        self.thread = threading.Thread(target=self._runner,
-                                       name='format-ticket-%s' %
-                                       (self.ticket_id()))
-        self.thread.start()
-
-    def is_alive(self):
-        return self.thread and self.thread.is_alive()
-
-    def reraise(self):
-        if self.result is not None:
-            reraise.reraise(*self.result)
+from typing import Optional
+from typing import Union
 
 
 class generator:
 
-    def __init__(self, release, fmt='markdown'):
-        if fmt != 'markdown' and fmt != 'trac':
-            raise RuntimeError('invalid format: ' + fmt)
-        self.release = release
+    md_comment_start = re.compile(r'<![-\S].*')
+    md_comment_end = re.compile(r'.*[-\S]>')
+    md_single_quote = re.compile(r'`(.*?)`')
+    md_url = re.compile(r'\[(.*?)\](\(([^()]|([()]))*\))')
+    md_unicode = re.compile(r'&#(.*?);')
+
+    def __init__(self):
+        self.md_trace = False
         self.milestone = None
-        self.format = fmt
-        self.generator = MarkdownGenerator()
+        self.reset()
+
+    def _heading(self, text: str, level: chr) -> None:
+        self.write(text)
+        self.write(level * len(text))
+        self.write()
+
+    def _anchor(self, ref: str) -> None:
+        self.write('.. _' + ref + ':')
+        self.write()
 
     def set_milestone(self, milestone):
         self.milestone = milestone
 
-    def gen_toc(self, notes):
-        headings = [line for line in notes
-                    if line.startswith('##')] if notes is not None else []
-        self.generator.gen_raw(self.md_toc(headings))
+    def reset(self):
+        self.out = []
+        self.table = []
+        self.indent_level = 0
+        self.write('.. RTEMS Release Note Generator. Do not edit')
+        self.write()
 
-    def gen_start(self, notes):
-        self.generator.gen_raw('# RTEMS Release ' + self.milestone +
-                               os.linesep)
-        if notes is not None:
-            self.generator.gen_raw(os.linesep.join(notes))
-        self.generator.gen_page_break()
+    def write(self, line: Optional[Union[str, list]] = '') -> None:
+        if isinstance(line, list):
+            for l in line:
+                self.write(l)
+        else:
+            self.out.append(' ' * self.indent_level + line)
 
-    def gen_overall_progress(self, overall_progress):
-        self.generator.gen_heading(
-            'RTEMS ' + self.milestone + ' Ticket Overview', heading_base)
-        self.generator.gen_table(
-            [k.capitalize() for k in overall_progress.keys()],
-            [overall_progress.values()],
-            align='left')
+    def output(self, out, fname):
+        with open(os.path.join(out, fname) + '.rst', 'w') as f:
+            f.write(os.linesep.join(self.out))
 
-    def gen_tickets_summary(self, tickets):
-        self.generator.gen_line_break()
-        self.generator.gen_heading(
-            'RTEMS ' + self.milestone + ' Ticket Summary', heading_base)
-        keys = tickets.keys()
-        id_summary_mapping = [
-            ('[%s](#t%s)' % (k, k), tickets[k]['meta']['status'],
-             tickets[k]['meta']['summary']) for k in keys
-        ]
-        cols = ['ID', 'Status', 'Summary']
-        self.generator.gen_table(cols, id_summary_mapping, sort_by='ID')
-        self.generator.gen_line_break()
+    def indent(self, level: int = 0) -> int:
+        i = self.indent_level
+        self.indent_level = level
+        return i
 
-    @staticmethod
-    def _convert_to_bulleted_link(name: str, generator):
-        level = name.count('#')
-        stripped_name = name.replace('#', '').strip()
-        linked_name = name.lower().replace(' ',
-                                           '-').replace('-', '', 1).replace(
-                                               '#', '', level - 1)
-        if not isinstance(generator, MarkdownGenerator):
-            linked_name = linked_name.replace('.', '-')
+    def indent_adjust(self, level: int, inc: bool = True) -> int:
+        i = self.indent_level
+        if inc:
+            self.indent_level += level
+        else:
+            self.indent_level -= level
+            if self.indent_level < 0:
+                self.indent_level = 0
+        return i
 
-        return f"{('    ' * (level - 1)) + '* '}[{stripped_name}]({linked_name})"
+    def block_break(self):
+        self.write()
+        self.write('..')
+        self.write()
 
-    def md_toc(self, headings):
-        tmp_gen = MarkdownGenerator()
-        toc_headers = [h[1:] for h in headings]
-        toc_headers.extend([
-            '# RTEMS ' + self.milestone + ' Ticket Overview',
-            '# RTEMS ' + self.milestone + ' Ticket Summary',
-            '# RTEMS ' + self.milestone + ' Tickets By Category'
-        ])
-        toc_headers.append('# RTEMS ' + self.milestone + ' Tickets')
-        bulleted_links = []
-        for c in toc_headers:
-            bulleted_links.append(self._convert_to_bulleted_link(c, tmp_gen))
-        for b in bulleted_links:
-            tmp_gen.gen_unwrapped_line(b)
-        return tmp_gen.content
+    def toc(self, caption: str, topics: list[str] = None) -> None:
+        self.write('.. toctree::')
+        self.write('   :maxdepth: 2')
+        self.write('   :caption: ' + caption)
+        self.write()
+        if topics is not None:
+            for topic in topics:
+                self.write('   ' + topic)
 
-    def gen_tickets_stats_by_category(self, by_category):
-        self.generator.gen_heading('RTEMS ' + self.milestone + \
-                                   ' Tickets By Category', heading_base)
-        self.generator.gen_line('')
+    def milestone_start(self) -> None:
+        l = 'RTEMS ' + self.milestone
+        self.write('*' * len(l))
+        self.write(l)
+        self.write('*' * len(l))
+        self.write()
 
-        for category in by_category:
-            self.generator.gen_heading(category.capitalize(), heading_base + 1)
+    def project_heading(self, project: str) -> None:
+        self._heading(project, '=')
 
-            # Get header and all rows to generate table, set category as first col
-            header = [category.capitalize()]
-            rows = []
-            ticket_stats_list = list(by_category[category].values())
-            if len(ticket_stats_list) > 0:
-                header += [k.capitalize() for k in ticket_stats_list[0].keys()]
+    def issue_reference(self, issue: str, title: str) -> str:
+        return 'rn-' + issue + '-' + str(
+            int(hashlib.sha1(title.encode('utf-8')).hexdigest(), 16) % (10**8))
 
-            for category_value in by_category[category]:
-                ticket_stats = by_category[category][category_value]
-                rows.append([category_value] + list(ticket_stats.values()))
+    def issue_heading(self, issue: str, title: str, state: str = None) -> None:
+        s = issue + ' - ' + title
+        if state is not None:
+            s += ' (' + state + ')'
+        self._anchor(self.issue_reference(issue, title))
+        self._heading(s, '-')
 
-            self.generator.gen_table(header, rows)
-            self.generator.gen_line('')
+    def heading(self, label: str) -> None:
+        self._heading(label, '`')
 
-    def gen_individual_tickets_info(self, tickets):
-        self.generator.gen_line_break()
-        self.generator.gen_heading('RTEMS ' + self.milestone + ' Tickets',
-                                   heading_base)
-        num_jobs = 1
-        job_count = 0
-        job_total = len(tickets)
-        job_len = len(str(job_total))
-        for ticket_id in sorted(list(tickets.keys())):
-            job = ticket(self.format, tickets[ticket_id])
-            job_count += 1
-            print('\r %*d of %d - %s ticket %s ' %
-                  (job_len, job_count, job_total, self.milestone, ticket_id),
-                  end='')
-            job.formatter()
-            self.generator.gen_horizontal_line()
-            self.generator.content += job.generator.content
-        print()
+    def detail(self, label: str, value: str) -> None:
+        self.write('*' + label + '*' + ' ' + value)
+        self.write()
+
+    def table_start(self) -> None:
+        self.table = [[]]
+
+    def table_end_simple(self, heading: bool = False) -> None:
+        cols = [len(r) for r in self.table]
+        if len(set(cols)) != 1:
+            raise RuntimeError('invalid table')
+        cols = cols[0]
+        col_len = 0
+        for row in self.table:
+            col_len = max([col_len] + [len(text) for text in row])
+
+    def table_end(self,
+                  mode='list',
+                  heading: bool = False,
+                  width: str = None,
+                  widths: list[int] = None) -> None:
+        cols = [len(r) for r in self.table]
+        if len(set(cols)) != 1:
+            raise RuntimeError('invalid table')
+        cols = cols[0]
+        if mode == 'simple':
+            dashes = ''
+            cols_len = [0] * cols
+            for row in self.table:
+                for col in range(0, cols):
+                    if cols_len[col] < len(row[col]):
+                        cols_len[col] = len(row[col])
+            marker = '  '.join(['=' * l for l in cols_len])
+            r_count = 0
+            self.write(marker)
+            for row in self.table:
+                cols_text = []
+                for col in range(0, cols):
+                    cols_text += [
+                        row[col] + ' ' * (cols_len[col] - len(row[col]))
+                    ]
+                self.write('  '.join(cols_text))
+                if r_count == 0 and heading:
+                    self.write(marker)
+                r_count += 1
+            self.write(marker)
+        elif mode == 'list':
+            self.write('.. list-table::')
+            self.write('   :class: rrn-detail-table')
+            self.write('   :align: left')
+            if heading:
+                self.write('   :header-rows: 1')
+            if width is not None:
+                self.write('   :width: ' + width)
+            if widths is not None:
+                self.write('   :widths: ' + ' '.join([w for w in widths]))
+            self.write()
+            for row in self.table:
+                row_chr = '*'
+                for text in row:
+                    self.write('   ' + row_chr + ' - ' + text)
+                    row_chr = ' '
+        self.write()
+
+    def table_row(self, last: bool = False) -> None:
+        if not last:
+            self.table.append([])
+
+    def table_col(self,
+                  text: Optional[Union[str, int, float]],
+                  last: bool = False) -> None:
+        if text is None:
+            raise InvalidValue('table text is None')
+        if isinstance(text, int) or isinstance(text, float):
+            text = str(text)
+        self.table[-1].append(text)
+
+    def markdown(self, md: str, url_base: str) -> None:
+
+        def _filter_comments(line: str, in_comment: bool) -> None:
+            process = True
+            out = ''
+            while process:
+                process = False
+                if in_comment:
+                    m = generator.md_comment_end.match(line)
+                    if m is not None:
+                        line = line[m.span()[1]:]
+                        in_comment = False
+                        process = True
+                if not in_comment:
+                    if '<!-' in line:
+                        m = generator.md_comment_start.match(line)
+                        out += line[:m.span()[0]]
+                        line_raw = line[m.span()[1]:]
+                        in_comment = True
+                        process = True
+                    else:
+                        out = line
+            return in_comment, out
+
+        def _unicode_filter(md: str, base: int):
+            md = md.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
+            uchars = set(generator.md_unicode.findall(md))
+            codes = {}
+            for uc in uchars:
+                code = '|md_' + str(base) + '_' + uc + '|'
+                xml = '&#' + uc + ';'
+                codes[code] = hex(int(uc))
+                md = md.replace(xml, '\ ' + code + '\ ')
+            return codes, md
+
+        def write_line(self, line: str, url_base: str) -> None:
+            m = generator.md_url.search(line)
+            if m is not None:
+                s = m.span()
+                s = m.span()
+                link = line[s[0]:s[1]]
+                if self.md_trace:
+                    print('link:', link)
+                    print('m.group', m.group(0))
+                url_start = link.find('(') + 1
+                url_end = link.rfind(')')
+                url = link[url_start:url_end]
+                url = urllib.parse.quote(url)
+                if self.md_trace:
+                    print('url/line', url, line)
+                if url[0] == '/':
+                    # This seem fragile but I am not sure how else to do this
+                    url = url_base + '/-/blob/main' + url
+                link = link.replace('[', '`')
+                link = link.replace(']', ' ')
+                link = link[:url_start - 1] + '<' + url + '>`_'
+                line = line[:s[0]] + link + line[s[1]:]
+                if self.md_trace:
+                    print(line, link, url)
+            self.write(line.strip())
+
+        if self.md_trace:
+            print('=' * 40)
+            print(md)
+            print('=' * 40)
+
+        md = md.replace('\\', '\\\\')
+        codes, md = _unicode_filter(md, 0)
+        for code in codes:
+            self.write('.. ' + code + ' unicode:: ' + codes[code] +
+                       ' .. something')
+        self.write()
+
+        section_table = ['-', '`', "'", '.', '~', '*', '+', '^']
+        lines = md.split(os.linesep)
+        block = 0
+        section = 0
+        table = None
+        in_comment = False
+        in_table = False
+        in_code = False
+        in_code_block = False
+        for line in lines:
+            in_comment, line = _filter_comments(line, in_comment)
+            line = line.strip()
+            if self.md_trace:
+                print('-' * 40)
+                print(line)
+                print('-' * 40)
+            if len(line) == 0:
+                self.write()
+                continue
+            while len(line) != 0:
+                if in_code_block:
+                    if '```' in line:
+                        ls = line.split('```', 1)
+                        write_line(self, ls[0], url_base)
+                        self.indent_adjust(4, False)
+                        if len(ls) > 1:
+                            line = ls[1]
+                        else:
+                            line = ''
+                        in_code_block = False
+                    else:
+                        write_line(self, line, url_base)
+                        line = ''
+                elif in_table:
+                    if line[0] == '|':
+                        rs = line.replace('||', '|').split('|')
+                        if len(rs[0]) != 0 or len(rs[-1]) != 0:
+                            in_table = False
+                            self.write(line)
+                        else:
+                            table += [[rs[i] for i in range(1, len(rs) - 1)]]
+                        line = ''
+                    else:
+                        self.table_start()
+                        heading = False
+                        add_row = False
+                        first_row = True
+                        for row in table:
+                            if add_row:
+                                self.table_row()
+                            add_row = True
+                            for col in row:
+                                if col.startswith('---'):
+                                    heading = True
+                                    add_row = False
+                                else:
+                                    if first_row:
+                                        if col[0] == '=':
+                                            col = col[1:]
+                                        if col[-1] == '=':
+                                            col = col[:-1]
+                                        col = col.strip()
+                                    self.table_col(col)
+                            first_row = False
+                        self.table_row(True)
+                        self.table_end(mode='simple', heading=heading)
+                        in_table = False
+                elif line[0] == '#':
+                    this_block = 0
+                    for i in range(0, len(line)):
+                        if line[i] != '#':
+                            break
+                        this_block += 1
+                    if this_block > block:
+                        section += 1
+                    elif this_block < block:
+                        section -= 1
+                    block = this_block
+                    if section < 0:
+                        section = 0
+                    elif section >= len(section_table):
+                        section = len(section_table)
+                    line = line[this_block:]
+                    self.write()
+                    write_line(self, line, url_base)
+                    write_line(self, section_table[section] * len(line),
+                               url_base)
+                    self.write()
+                    line = ''
+                elif line[0] == '|':
+                    if not in_table:
+                        table = []
+                        in_table = True
+                elif '```' in line:
+                    ls = line.split('```', 1)
+                    if len(ls) > 1:
+                        cb_line = ls[1]
+                    else:
+                        cb_line = ''
+                    code_block_type = ''
+                    cbls = None
+                    if len(cb_line) > 0:
+                        if cb_line[0] != ' ':
+                            cbls = cb_line.split(maxsplit=1)
+                            code_block_type = ' ' + cbls[0]
+                            if len(cbls) > 1:
+                                ls[1] = cbls[1]
+                            else:
+                                ls[1] = ''
+                    in_code_block = True
+                    write_line(self, ls[0], url_base)
+                    self.write()
+                    self.write('.. code-block::' + code_block_type)
+                    self.indent_adjust(4)
+                    self.write()
+                    line = ls[1]
+                elif '`' in line:
+                    m = generator.md_single_quote.search(line)
+                    if m is not None:
+                        write_line(self, line[:m.span()[0]], url_base)
+                        self.write('`' + line[m.span()[0]:m.span()[1]] + '`')
+                        line = line[m.span()[1]:]
+                    else:
+                        write_line(self, line, url_base)
+                        line = ''
+                else:
+                    write_line(self, line, url_base)
+                    line = ''
+        self.write()

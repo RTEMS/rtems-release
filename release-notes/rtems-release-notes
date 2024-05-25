@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2022 Chris Johns (chris@contemporary.software)
+# Copyright 2024 Chris Johns (chris@contemporary.software)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -30,138 +30,620 @@
 #
 
 import argparse
+import json
+import os
+import shutil
+import subprocess
 import sys
+import time
 
-import trac
-import tickets
+import gitlab
+
+from typing import Optional
+from typing import Tuple
+
 import reports
 
+rtems_version_major = 6
 
-def get_notes(notes_file):
-    return [l[:-1] for l in open(notes_file, 'r').readlines()] if notes_file is not None else None
+dot_length = 50
 
 
-def milestone_to_major_minor(release):
-    rtems_major, rtems_minor = release.split('.', 1)
-    try:
-        major = int(rtems_major)
-        rm = ''
-        for c in rtems_minor:
-            if c.isdigit():
-                rm += c
-            else:
-                break
+def _print_percentage(what: str, num: int, total: int) -> None:
+    percent = (num / total) * 100
+    if percent > 100:
+        percent = 100
+    print('\r' + what + ' ' + \
+          '.' * (dot_length - len(what)) + \
+          ' %0.0f%% ' % (percent), end='')
+
+
+def _print_count(what: str, num: int) -> None:
+    print('\r' + what + ' ' + \
+          '.' * (dot_length - len(what)) + \
+          ' %0.0f ' % (num), end='')
+
+
+def _iso_date_to_seconds(date: str) -> int:
+    dt = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
+    return dt.total_seconds()
+
+
+def milestone_major_minor_rev(
+        milestone: str) -> Tuple[Optional[int], Optional[int], Optional[int]]:
+    major = None
+    minor = None
+    revision = None
+    if milestone != 'all' and milestone is not None:
+        ss = milestone.split('.')
+        if len(ss) > 3:
+            raise InvalidValue('milestone has too many dots: ' + milestone)
         try:
-            minor = int(rm)
+            major = int(ss[0])
         except:
-            raise RuntimeError('invalid release: ' + milestone)
-    except:
-        raise RuntimeError('invalid release: ' + milestone)
-    return major, minor
+            pass
+        if len(ss) > 1:
+            try:
+                minor = int(ss[1])
+            except:
+                pass
+            if len(ss) > 2:
+                try:
+                    revision = int(ss[2])
+                except:
+                    pass
+    return major, minor, revision
 
 
-def milestone_from_major_minor(major, minor):
-    return '%d.%d' % (major, minor)
+def builder(step: str,
+            cmd: list[str],
+            cwd: str = None,
+            check_error: bool = True):
+    print(step + ' ', end='')
+    sys.stdout.flush()
+    e = subprocess.run(cmd,
+                       shell=False,
+                       check=False,
+                       capture_output=True,
+                       cwd=cwd)
+    if check_error and e.returncode != 0:
+        print('ERROR')
+        if len(e.stdout) != 0:
+            print(e.stdout.decode('utf-8'))
+        if len(e.stderr) != 0:
+            print(e.stderr.decode('utf-8'))
+        raise RuntimeError('building sphinx ' + step)
 
 
-def milestones(release, reverse=False):
-    major, minor = milestone_to_major_minor(release)
-    ms = [milestone_from_major_minor(major, m) for m in range(1, minor + 1)]
-    if reverse:
-        ms.reverse()
-    return ms
+def major_minor_rev_milestone(milestone: Tuple[Optional[int], Optional[int],
+                                               Optional[int]],
+                              format: str = '%i') -> str:
+    s = ''
+    if milestone[0] is not None:
+        s = '%' + format % (milestone[0])
+        if milestone[1] is not None:
+            s += '.' + format % (milestone[1])
+            if milestone[2] is not None:
+                s += '.' + format % (milestone[2])
+    return s
 
 
-def collect_tickets(release, cache, force):
-    '''
-    Collect the tickets for the release and all previous release milestones
-
-    A release is major.minor[-.*] from minor back to 1.
-    '''
-    ticks = {}
-    for milestone in milestones(release):
-        print(
-            f"Fetching and processing tickets for release {release} milestone {milestone}."
-        )
-        tcache = trac.cache(milestone, cache, force)
-        ticks[milestone] = tickets.tickets(release=release, milestone=milestone)
-        ticks[milestone].load(cache=tcache)
-    return ticks
+def milestone_key(milestone: str) -> str:
+    m = milestone_major_minor_rev(milestone)
+    s = major_minor_rev_milestone(m, format='%04i')
+    if len(s) == 0:
+        s = 'Z'
+    return s
 
 
-def generate(ticks, release, notes_file):
-    rtems_major, rtems_minor = milestone_to_major_minor(release)
-    notes = {}
-    for milestone in milestones(release):
-        notes[milestone] = get_notes(notes_file % (milestone))
-    gen = reports.generator(release)
-    gen.generator.gen_heading('Table of Content', reports.heading_base)
-    for milestone in milestones(release, reverse=True):
-        print(
-            f"Formatting tickets for release {release} milestone {milestone}."
-        )
-        t = ticks[milestone]
-        gen.set_milestone(milestone)
-        gen.gen_toc(notes[milestone])
-    for milestone in milestones(release, reverse=True):
-        t = ticks[milestone]
-        gen.generator.gen_page_break()
-        gen.generator.gen_line_break()
-        gen.set_milestone(milestone)
-        gen.gen_start(notes[milestone])
-        gen.gen_overall_progress(t.tickets['overall_progress'])
-        gen.gen_tickets_summary(t.tickets['tickets'])
-        gen.gen_tickets_stats_by_category(t.tickets['by_category'])
-        gen.gen_individual_tickets_info(t.tickets['tickets'])
-    return gen.generator.content
+def milestone_sort(milestones: list[str]) -> list[str]:
+    m_mmr = [(milestone_key(m), m) for m in milestones]
+    m_mmv = sorted(m_mmr, key=lambda t: t[0])
+    return [m[1] for m in m_mmv]
+
+
+class rtems_gitlab:
+
+    @staticmethod
+    def _issue_check_field(issue, key):
+        return key in issue and issue[key] is not None
+
+    @staticmethod
+    def _issue_latest_date(issue: dict) -> str:
+        latest = None
+        closed_at = None
+        if rtems_gitlab._issue_check_field(issue, 'closed_at'):
+            latest = issue['closed_at']
+        if rtems_gitlab._issue_check_field(issue, 'updated_at'):
+            if latest is None:
+                latest = issue['updated_at']
+            elif issue['updated_at'] > latest:
+                latest = issue['updated_at']
+        if latest is None:
+            latest = issue['created_at']
+        elif issue['created_at'] > latest:
+            latest = issue['created_at']
+        return latest
+
+    @staticmethod
+    def _milestone_zeroed(milestone: str) -> str:
+        try:
+            milestone = '.'.join(
+                ['%04i' % (int(f)) for f in milestone.split('.')])
+        except:
+            milestone = '000000' + milestone
+        return milestone
+
+    def __init__(self, milestone: str) -> None:
+        self.milestone = milestone
+        self.milestones = {}
+        self.rtems_group = None
+        self.rtems_groups = []
+        self.rtems_milestones = []
+        self.issue_count = 0
+
+    def fetch(self, config: str) -> None:
+        gl = gitlab.Gitlab.from_config(config_files=[config])
+        gl.auth()
+        print('User: ' + gl.user.username + ' (' + gl.user.name + ')')
+        rtems_group = None
+        _print_count('Get RTEMS groups', 0)
+        for group in gl.groups.list(iterator=True,
+                                    visibility='public',
+                                    search='RTEMS'):
+            if group.full_name == 'RTEMS':
+                rtems_group = group
+                self.rtems_group = group.asdict()
+            self.rtems_groups.append(group.asdict())
+            _print_count('Get RTEMS groups', len(self.rtems_groups))
+        print()
+        _print_count('Get milestones', 0)
+        for milestone in rtems_group.milestones.list(iterator=True):
+            self.rtems_milestones.append(milestone.asdict())
+            _print_count('Get milestones', len(self.rtems_milestones))
+        print()
+        for milestone in self.rtems_milestones:
+            major, minor, revision = milestone_major_minor_rev(self.milestone)
+            title = milestone['title']
+            add = False
+            if self.milestone == 'all':
+                self.milestones[title] = {}
+                add = True
+            else:
+                maj, min, rev = milestone_major_minor_rev(title)
+                if maj != None and maj == major and \
+                   min != None and min <= minor:
+                    add = True
+            if add:
+                self.milestones[title] = {
+                    'milestone': milestone,
+                    "projects": {},
+                    'issues': {}
+                }
+        milestones = milestone_sort(self.milestones)
+        for milestone in milestones:
+            for subgroup in rtems_group.subgroups.list(iterator=True):
+                group = gl.groups.get(subgroup.id)
+                for project in group.projects.list(iterator=True):
+                    project = gl.projects.get(project.id)
+                    self.milestones[milestone]['projects'][
+                        project.path_with_namespace] = project.asdict()
+                    issue_label = 'Get ' + milestone + ' ' + project.name + ' issues'
+                    self.milestones[milestone]['issues'][
+                        project.path_with_namespace] = {}
+                    m_issues = self.milestones[milestone]['issues'][
+                        project.path_with_namespace]
+                    _print_count(issue_label, self.issue_count)
+                    issues = project.issues.list(milestone=milestone,
+                                                 iterator=True)
+                    for issue in issues:
+                        discussions = []
+                        for discussion in issue.discussions.list(
+                                iterator=True):
+                            discussions.append(discussion.asdict())
+                        issue_dict = issue.asdict()
+                        issue_dict['discussions'] = discussions
+                        m_issues[str(issue.iid)] = issue_dict
+                        self.issue_count += 1
+                        _print_count(issue_label, self.issue_count)
+        print()
+
+    def dump(self, fname: str) -> None:
+        data = {
+            'rtems_group': self.rtems_group,
+            'rtems_groups': self.rtems_groups,
+            'milestones': self.milestones
+        }
+        _print_count('Dump issues (' + fname + ')', self.issue_count)
+        print()
+        with open(fname, 'w') as f:
+            f.write(json.dumps(data, indent=2))
+
+    def load(self, fname: str) -> None:
+        with open(fname, 'r') as f:
+            data = json.load(f)
+            self.rtems_group = data['rtems_group']
+            self.rtems_groups = data['rtems_groups']
+            self.milestones = data['milestones']
+        self.issue_count = 0
+        for milestone in self.milestones:
+            for project in self.milestones[milestone]['issues']:
+                self.issue_count += len(
+                    self.milestones[milestone]['issues'][project])
+        _print_count('Load issues (' + fname + ')', self.issue_count)
+        print()
+
+    def _setup_sphinx(self, out: str) -> None:
+        if not os.path.exists(out):
+            os.mkdir(out)
+        shutil.copytree('sphinx', out, dirs_exist_ok=True)
+
+    def _setup_notes(self, out: str, notes: str) -> None:
+        if not os.path.exists(out):
+            os.mkdir(out)
+        shutil.copy(notes, out)
+
+    def _gen_index(self, label: str, includes: list[str]) -> list[str]:
+        out = [
+            '.. RTEMS Release Note Generator. Do not edit ',
+            '',
+            '##############' + '#' * len(label),
+            'RTEMS Release ' + label,
+            '##############' + '#' * len(label),
+            '',
+            '.. toctree::',
+            '    :maxdepth: 2',
+            '    :caption: RTEMS ' + label,
+            '',
+        ]
+        for inc in includes:
+            out.append('    ' + inc)
+        out += [
+            '',
+            '* :ref:`genindex`',
+            '* :ref:`search`',
+            '',
+        ]
+        return out
+
+    def generate_issue_details(self, gen: reports.generator, issue: dict,
+                               project_url: str) -> None:
+        gen.table_start()
+        gen.table_col('**Id**')
+        gen.table_col(str(issue['iid']), True)
+        gen.table_row()
+        gen.table_col('**State**')
+        gen.table_col(issue['state'])
+        gen.table_row()
+        gen.table_col('**Type**')
+        gen.table_col(issue['type'])
+        gen.table_row()
+        gen.table_col('**Author**')
+        gen.table_col(issue['author']['name'])
+        gen.table_row()
+        if len(issue['assignees']) != 0:
+            gen.table_col('**Assignee(s)**')
+            gen.table_col(', '.join(a['name'] for a in issue['assignees']))
+            gen.table_row()
+        if rtems_gitlab._issue_check_field(issue, 'closed_by'):
+            gen.table_col('**Closed by**')
+            gen.table_col(issue['closed_by']['name'])
+            gen.table_row()
+        gen.table_col('**Created**')
+        gen.table_col(issue['created_at'])
+        gen.table_row()
+        if rtems_gitlab._issue_check_field(issue, 'closed_at'):
+            gen.table_col('**Closed**')
+            gen.table_col(issue['closed_at'])
+            gen.table_row()
+        gen.table_col('**Updated**')
+        gen.table_col(issue['updated_at'])
+        gen.table_row()
+        gen.table_col('**Milestone**')
+        gen.table_col(issue['milestone']['title'])
+        gen.table_row()
+        if len(issue['labels']) != 0:
+            gen.table_col('**Labels**')
+            gen.table_col(', '.join(issue['labels']))
+            gen.table_row()
+        gen.table_col('**Link**')
+        gen.table_col(issue['web_url'])
+        gen.table_row()
+        gen.table_col('**Merges**')
+        gen.table_col(issue['merge_requests_count'])
+        gen.table_row(True)
+        gen.table_end(width='90%', widths=['20', '80'])
+        gen.write()
+
+    def generate_issue_discussion(self, gen: reports.generator, issue: dict,
+                                  project_url: str) -> None:
+        for discussion in issue['discussions']:
+            gen.block_break()
+            for note in discussion['notes']:
+                gen.indent_adjust(4, True)
+                gen.table_start()
+                gen.table_col('**Author:** ' + note['author']['name'])
+                gen.table_col(note['updated_at'])
+                gen.table_row(True)
+                gen.table_end(mode='list')
+                gen.markdown(note['body'], project_url)
+                gen.indent_adjust(4, False)
+                gen.block_break()
+        gen.write()
+
+    def generate_issue_tables(self, gen: reports.generator,
+                              issues: dict) -> None:
+        gen.table_start()
+        first = True
+        for issue in sorted(issues.keys(), reverse=True, key=lambda i: int(i)):
+            if issues[issue]['state'] == 'closed':
+                continue
+            if not first:
+                gen.table_row()
+            first = False
+            gen.table_col(':ref:`' +
+                          gen.issue_reference(issue, issues[issue]['title']) +
+                          '`')
+        gen.table_row(True)
+        gen.table_end(mode='list')
+        gen.write()
+        gen.table_start()
+        first = True
+        for issue in sorted(issues.keys(), reverse=True, key=lambda i: int(i)):
+            if issues[issue]['state'] != 'closed':
+                continue
+            if not first:
+                gen.table_row()
+            first = False
+            gen.table_col(':ref:`' +
+                          gen.issue_reference(issue, issues[issue]['title']) +
+                          '`')
+        gen.table_row(True)
+        gen.table_end(mode='list')
+        gen.write()
+
+    def generate(self, out: str, label: str, notes: str) -> None:
+        self._setup_sphinx(out)
+        if label == 'all':
+            label = 'All'
+        inc_milestones = []
+        gen = reports.generator()
+        milestones = sorted(self.milestones.keys(),
+                            reverse=True,
+                            key=lambda m: self._milestone_zeroed(m))
+        for milestone in milestones:
+            fname_milestone = 'r-' + milestone.replace('.', '-')
+            inc_projects = []
+            if notes is not None:
+                inc_projects += ['notes']
+            gen.set_milestone(milestone)
+            for project_path in self.milestones[milestone]['projects']:
+                issues = sorted(
+                    self.milestones[milestone]['issues'][project_path],
+                    reverse=True,
+                    key=lambda i: rtems_gitlab._issue_latest_date(
+                        self.milestones[milestone]['issues'][project_path][i]))
+                if len(issues) != 0:
+                    project = self.milestones[milestone]['projects'][
+                        project_path]
+                    project_url = project['web_url']
+                    gen.reset()
+                    gen.project_heading(project['name_with_namespace'])
+                    gen.toc(project_path)
+                    self.generate_issue_tables(
+                        gen,
+                        self.milestones[milestone]['issues'][project_path])
+                    for issue_id in issues:
+                        issue = self.milestones[milestone]['issues'][
+                            project_path][issue_id]
+                        gen.issue_heading(
+                            issue_id, issue['title'], issue['state']
+                            if issue['state'] != 'closed' else None)
+                        self.generate_issue_details(gen, issue, project_url)
+                        gen.markdown(issue['description'], project_url)
+                        self.generate_issue_discussion(gen, issue, project_url)
+                    fname = fname_milestone + '-' + project_path.replace(
+                        '/', '-')
+                    inc_projects.append(fname)
+                    gen.output(out, fname)
+            gen.reset()
+            if notes is not None:
+                gen.project_heading('Notes')
+                gen.toc('Notes ' + milestone, [os.path.basename(notes)])
+                gen.output(out, 'notes')
+                gen.reset()
+            gen.milestone_start()
+            gen.toc('Milestone ' + milestone, inc_projects)
+            if notes is not None:
+                self._setup_notes(out, notes)
+            gen.output(out, fname_milestone)
+            inc_milestones.append(fname_milestone)
+        with open(os.path.join(out, 'index.rst'), 'w') as f:
+            f.write(os.linesep.join(self._gen_index(label, inc_milestones)))
+
+    def build_html(self, release: str, out: str) -> None:
+        release_label = release
+        if release_label == 'all':
+            release_label = 'All'
+        print('Building HTML documentation for ' + release_label +
+              ' ............... ',
+              end='')
+        cmd = [
+            'sphinx-build',
+            '-M',
+            'html',
+            'out',
+            'build',
+            '-j',
+            'auto',
+            '-D',
+            'release="' + release + '"',
+            '-D',
+            'project="RTEMS ' + release_label + '"',
+            '-D',
+            'release="' + release + '"',
+            '-D',
+            'html_title=RTEMS ' + release_label + '',
+        ]
+        builder('HTML', cmd)
+        print('done')
+
+    def build_pdf(self, release: str, out: str) -> None:
+        release_label = release
+        if release_label == 'all':
+            release_label = 'All'
+        print('Building PDF documentation for ' + release_label +
+              ' ................ ',
+              end='')
+        build_path = os.path.join('build', 'latex')
+        release_tex = 'rtems-release-notes-%s.tex' % (release)
+        rnlatex = [
+            'latex_documents = [',
+            '    ("index",',
+            '     "' + release_tex + '",',
+            '     u"RTEMS Release Notes",',
+            '     u"RTEMS Project",',
+            '     "manual"),',
+            ']',
+        ]
+        print('rnlatex ', end='')
+        sys.stdout.flush()
+        with open(os.path.join(out, 'rnlatex.py'), 'w') as f:
+            f.write(os.linesep.join(rnlatex))
+        cmd = [
+            'sphinx-build',
+            '-M',
+            'latex',
+            out,
+            'build',
+            '-j',
+            'auto',
+            '-D',
+            'release="' + release + '"',
+            '-D',
+            'project="RTEMS ' + release_label + '"',
+            '-D',
+            'release=' + release,
+            '-D',
+            'html_title=RTEMS ' + release_label + '',
+        ]
+        builder('latex', cmd)
+        pdf_cmd = [
+            'pdflatex', '-shell-escape', '-interaction=batchmode', release_tex
+        ]
+        # return code always 1, I suspect the sphinx output
+        builder('pdf-pass-1', pdf_cmd, cwd=build_path, check_error=False)
+        cmd = ['makeindex', '-s', 'python.ist', release_tex]
+        builder('index', cmd, cwd=build_path)
+        builder('pdf-pass-2', pdf_cmd, cwd=build_path, check_error=False)
+        print('done')
 
 
 if __name__ == '__main__':
 
+    raise_error = False
+
     args = argparse.ArgumentParser()
 
-    args.add_argument('-r',
-                      '--release',
-                      required=True,
-                      dest='release',
-                      help='The release to report',
+    args.add_argument('-C',
+                      '--config',
+                      dest='config',
+                      help='GitLab configuration file' + \
+                      '(default: %(default)s)',
+                      type=str,
+                      default='config.ini')
+    args.add_argument('-M',
+                      '--milestone',
+                      dest='milestone',
+                      help='Milestone to report, all for everything' + \
+                      '(default: %(default)s)',
+                      type=str,
+                      default=None)
+    args.add_argument('-H',
+                      '--no-html',
+                      dest='html',
+                      help='Disable building HTML documentation' + \
+                      '(default: %(default)s)',
+                      action='store_false',
+                      default=True)
+    args.add_argument('-P',
+                      '--no-pdf',
+                      dest='pdf',
+                      help='Disable building PDF documentation' + \
+                      '(default: %(default)s)',
+                      action='store_false',
+                      default=True)
+    args.add_argument('-N',
+                      '--notes',
+                      dest='notes',
+                      help='Milestone release notes' + \
+                      '(default: %(default)s)',
                       type=str,
                       default=None)
     args.add_argument('-f',
-                      '--force',
-                      dest='force',
-                      help='Force downloading of tickets',
+                      '--fetch',
+                      dest='fetch',
+                      help='Fetch data and cache' + \
+                      '(default: %(default)s)',
                       action='store_true')
-    args.add_argument('-c',
-                      '--cache',
-                      dest='cache',
-                      help='Cache file base name of ticket data, one per milestone',
+    args.add_argument('-r',
+                      '--read',
+                      required=False,
+                      dest='read',
+                      help='Read release data from JSON file: %(default)s)',
+                      type=str,
+                      default=None)
+    args.add_argument('-w',
+                      '--write',
+                      required=False,
+                      dest='write',
+                      help='Write release data to JSON file: %(default)s)',
                       type=str,
                       default=None)
     args.add_argument('-o',
                       '--output',
-                      required=True,
+                      required=False,
                       dest='output',
-                      help='Output file',
+                      help='Output directory (default: %(default)s)',
                       type=str,
-                      default=None)
-    args.add_argument('-N',
-                      '--notes',
-                      dest='notes',
-                      help='Top-level, manually-written release notes',
-                      default=None)
+                      default='out')
 
     opts = args.parse_args()
 
-    if opts.cache is not None:
-        cache = opts.cache
+    ec = 0
+
+    if opts.milestone is None:
+        print('error: no milestone specified', file=sys.stderr)
+        ec = 1
+    elif opts.read is None and not opts.fetch:
+        print('error: need read or fetch', file=sys.stderr)
+        ec = 1
+    elif opts.read is not None and opts.fetch:
+        print('error: cannot read and fetch', file=sys.stderr)
+        ec = 1
+    elif opts.read is not None and opts.write is not None:
+        print('error: cannot read and write', file=sys.stderr)
+        ec = 1
     else:
-        cache = '.rng-cache'
+        try:
+            rtems = rtems_gitlab(opts.milestone)
+            if opts.fetch:
+                rtems.fetch(opts.config)
+                if opts.write:
+                    rtems.dump(opts.write)
+            else:
+                rtems.load(opts.read)
+            rtems.generate(opts.output, opts.milestone, opts.notes)
+            if opts.html:
+                rtems.build_html(opts.milestone, opts.output)
+            if opts.pdf:
+                rtems.build_pdf(opts.milestone, opts.output)
+        except Exception as e:
+            if raise_error:
+                raise
+            print('error: ' + str(e), file=sys.stderr)
+        except KeyboardInterrupt:
+            print('warning: abort: user terminated', file=sys.stderr)
+            ec = 1
 
-    ticks = collect_tickets(release=opts.release, cache=cache, force=opts.force)
-    contents = generate(ticks, opts.release, opts.notes)
-
-    print('Writing ' + opts.output)
-
-    with open(opts.output, 'w') as f:
-        f.write(contents)
+    sys.exit(ec)
