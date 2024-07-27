@@ -35,12 +35,9 @@ Regards
 --------- ------------------------------------------
      Home <https://www.rtems.org/>
  Download <https://ftp.rtems.org/pub/rtems/releases>
-     Wiki <https://devel.rtems.org/>
      Docs <https://docs.rtems.org/>
-     Bugs <https://devel.rtems.org/query>
     Lists <https://lists.rtems.org/>
-Developer <https://devel.rtems.org/>
-      GIT <https://git.rtems.org/>
+Developer <https://gitlab.rtems.org/>
 --------- ------------------------------------------
 
 ## Release Files
@@ -188,4 +185,4 @@ To build the tools, kernel and all packages for the Beagleboneblack:
 If you encounter a problem please post to the user@rtems.org mailing list. You
 can join the Users mailing at <https://lists.rtems.org/>.
 
-If you find a bug please raise a ticket at <https://devel.rtems.org/newticket>.
+If you find a bug please raise an issue at https://gitlab.rtems.org/rtems/

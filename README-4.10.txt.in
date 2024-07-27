@@ -27,11 +27,9 @@ RTEMS Web Sites
 ~~~~~~~~~~~~~~~
 
       Home: https://www.rtems.org/
-Developers: https://devel.rtems.org/
+Developers: https://gitlab.rtems.org/
       Docs: https://docs.rtems.org/
-       Bug: https://devel.rtems.org/query
      Lists: https://lists.rtems.org/
-       GIT: https://git.rtems.org/
 
 Release Files
 ~~~~~~~~~~~~~
@@ -55,7 +53,7 @@ Please check to the RSB documentation (https://docs.rtems.org/rsb/) and the
 Wiki (TBD) if you have any issues.
 
 If you encounter a problem please post to the user@rtems.org mailing list and
-if you find a bug please raise a ticket (https://devel.rtems.org/newticket).
+if you find a bug please raise an issue http://gitlab.rtems.org/rtems/
 
 The following builds RTEMS for the SPARC architecture:
 

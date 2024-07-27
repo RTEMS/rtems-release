@@ -54,7 +54,7 @@ h1.title {
 }
 
 h1.title::before {
-  content:url(http://devel.rtems.org/images/logo.png);
+  content:url(https://gitlab.rtems.org/uploads/-/system/appearance/logo/1/logo.png);
   vertical-align: top;
 }
 
