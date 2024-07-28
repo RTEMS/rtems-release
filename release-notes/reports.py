@@ -30,6 +30,7 @@
 
 import datetime
 import hashlib
+import html.parser
 import os
 import re
 import time
@@ -40,15 +41,104 @@ from typing import Optional
 from typing import Union
 
 
+class url_meta:
+
+    def __init__(self, project: dict, page_url: str) -> None:
+        self.project = project
+        self.page_url = page_url
+        self.project_url = project['web_url']
+        self.url = urllib.parse.urlsplit(self.project_url)
+        self.host = urllib.parse.urlunparse(
+            [self.url.scheme, self.url.netloc, '', '', '', ''])
+        self.project_id_url = urllib.parse.urlunparse([
+            self.url.scheme, self.url.netloc,
+            '-/project/' + str(project['id']), '', '', ''
+        ])
+        self.project_path = self.url.path
+
+    def __str__(self) -> str:
+        out = []
+        out += ['project_url = ' + str(self.project_url)]
+        out += ['page_url = ' + str(self.page_url)]
+        out += ['host = ' + self.host]
+        out += ['project_path = ' + self.project_path]
+        return os.linesep.join(out)
+
+    def transform(self, link: str) -> str:
+        us = urllib.parse.urlsplit(link)
+        if us.scheme == '' or us.netloc == self.url.netloc:
+            if link.startswith(self.host):
+                pass
+            elif link.startswith(self.project_path):
+                link = urllib.parse.urljoin(self.host, link)
+            elif link[0] in ['#']:
+                link = urllib.parse.urljoin(self.page_url, link)
+            elif us.netloc == '':
+                ps = us.path.split('/')
+                if len(ps) > 1:
+                    if ps[1] in ['assets']:
+                        if len(ps) > 2 and ps[2] == 'tracmigration':
+                            link = self.project_url + '/-/blob/main' + link
+                        else:
+                            link = self.host + link
+                    elif ps[1] in ['uploads']:
+                        link = urllib.parse.urljoin(self.project_id_url,
+                                                    link[1:])
+        return link
+
+
+class html_parser(html.parser.HTMLParser):
+
+    def __init__(self, generator, url: url_meta) -> None:
+        super().__init__()
+        self.generator = generator
+        self.url = url
+        self.tag = None
+        self.line = ''
+
+    def write(self, text: str) -> None:
+        if self.tag is not None:
+            self.line += text
+        else:
+            self.generator.markdown(text, self.url)
+
+    def handle_starttag(self, tag: str, attrs: list) -> None:
+        if tag == 'ul':
+            self.tag = tag
+        elif tag == 'li':
+            self.write('* ')
+        elif tag == 'code':
+            self.write('``')
+        elif tag in ['span']:
+            pass
+        else:
+            raise RuntimeError('invalid html tag')
+
+    def handle_endtag(self, tag):
+        if tag == 'li':
+            self.generator.write(self.line)
+            self.line = ''
+        elif tag == 'ul':
+            self.tag = None
+        elif tag == 'code':
+            self.write('``')
+
+    def handle_data(self, data):
+        self.write(data)
+
+
 class generator:
 
     md_comment_start = re.compile(r'<![-\S].*')
     md_comment_end = re.compile(r'.*[-\S]>')
     md_single_quote = re.compile(r'`(.*?)`')
     md_url = re.compile(r'\[(.*?)\](\(([^()]|([()]))*\))')
+    md_reference = re.compile(r'[\s"]+[\w/]*[@!#][\w]+')
     md_unicode = re.compile(r'&#(.*?);')
+    section_chars = ['*', '=', '-', '`', "'", '.', '~', '*', '+', '^']
 
     def __init__(self):
+        super().__init__()
         self.md_trace = False
         self.milestone = None
         self.reset()
@@ -69,6 +159,7 @@ class generator:
         self.out = []
         self.table = []
         self.indent_level = 0
+        self.indent_stack = []
         self.write('.. RTEMS Release Note Generator. Do not edit')
         self.write()
 
@@ -98,6 +189,15 @@ class generator:
                 self.indent_level = 0
         return i
 
+    def indent_push(self) -> int:
+        self.indent_stack.append(self.indent_level)
+        return self.indent_level
+
+    def indent_pop(self) -> int:
+        if len(self.indent_stack) > 0:
+            self.indent_level = self.indent_stack.pop()
+        return self.indent_level
+
     def block_break(self):
         self.write()
         self.write('..')
@@ -114,13 +214,16 @@ class generator:
 
     def milestone_start(self) -> None:
         l = 'RTEMS ' + self.milestone
-        self.write('*' * len(l))
+        self.write(self.section_chars[0] * len(l))
         self.write(l)
-        self.write('*' * len(l))
+        self.write(self.section_chars[0] * len(l))
         self.write()
 
     def project_heading(self, project: str) -> None:
-        self._heading(project, '=')
+        self._heading(project, self.section_chars[1])
+
+    def group_heading(self, group: str) -> None:
+        self._heading(group, self.section_chars[2])
 
     def issue_reference(self, issue: str, title: str) -> str:
         return 'rn-' + issue + '-' + str(
@@ -131,13 +234,24 @@ class generator:
         if state is not None:
             s += ' (' + state + ')'
         self._anchor(self.issue_reference(issue, title))
-        self._heading(s, '-')
+        self._heading(s, self.section_chars[3])
 
     def heading(self, label: str) -> None:
-        self._heading(label, '`')
+        self._heading(label, self.section_chars[4])
 
     def detail(self, label: str, value: str) -> None:
         self.write('*' + label + '*' + ' ' + value)
+        self.write()
+
+    def link_test(self, detail: str, url: str) -> None:
+        return '`' + detail + ' <' + url + '>`_'
+
+    def link(self, detail: str, url: str) -> None:
+        gen.write(self.link_test(detail, url))
+
+    def divider(self) -> None:
+        self.write()
+        self.write('-' * 10)
         self.write()
 
     def table_start(self) -> None:
@@ -213,7 +327,7 @@ class generator:
             text = str(text)
         self.table[-1].append(text)
 
-    def markdown(self, md: str, url_base: str) -> None:
+    def markdown(self, md: str, url: url_meta) -> None:
 
         def _filter_comments(line: str, in_comment: bool) -> None:
             process = True
@@ -248,31 +362,110 @@ class generator:
                 md = md.replace(xml, '\ ' + code + '\ ')
             return codes, md
 
-        def write_line(self, line: str, url_base: str) -> None:
+        def _get_link(self, line: str, url: url_meta) -> None:
             m = generator.md_url.search(line)
             if m is not None:
-                s = m.span()
                 s = m.span()
                 link = line[s[0]:s[1]]
                 if self.md_trace:
                     print('link:', link)
                     print('m.group', m.group(0))
-                url_start = link.find('(') + 1
                 url_end = link.rfind(')')
-                url = link[url_start:url_end]
-                url = urllib.parse.quote(url)
+                link_end = link.find(']')
+                link = link[1:link_end]
                 if self.md_trace:
-                    print('url/line', url, line)
-                if url[0] == '/':
-                    # This seem fragile but I am not sure how else to do this
-                    url = url_base + '/-/blob/main' + url
-                link = link.replace('[', '`')
-                link = link.replace(']', ' ')
-                link = link[:url_start - 1] + '<' + url + '>`_'
-                line = line[:s[0]] + link + line[s[1]:]
+                    print(line, '||', link, s)
+                    print(line[:s[1]])
+                return link, line[:s[1]]
+            return None, None
+
+        def transform_url(self, line: str, url: url_meta) -> str:
+            m = generator.md_url.search(line)
+            if m is not None:
+                s = m.span()
+                link = line[s[0]:s[1]]
                 if self.md_trace:
-                    print(line, link, url)
-            self.write(line.strip())
+                    print('link:', link)
+                    print('m.group', m.group(0))
+                link_url_start = link.find('(') + 1
+                link_url_end = link.rfind(')')
+                link_url = link[link_url_start:link_url_end]
+                if ' ' in link_url:
+                    link_url_end = link.find('"')
+                    link_url = link[link_url_start:link_url_end].strip()
+                if self.md_trace:
+                    print('line', line)
+                    print('url:', url)
+                    print('url_link:', link_url)
+                    print('url.url:', url.url)
+                link_url = url.transform(link_url)
+                link_end = link.find(']')
+                link = link[1:link_end]
+                if link[0] in ['`', '*`']:
+                    link = link[1:]
+                if link[-1] in ['`', '*`']:
+                    link = link[:-1]
+                link_url = '`' + link + ' <' + link_url + '>`_'
+                line = line[:s[0]] + link_url + line[s[1]:]
+                if self.md_trace:
+                    print(line, '[]', link, '[]', link_url)
+            return line
+
+        def transform_reference(self, line: str, url: url_meta) -> str:
+            m = generator.md_reference.search(line)
+            if m is not None:
+                s = m.span()
+                link_prefix = line[s[0]]
+                link = line[s[0] + 1:s[1]].strip()
+                link_num = link[1:]
+                try:
+                    num = int(link_num, 16)
+                except:
+                    link_num = None
+                if link_num is not None:
+                    l = generator.md_url.search(line)
+                    if l is not None:
+                        ls = l.span()
+                        if self.md_trace:
+                            print('l.group', l.group(0))
+                            print('ls.span', ls)
+                        if (s[0] < ls[0] or s[0] > ls[1]) and (s[1] < ls[0] or
+                                                               s[1] > ls[1]):
+                            link_num = None
+                if link_num is not None:
+                    if self.md_trace:
+                        print('link:', link)
+                        print('m.group', m.group(0))
+                        print('m.span', s)
+                    if '@' in link:
+                        link_type = '@'
+                        link_label = 'commit'
+                    elif '#' in link:
+                        link_type = '#'
+                        link_label = 'issues'
+                    elif '!' in link:
+                        link_type = '!'
+                        link_label = 'merge_requests'
+                    ls = link.split(link_type)
+                    if len(ls[0]) == 0:
+                        ls[0] = url.project_path[1:]
+                    link_url = url.host + '/' + ls[
+                        0] + '/-/' + link_label + '/' + ls[1]
+                    link_md = '[' + link + '](' + link_url + ')'
+                    line = line[:s[0]] + link_prefix + link_md + line[s[1]:]
+                    if self.md_trace:
+                        print('link_type:', link_type, link_label)
+                        print('link_url:', link_url)
+                        print('link_md:', link_md)
+                        print('line:', line)
+            return line
+
+        def write_line(self, line: str, url: url_meta) -> str:
+            line = transform_reference(self, line, url)
+            line = transform_url(self, line, url)
+            return line
+
+        self.indent_push()
 
         if self.md_trace:
             print('=' * 40)
@@ -286,7 +479,7 @@ class generator:
                        ' .. something')
         self.write()
 
-        section_table = ['-', '`', "'", '.', '~', '*', '+', '^']
+        section_table = self.section_chars[4:]
         lines = md.split(os.linesep)
         block = 0
         section = 0
@@ -295,21 +488,37 @@ class generator:
         in_table = False
         in_code = False
         in_code_block = False
+        line_out = ''
+        reply_depth = 0
         for line in lines:
             in_comment, line = _filter_comments(line, in_comment)
             line = line.strip()
             if self.md_trace:
                 print('-' * 40)
                 print(line)
+                print(' - ' * 40)
+                print(line_out)
                 print('-' * 40)
             if len(line) == 0:
                 self.write()
                 continue
+            if line[0] == '>':
+                depth = 0
+                while len(line) != 0 and line[0] == '>':
+                    depth += 1
+                    line = line[1:].strip()
+                if reply_depth != depth:
+                    self.write()
+                    self.indent_adjust(2 * (depth - reply_depth))
+                    self.write()
+                    reply_depth = depth
+            else:
+                reply_depth = 0
             while len(line) != 0:
                 if in_code_block:
                     if '```' in line:
                         ls = line.split('```', 1)
-                        write_line(self, ls[0], url_base)
+                        self.write(ls[0])
                         self.indent_adjust(4, False)
                         if len(ls) > 1:
                             line = ls[1]
@@ -317,14 +526,14 @@ class generator:
                             line = ''
                         in_code_block = False
                     else:
-                        write_line(self, line, url_base)
+                        self.write(line)
                         line = ''
                 elif in_table:
                     if line[0] == '|':
                         rs = line.replace('||', '|').split('|')
                         if len(rs[0]) != 0 or len(rs[-1]) != 0:
                             in_table = False
-                            self.write(line)
+                            self.write(write_line(self, line, url))
                         else:
                             table += [[rs[i] for i in range(1, len(rs) - 1)]]
                         line = ''
@@ -368,17 +577,38 @@ class generator:
                         section = 0
                     elif section >= len(section_table):
                         section = len(section_table)
-                    line = line[this_block:]
+                    line = line[this_block:].strip()
+                    if len(line_out) != 0:
+                        self.write(line_out)
+                        line_out = ''
                     self.write()
-                    write_line(self, line, url_base)
-                    write_line(self, section_table[section] * len(line),
-                               url_base)
+                    self.write(write_line(self, line, url))
+                    self.write(
+                        write_line(self, section_table[section] * len(line),
+                                   url))
+                    self.write()
+                    line = ''
+                elif ('* ' == line[0:2]
+                      or '- ' == line[0:2]) and len(line_out) == 0:
+                    line_out += '* '
+                    line = line[2:]
+                elif '[ ] ' == line[0:4]:
+                    line = line[4:]
+                    line_out += '[] '
+                elif '----' == line:
+                    if len(line_out) != 0:
+                        self.write(line_out)
+                        line_out = ''
+                    self.write()
+                    self.write('-' * 10)
                     self.write()
                     line = ''
                 elif line[0] == '|':
                     if not in_table:
                         table = []
                         in_table = True
+                elif '\\\\' in line:
+                    line = line.replace('\\\\', '\\')
                 elif '```' in line:
                     ls = line.split('```', 1)
                     if len(ls) > 1:
@@ -396,7 +626,9 @@ class generator:
                             else:
                                 ls[1] = ''
                     in_code_block = True
-                    write_line(self, ls[0], url_base)
+                    if len(line_out) != 0:
+                        self.write(line_out)
+                    line_out = write_line(self, ls[0], url)
                     self.write()
                     self.write('.. code-block::' + code_block_type)
                     self.indent_adjust(4)
@@ -405,13 +637,34 @@ class generator:
                 elif '`' in line:
                     m = generator.md_single_quote.search(line)
                     if m is not None:
-                        write_line(self, line[:m.span()[0]], url_base)
-                        self.write('`' + line[m.span()[0]:m.span()[1]] + '`')
-                        line = line[m.span()[1]:]
+                        link, line_url = _get_link(self, line, url)
+                        if link is not None:
+                            s = m.span()
+                            quoted = line[s[0]:s[1]]
+                            if link == quoted:
+                                line_out += write_line(self, line_url, url)
+                                line = line[len(line_url):]
+                                m = None
+                        if m is not None:
+                            line_out += write_line(self, line[:m.span()[0]],
+                                                   url)
+                            line_out += '`' + line[m.span()[0]:m.span(
+                            )[1]] + '`'
+                            line = line[m.span()[1]:]
                     else:
-                        write_line(self, line, url_base)
+                        line_out += write_line(self, line, url)
                         line = ''
                 else:
-                    write_line(self, line, url_base)
+                    line_out += write_line(self, line, url)
                     line = ''
+                if len(line) == 0 and len(line_out) != 0:
+                    self.write(line_out)
+                    line_out = ''
+
+        self.write()
+        self.indent_pop()
+
+    def html(self, text: str, url: url_meta) -> None:
+        html = html_parser(self, url)
+        html.feed(text)
         self.write()
