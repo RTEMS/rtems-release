@@ -54,6 +54,17 @@ Implementation improvements usually fall into one of the following categories:
     that have been sent. It is save to ignore the extra parameter for
     applications that don't need it.
 
+* The system termination procedure was simplified and the CPU port provided
+  fatal halt handler was removed. See the section *23.2.2. System Termination
+  Procedure* in the *RTEMS Classic API Guide*.
+
+* The fatal extensions are now invoked with maskable interrupts disabled.
+
+* The signature of the BSP reset function changed to
+  `RTEMS_NO_RETURN void bsp_reset(rtems_fatal_source source, rtems_fatal_code code)`.
+  This allows BSPs to pass the reset cause to a monitor or save it for the next
+  boot sequence.
+
 #### API Additions
 
 * `RTEMS_ALIGN_UP()`
@@ -233,6 +244,8 @@ Implementation improvements usually fall into one of the following categories:
 
 ### SMP Support Improvements
 
+* The SMP EDF scheduler affinity handling was improved to ensure FIFO fairness.
+
 * The SMP scheduler framework was reworked to fix potential data corruption
   issues and priority group ordering violations.
 
@@ -292,6 +305,8 @@ Obsoleted architectures:
     * `arm/imxrt`
 
     * `arm/stm32h7`
+
+    * `arm/xilinx-zynqmp-rpu`
 
 * Significant updates to existing BSPs
 
