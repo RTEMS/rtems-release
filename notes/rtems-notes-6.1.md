@@ -283,14 +283,15 @@ The following improvements were made to the RTEMS Shell:
 Removed obsoleted architectures:
 
 * Epiphany
-
 * PowerPC SPE
 
 Obsoleted architectures:
 
-* V850
+* Blackfin (bfin)
+* Lattice Mico 32 (lm32)
 * SPARC64
 * SuperH (sh)
+* V850
 
 ## BSPs and Device Drivers
 
@@ -338,11 +339,31 @@ Obsoleted architectures:
 
 * Obsoleted BSPs
 
+    * `bfin/TLL6527M`
+    * `bfin/bf537Stamp`
+    * `bfin/eZKit533`
+    * `lm32/lm32_evr`
+    * `lm32/lm32_evr_gdbsim`
+    * `lm32/milkymist`
     * `m68k/gen68302`
-
+    * `m68k/mrm332`
     * `m68k/ods68302`
-
     * `powerpc/mbx8xx`
+    * `sparc64/niagara`
+    * `sparc64/usiii`
+    * `sh/gensh1`
+    * `sh/gensh2`
+    * `sh/gensh4`
+    * `sh/simsh1`
+    * `sh/simsh2`
+    * `sh/simsh2e`
+    * `sh/simsh4`
+    * `v850/v850e1sim`
+    * `v850/v850e2sim`
+    * `v850/v850e2v3sim`
+    * `v850/v850esim`
+    * `v850/v850essim`
+    * `v850/v850sim`
 
 * Drivers
 
