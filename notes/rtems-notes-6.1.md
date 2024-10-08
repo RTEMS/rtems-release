@@ -346,7 +346,20 @@ Obsoleted architectures:
     * `lm32/lm32_evr_gdbsim`
     * `lm32/milkymist`
     * `m68k/gen68302`
+    * `m68k/csb360`
+    * `m68k/gen68340`
+    * `m68k/gen68360`
+    * `m68k/gen68360_040`
+    * `m68k/pgh360`
+    * `m68k/mcf5206elite`
+    * `m68k/mcf52235`
+    * `m68k/mcf5225x`
     * `m68k/mrm332`
+    * `m68k/mvme147`
+    * `m68k/mvme147s`
+    * `m68k/mvme162`
+    * `m68k/mvme162lx`
+    * `m68k/mvme167`
     * `m68k/ods68302`
     * `powerpc/mbx8xx`
     * `sparc64/niagara`
