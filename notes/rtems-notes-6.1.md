@@ -299,15 +299,63 @@ Obsoleted architectures:
 
     * TBD
 
+* New Architectures
+
+    * aarch64
+    * microblaze
+
 * New BSPs
 
+    * `aarch64/a53_ilp32_qemu`
+    * `aarch64/a53_lp64_qemu`
+    * `aarch64/a72_ilp32_qemu`
+    * `aarch64/a72_lp64_qemu`
+    * `aarch64/raspberrypi4b`
+    * `aarch64/xilinx_versal_aiedge`
+    * `aarch64/xilinx_versal_qemu`
+    * `aarch64/xilinx_versal_vck190`
+    * `aarch64/xilinx_zynqmp_ilp32_qemu`
+    * `aarch64/xilinx_zynqmp_ilp32_zu3eg`
+    * `aarch64/xilinx_zynqmp_lp64_a53`
+    * `aarch64/xilinx_zynqmp_lp64_cfc400x`
+    * `aarch64/xilinx_zynqmp_lp64_qemu`
+    * `aarch64/xilinx_zynqmp_lp64_zu3eg`
+    * `arm/bbxm`
     * `arm/fvp`
-
-    * `arm/imxrt`
-
+    * `arm/fvp_r52`
+    * `arm/imxrt1052`
+    * `arm/imxrt1166-cm7-saltshaker`
+    * `arm/nucleo-h743zi`
+    * `arm/nucleo-h755zi`
     * `arm/stm32h7`
-
-    * `arm/xilinx-zynqmp-rpu`
+    * `arm/stm32h747i-disco`
+    * `arm/stm32h747i-disco-m4`
+    * `arm/stm32h750b-dk`
+    * `arm/stm32h757i-eval`
+    * `arm/stm32h757i-eval-m4`
+    * `arm/stm32h7b3i-dk`
+    * `arm/tms570lc4357_hdk`
+    * `arm/tms570lc4357_hdk_sdram`
+    * `arm/xilinx_zynq_microzed`
+    * `arm/xilinx_zynq_picozed`
+    * `arm/xilinx_zynq_pynq`
+    * `arm/xilinx_zynq_zybo`
+    * `arm/xilinx_zynq_zybo_z7`
+    * `arm/xilinx_zynqmp_mercuryxu5_rpu`
+    * `arm/zynqmp_rpu_lock_step`
+    * `arm/zynqmp_rpu_split_0`
+    * `arm/zynqmp_rpu_split_1`
+    * `microblaze/kcu105`
+    * `microblaze/kcu105_qemu`
+    * `powerpc/mvme2700`
+    * `riscv/noel32im`
+    * `riscv/noel32imafd`
+    * `riscv/noel64imac`
+    * `riscv/noel64imafd`
+    * `riscv/noel64imafdc`
+    * `riscv/kendrytek210`
+    * `riscv/mpfs64imafdc`
+    * `x86_64/amd64efi`
 
 * Significant updates to existing BSPs
 
@@ -315,27 +363,30 @@ Obsoleted architectures:
 
 * Removal of obsoleted BSPs
 
+    * `arm/tms570ls3137_hdk_with_loader`
+    * `epiphany/epiphany_sim`
     * `powerpc/brs5l`
-
     * `powerpc/brs6l`
-
     * `powerpc/dp2`
-
     * `powerpc/haleakala`
-
     * `powerpc/mpc5566evb_spe`
-
     * `powerpc/mpc5643l_dpu`
-
     * `powerpc/mpc5643l_evb`
-
     * `powerpc/mpc5674f_ecu508_app`
-
     * `powerpc/mpc5674f_ecu508_boot`
-
     * `powerpc/mpc5674fevb_spe`
-
     * `powerpc/mpc5674f_rsm6`
+    * `riscv/rv32i_clang`
+    * `riscv/rv32iac_clang`
+    * `riscv/rv32im_clang`
+    * `riscv/rv32imac_clang`
+    * `riscv/rv32imafc_clang`
+    * `riscv/rv32imafd_clang`
+    * `riscv/rv32imafdc_clang`
+    * `riscv/rv64imac_medany`
+    * `riscv/rv64imafd_medany`
+    * `riscv/rv64imafdc_clang`
+    * `riscv/rv64imafdc_medany`
 
 * Obsoleted BSPs
 
