@@ -470,3 +470,7 @@ Obsoleted architectures:
   options `-fprofile-info-section` and `-fprofile-update=atomic`.  The
   `libgcov` provides now the `__gcov_info_to_gcda()` function to dump the GCOV
   information.
+
+## Debugger Improvements 
+
+* `rtems-gdb` now supports auto-loading of Python - allowing for pretty-printing support. All C++ STL Structures are now pretty-printed, and support for additional structures (including RTEMS SCORE) can be added using Python.
