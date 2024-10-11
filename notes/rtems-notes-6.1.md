@@ -259,6 +259,8 @@ Implementation improvements usually fall into one of the following categories:
 
     * `CONFIGURE_MINIMUM_TASKS_WITH_USER_PROVIDED_STORAGE`
 
+    * `CONFIGURE_STACK_CHECKER_REPORTER`
+
 * Renamed configuration options:
 
     * TBD
