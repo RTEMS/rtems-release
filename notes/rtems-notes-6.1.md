@@ -316,12 +316,11 @@ Obsoleted architectures:
     * `aarch64/xilinx_versal_aiedge`
     * `aarch64/xilinx_versal_qemu`
     * `aarch64/xilinx_versal_vck190`
-    * `aarch64/xilinx_zynqmp_ilp32_qemu`
-    * `aarch64/xilinx_zynqmp_ilp32_zu3eg`
-    * `aarch64/xilinx_zynqmp_lp64_a53`
-    * `aarch64/xilinx_zynqmp_lp64_cfc400x`
-    * `aarch64/xilinx_zynqmp_lp64_qemu`
-    * `aarch64/xilinx_zynqmp_lp64_zu3eg`
+    * `aarch64/zynqmp_qemu_ilp32`
+    * `aarch64/zynqmp_apu_ilp32`
+    * `aarch64/zynqmp_apu`
+    * `aarch64/zynqmp_cfc400x`
+    * `aarch64/zynqmp_qemu`
     * `arm/bbxm`
     * `arm/fvp`
     * `arm/fvp_r52`
@@ -343,7 +342,6 @@ Obsoleted architectures:
     * `arm/xilinx_zynq_pynq`
     * `arm/xilinx_zynq_zybo`
     * `arm/xilinx_zynq_zybo_z7`
-    * `arm/xilinx_zynqmp_mercuryxu5_rpu`
     * `arm/zynqmp_rpu_lock_step`
     * `arm/zynqmp_rpu_split_0`
     * `arm/zynqmp_rpu_split_1`
