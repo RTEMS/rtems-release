@@ -313,9 +313,9 @@ Obsoleted architectures:
     * `aarch64/a72_ilp32_qemu`
     * `aarch64/a72_lp64_qemu`
     * `aarch64/raspberrypi4b`
-    * `aarch64/xilinx_versal_aiedge`
-    * `aarch64/xilinx_versal_qemu`
-    * `aarch64/xilinx_versal_vck190`
+    * `aarch64/versal_aiedge`
+    * `aarch64/versal_qemu`
+    * `aarch64/versal_vck190`
     * `aarch64/zynqmp_qemu_ilp32`
     * `aarch64/zynqmp_apu_ilp32`
     * `aarch64/zynqmp_apu`
