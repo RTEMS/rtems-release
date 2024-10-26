@@ -348,6 +348,7 @@ Obsoleted architectures:
     * `microblaze/kcu105`
     * `microblaze/kcu105_qemu`
     * `powerpc/mvme2700`
+    * `riscv/niosvc10lp`
     * `riscv/noel32im`
     * `riscv/noel32imafd`
     * `riscv/noel64imac`
