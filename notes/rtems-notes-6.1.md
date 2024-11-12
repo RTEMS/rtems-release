@@ -65,6 +65,10 @@ Implementation improvements usually fall into one of the following categories:
   This allows BSPs to pass the reset cause to a monitor or save it for the next
   boot sequence.
 
+* The event record version changed (`RTEMS_RECORD_THE_VERSION`).  You need the
+  corresponding host tools to work with the record data.  The
+  `rtems_record_client_init()` directive returns now a status code.
+
 #### API Additions
 
 * `RTEMS_ALIGN_UP()`
@@ -88,6 +92,8 @@ Implementation improvements usually fall into one of the following categories:
 * `rtems_interrupt_get_affinity()`
 
 * `rtems_interrupt_get_attributes()`
+
+* `rtems_interrupt_get_priority()`
 
 * `rtems_interrupt_handler_install()`
 
@@ -141,6 +147,8 @@ Implementation improvements usually fall into one of the following categories:
 
 * `rtems_interrupt_set_affinity()`
 
+* `rtems_interrupt_set_priority()`
+
 * `rtems_interrupt_vector_disable()`
 
 * `rtems_interrupt_vector_enable()`
@@ -152,6 +160,12 @@ Implementation improvements usually fall into one of the following categories:
 * `rtems_message_queue_construct()`
 
 * `RTEMS_PARTITION_ALIGNMENT`
+
+* `rtems_record_get_item_count_for_fetch()`
+
+* `rtems_record_fetch_initialize()`
+
+* `rtems_record_fetch()`
 
 * `rtems_task_construct()`
 
@@ -242,6 +256,10 @@ Implementation improvements usually fall into one of the following categories:
 * The obsoleted `RTEMS_MAXIMUM_NAME_LENGTH` define was removed. Use
   `sizeof(rtems_name)` instead.
 
+* The `rtems_record_drain()` was removed, use `rtems_record_fetch()` instead.
+
+* The `rtems_record_writev()` was removed, use `write()` instead.
+
 ### SMP Support Improvements
 
 * The SMP EDF scheduler affinity handling was improved to ensure FIFO fairness.
@@ -255,11 +273,19 @@ Implementation improvements usually fall into one of the following categories:
 
 * New configuration options:
 
+    * `CONFIGURE_IDLE_TASK_STORAGE_SIZE`
+
+    * `CONFIGURE_INIT_TASK_CONSTRUCT_STORAGE_SIZE`
+
     * `CONFIGURE_MAXIMUM_THREAD_LOCAL_STORAGE_SIZE`
 
     * `CONFIGURE_MINIMUM_TASKS_WITH_USER_PROVIDED_STORAGE`
 
+    * `CONFIGURE_RECORD_INTERRUPTS_ENABLED`
+
     * `CONFIGURE_STACK_CHECKER_REPORTER`
+
+    * `CONFIGURE_TASK_STACK_ALLOCATOR_FOR_IDLE`
 
 * Renamed configuration options:
 
