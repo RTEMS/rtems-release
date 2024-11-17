@@ -269,7 +269,9 @@ Implementation improvements usually fall into one of the following categories:
 
 ### Configuration Changes
 
-* TBD
+* Configuration changes:
+    * `CONFIGURE_FILESYSTEM_ALL` no longer includes `CONFIGURE_FILESYSTEM_NFS`.
+      Use `CONFIGURE_FILESYSTEM_NFS` explicitly if it is needed.
 
 * New configuration options:
 
