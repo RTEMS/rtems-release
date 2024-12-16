@@ -52,6 +52,7 @@ if [ ${version} -ge 6 ]; then
   rtems_packages="${rtems_packages} rtems/pkg/rtems-net-legacy"
   rtems_packages="${rtems_packages} rtems/pkg/rtems-lwip"
   rtems_packages="${rtems_packages} rtems/pkg/rtems-net-services"
+  rtems_packages="${rtems_packages} rtems/pkg/rtems-littlevgl"
 fi
 
 #
