@@ -78,6 +78,7 @@ rtems_net_services=yes
 rtems_docs=yes
 rtems_docs_required=yes
 rtems_docs_build=sphinx
+rtems_docs_singlehtml=no
 rtems_release_info_html=no
 rtems_release_notes=yes
 rtems_readme=README.md.in

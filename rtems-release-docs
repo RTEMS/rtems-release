@@ -121,7 +121,10 @@ echo "] Created: ${release}/${prefix}.tar.${comp_ext}"
 #
 mkdir install
 cd ${prefix}
- ./waf distclean configure --prefix=../install/${prefix} --pdf --singlehtml
+ if [ ${rtems_docs_singlehtml} == yes ]; then
+  config_singlehtml="--singlehtml"
+ fi
+ ./waf distclean configure --prefix=../install/${prefix} --pdf ${config_singlehtml}
  ./waf build install
  cd ..
 
@@ -143,12 +146,14 @@ cd install
   echo "] Creating PDF rtems-${release}-${manual}.pdf"
   mv $p ${top}/${release}/${docs}/rtems-${release}-${manual}.pdf
   #
-  # Create the single html manual
+  # Create the single html manual if enabled
   #
-  echo "] Creating SingleHTML rtems-${release}-${manual}.html.${comp_ext}"
-  mv ${base}/${manual}.html ${base}/rtems-${release}-${manual}.html
-  ${comp} ${base}/rtems-${release}-${manual}.html
-  mv ${base}/rtems-${release}-${manual}.html.${comp_ext} ${top}/${release}/${docs}/.
+  if [ ${rtems_docs_singlehtml} == yes ]; then
+   echo "] Creating SingleHTML rtems-${release}-${manual}.html.${comp_ext}"
+   mv ${base}/${manual}.html ${base}/rtems-${release}-${manual}.html
+   ${comp} ${base}/rtems-${release}-${manual}.html
+   mv ${base}/rtems-${release}-${manual}.html.${comp_ext} ${top}/${release}/${docs}/.
+  fi
   #
   # Tar the multi-page html and install.
   #
