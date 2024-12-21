@@ -73,6 +73,7 @@ rtems_deplayment=yes
 rtems_waf=yes
 rtems_examples=yes
 rtems_libbsd=yes
+rtems_lwip=yes
 rtems_net_legacy=yes
 rtems_net_services=yes
 rtems_docs=yes

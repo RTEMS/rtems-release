@@ -145,6 +145,7 @@ pkg_rtems_deployment=rtems/tools/rtems-deployment
 pkg_rtems_tools=rtems/tools/rtems-tools
 pkg_rtems=rtems/rtos/rtems
 pkg_rtems_libbsd=rtems/pkg/rtems-libbsd
+pkg_rtems_lwip=rtems/pkg/rtems-lwip
 pkg_rtems_net_legacy=rtems/pkg/rtems-net-legacy
 pkg_rtems_net_services=rtems/pkg/rtems-net-services
 pkg_rtems_examples=rtems/rtos/rtems-examples
@@ -162,6 +163,9 @@ if [ ${rtems_libbsd} = yes ]; then
 fi
 if [ ${rtems_net_legacy} = yes ]; then
  build ${pkg_rtems_libbsd} ${version} ${revision} ${release_url}
+fi
+if [ ${rtems_lwip} = yes ]; then
+ build ${pkg_rtems_lwip} ${version} ${revision} ${release_url}
 fi
 build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url} rtems-release-rsb-version
 if [ ${rtems_deployment} = yes ]; then
