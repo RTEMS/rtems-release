@@ -103,12 +103,9 @@ release_ver_rel_minor="${release_ver_rel}.0"
 cd ${prefix}
  if [ ${rtems_waf} = yes ]; then
   #
-  # Waf build system. Update RTEMS version and collect the BSPs
+  # Waf build system.
   #
   echo "] RTEMS Build System: waf"
-  f="VERSION"
-  echo "] Creating ${f}: ${release}"
-  echo -e "[RTEMS_VERSION]\nRTEMS_VERSION_CONTROL_KEY = ${release}" > ${f}
  else
   #
   # Autoconf build system. Bootstrap RTEMS
