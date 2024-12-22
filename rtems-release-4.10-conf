@@ -35,6 +35,7 @@
 rtems_deployment=no
 rtems_waf=no
 rtems_libbsd=no
+rtems_net_lwip=no
 rtems_net_legacy=no
 rtems_net_services=no
 rtems_docs=no

@@ -161,11 +161,14 @@ build ${pkg_rtems}                ${version} ${revision} ${release_url} rtems-re
 if [ ${rtems_libbsd} = yes ]; then
  build ${pkg_rtems_libbsd} ${version} ${revision} ${release_url}
 fi
-if [ ${rtems_net_legacy} = yes ]; then
- build ${pkg_rtems_libbsd} ${version} ${revision} ${release_url}
-fi
 if [ ${rtems_lwip} = yes ]; then
  build ${pkg_rtems_lwip} ${version} ${revision} ${release_url}
+fi
+if [ ${rtems_net_legacy} = yes ]; then
+ build ${pkg_rtems_legacy} ${version} ${revision} ${release_url}
+fi
+if [ ${rtems_net_services} = yes ]; then
+ build ${pkg_rtems_services} ${version} ${revision} ${release_url}
 fi
 build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url} rtems-release-rsb-version
 if [ ${rtems_deployment} = yes ]; then
