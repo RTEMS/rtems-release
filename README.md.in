@@ -109,9 +109,9 @@ Source Downloads                               | RTEMS Source Code
 [D-E-O]: docs/html/eng
 [D-E-P]: docs/rtems-@RELEASE@-eng.pdf
 [D-E-H]: docs/rtems-@RELEASE@-eng-html.tar.xz
-[D-N-O]: docs/html/networking
-[D-N-P]: docs/rtems-@RELEASE@-networking.pdf
-[D-N-H]: docs/rtems-@RELEASE@-networking-html.tar.xz
+[D-N-O]: docs/html/legacy-networking
+[D-N-P]: docs/rtems-@RELEASE@-legacy-networking.pdf
+[D-N-H]: docs/rtems-@RELEASE@-legacy-networking-html.tar.xz
 [D-S-O]: docs/html/shell
 [D-S-P]: docs/rtems-@RELEASE@-shell.pdf
 [D-S-H]: docs/rtems-@RELEASE@-shell-html.tar.xz
