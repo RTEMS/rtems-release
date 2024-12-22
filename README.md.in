@@ -23,8 +23,8 @@ This release directory contains the source code for the RTEMS @RELEASE@
 operating system and tools. All the documenation provided in HTML and PDF
 formats.
 
-Please drop by the Users mailing list (users@rtems.org) and let us know how
-you are using RTEMS. We love hearing about user projects.
+Please drop by our Discord server (https://www.rtems.org/discord) and let us
+know how you are using RTEMS. We love hearing about user projects.
 
 Many thanks to everyone who helped create this release.
 
@@ -56,7 +56,7 @@ Developer <https://gitlab.rtems.org/>
 
 [sources](sources)                         Source code for this release
 
-[rtems-@RELEASE@-release-notes][RN-H]  @R_SP@  HTML RTEMS Release notes
+[rtems-@RELEASE@-release-notes][RN-H]  @R_SP@   HTML RTEMS Release notes
 
 [rtems-@RELEASE@-release-notes.pdf][RN-P]  @R_SP@ PDF RTEMS Release notes
 
@@ -72,6 +72,9 @@ Developer <https://gitlab.rtems.org/>
 [S-T]: sources/rtems-tools-@RELEASE@.tar.xz
 [S-DOC]: sources/rtems-docs-@RELEASE@.tar.xz
 [S-BSD]: sources/rtems-libbsd-@RELEASE@.tar.xz
+[S-LWIP]: sources/rtems-lwip-@RELEASE@.tar.xz
+[S-NLEG]: sources/rtems-net-legacy-@RELEASE@.tar.xz
+[S-NSRV]: sources/rtems-net-servuces-@RELEASE@.tar.xz
 [S-EX]: sources/rtems-examples-@RELEASE@.tar.xz
 [S-CS]: sources/sha512sum.txt
 
@@ -84,6 +87,9 @@ Source Downloads                               | RTEMS Source Code
 [rtems-tools-@RELEASE@.tar.xz][S-T]            | RTEMS Tools
 [rtems-docs-@RELEASE@.tar.xz][S-DOC]           | RTEMS Documentation source
 [rtems-libbsd-@RELEASE@.tar.xz][S-BSD]         | RTEMS LibBSD
+[rtems-lwip-@RELEASE@.tar.xz][S-LWIP]          | RTEMS LwIP
+[rtems-net-legacy-@RELEASE@.tar.xz][S-NLEG]    | RTEMS Legacy Networking
+[rtems-net-services-@RELEASE@.tar.xz][S-NSRV]  | RTEMS Networking Services
 [rtems-examples-@RELEASE@.tar.xz][S-EX]        | RTEMS Examples
 [sources](sources)                             | All source code for this release
 [sha512sum.txt][S-CS]                          | SHA512 checksums for the sources directory
