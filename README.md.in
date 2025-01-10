@@ -74,7 +74,7 @@ Developer <https://gitlab.rtems.org/>
 [S-BSD]: sources/rtems-libbsd-@RELEASE@.tar.xz
 [S-LWIP]: sources/rtems-lwip-@RELEASE@.tar.xz
 [S-NLEG]: sources/rtems-net-legacy-@RELEASE@.tar.xz
-[S-NSRV]: sources/rtems-net-servuces-@RELEASE@.tar.xz
+[S-NSRV]: sources/rtems-net-services-@RELEASE@.tar.xz
 [S-EX]: sources/rtems-examples-@RELEASE@.tar.xz
 [S-CS]: sources/sha512sum.txt
 
