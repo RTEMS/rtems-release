@@ -155,27 +155,44 @@ pkg_rtems_docs=rtems/docs/rtems-docs
 # Package the RSB, must be before the kernel. The kernel worker script uses the
 # RSB to create autoconf and automake so it can bootstrap the kernel.
 #
+# Add the package to the top package list to be placed in the sources directory.
+#
+export top_packages=""
+export rtems_rsb_hash_pkgs=""
 build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url}
 build ${pkg_rtems_tools}          ${version} ${revision} ${release_url}
+top_packages="${top_packages} rtems-tools"
 build ${pkg_rtems}                ${version} ${revision} ${release_url} rtems-release-kernel
+top_packages="${top_packages} rtems"
 if [ ${rtems_libbsd} = yes ]; then
  build ${pkg_rtems_libbsd} ${version} ${revision} ${release_url}
+ top_packages="${top_packages} rtems-libbsd"
+ rtems_rsb_hash_pkgs="${rtems_rsb_hash_pkgs} rtems-libbsd"
 fi
 if [ ${rtems_lwip} = yes ]; then
  build ${pkg_rtems_lwip} ${version} ${revision} ${release_url}
+ top_packages="${top_packages} rtems-lwip"
+ rtems_rsb_hash_pkgs="${rtems_rsb_hash_pkgs} rtems-lwip"
 fi
 if [ ${rtems_net_legacy} = yes ]; then
- build ${pkg_rtems_legacy} ${version} ${revision} ${release_url}
+ build ${pkg_rtems_net_legacy} ${version} ${revision} ${release_url}
+ top_packages="${top_packages} rtems-net-legacy"
+ rtems_rsb_hash_pkgs="${rtems_rsb_hash_pkgs} rtems-net-legacy"
 fi
 if [ ${rtems_net_services} = yes ]; then
- build ${pkg_rtems_services} ${version} ${revision} ${release_url}
+ build ${pkg_rtems_net_services} ${version} ${revision} ${release_url}
+ top_packages="${top_packages} rtems-net-services"
+ rtems_rsb_hash_pkgs="${rtems_rsb_hash_pkgs} rtems-net-services"
 fi
 build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url} rtems-release-rsb-version
+top_packages="${top_packages} rtems-source-builder"
 if [ ${rtems_deployment} = yes ]; then
  build ${pkg_rtems_deployment} ${version} ${revision} ${release_url}
+ top_packages="${top_packages} rtems-deployment"
 fi
 if [ ${rtems_examples} = yes ]; then
  build ${pkg_rtems_examples} ${version} ${revision} ${release_url}
+ top_packages="${top_packages} rtems-examples"
 fi
 
 #

@@ -80,8 +80,6 @@ else
  fi
 fi
 
-top_packages="rtems-kernel rtems-libbsd rtems-lwip rtems-tools rtems-examples rtems"
-
 #
 # Work in a package specific directory in the release directory.
 #

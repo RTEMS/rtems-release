@@ -60,11 +60,9 @@ echo "] Package: ${package}"
 echo "] Release: ${release}"
 
 #
-# Conditional add libbsd for an RSB hash if enabled.
+# Conditional add an RSB hash if the package is enabled. Look in rtems-release.
 #
-if [ ${rtems_libbsd} = yes ]; then
- rtems_rsb_hash="${rtems_rsb_hash} rtems-libbsd"
-fi
+rtems_rsb_hash="${rtems_rsb_hash} ${rtems_rsb_hash_pkgs}"
 
 #
 # Get the release sources path and add it to the VERSION.

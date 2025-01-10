@@ -74,7 +74,7 @@ fi
 if [ ${rtems_git_repo} = yes ]; then
  git_remote=https://gitlab.rtems.org/${package_git_path}/${package}.git
  git_local=${package}-release-${release}.git
- git_submodules_excludes="freebsd-org"
+ git_submodules_excludes="freebsd-org lwip-upstream"
 fi
 
 workspace=ws-${package}
