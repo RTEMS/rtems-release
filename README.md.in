@@ -191,10 +191,10 @@ To build the tools, kernel and all packages for the Beagleboneblack:
 ~~~~~~~
 ../source-builder/sb-set-builder \
   --prefix=$HOME/development/rtems/@RELEASE@ \
-  @VERSION@/bsps/beagleboneblack
+  bsps/beagleboneblack
 ~~~~~~~
 
-If you encounter a problem please post to the user@rtems.org mailing list. You
+If you encounter a problem please post to the users@rtems.org mailing list. You
 can join the Users mailing at <https://lists.rtems.org/>.
 
 If you find a bug please raise an issue at https://gitlab.rtems.org/rtems/
