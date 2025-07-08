@@ -56,6 +56,11 @@ Implementation improvements usually fall into one of the following categories:
 
     * TBD
 
+### Source Builder
+
+All build sets depending on github.com, git.rtems.org, and devel.rtems.org have
+been migrated to use the appropriate resources on gitlab.rtems.org.
+
 ## RTEMS Shell Improvements
 
 The following improvements were made to the RTEMS Shell:
