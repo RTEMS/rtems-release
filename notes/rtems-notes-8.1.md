@@ -1,4 +1,4 @@
-## RTEMS 7.1 Release Notes
+## RTEMS 8.1 Release Notes
 
 ### RTEMS Improvements
 
@@ -56,11 +56,6 @@ Implementation improvements usually fall into one of the following categories:
 
     * TBD
 
-### Source Builder
-
-All build sets depending on github.com, git.rtems.org, and devel.rtems.org have
-been migrated to use the appropriate resources on gitlab.rtems.org.
-
 ## RTEMS Shell Improvements
 
 The following improvements were made to the RTEMS Shell:
@@ -69,18 +64,13 @@ The following improvements were made to the RTEMS Shell:
 
 ## General
 
-* The obsolete libmisc/serdbg was removed. Use libdebugger instead. This functionality
-  was not built as part of the 5 release series in anticipation of its removal.
+* TBD
 
 ## Architectures
 
 Removed obsoleted architectures:
 
-* Blackfin (bfin)
-* Lattice Mico 32 (lm32)
-* SPARC64
-* SuperH (sh)
-* V850
+* TBD
 
 Obsoleted architectures:
 
@@ -106,47 +96,11 @@ Obsoleted architectures:
 
 * Removal of obsoleted BSPs
 
-    * `bfin/TLL6527M`
-    * `bfin/bf537Stamp`
-    * `bfin/eZKit533`
-    * `lm32/lm32_evr`
-    * `lm32/lm32_evr_gdbsim`
-    * `lm32/milkymist`
-    * `m68k/gen68302`
-    * `m68k/csb360`
-    * `m68k/gen68340`
-    * `m68k/gen68360`
-    * `m68k/gen68360_040`
-    * `m68k/pgh360`
-    * `m68k/mcf5206elite`
-    * `m68k/mcf52235`
-    * `m68k/mcf5225x`
-    * `m68k/mrm332`
-    * `m68k/mvme147`
-    * `m68k/mvme147s`
-    * `m68k/mvme162`
-    * `m68k/mvme162lx`
-    * `m68k/mvme167`
-    * `m68k/ods68302`
-    * `sparc64/niagara`
-    * `sparc64/usiii`
-    * `sh/gensh1`
-    * `sh/gensh2`
-    * `sh/gensh4`
-    * `sh/simsh1`
-    * `sh/simsh2`
-    * `sh/simsh2e`
-    * `sh/simsh4`
-    * `v850/v850e1sim`
-    * `v850/v850e2sim`
-    * `v850/v850e2v3sim`
-    * `v850/v850esim`
-    * `v850/v850essim`
-    * `v850/v850sim`
+    * `powerpc/virtex` TODO
 
 * Obsoleted BSPs
 
-    * `powerpc/virtex`
+    * TBD
 
 * Drivers
 
