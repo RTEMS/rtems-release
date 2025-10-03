@@ -739,8 +739,6 @@ class rtems_gitlab:
 
 if __name__ == '__main__':
 
-    raise_error = False
-
     args = argparse.ArgumentParser()
 
     args.add_argument('-C',
@@ -805,6 +803,12 @@ if __name__ == '__main__':
                       help='Output directory (default: %(default)s)',
                       type=str,
                       default='out')
+    args.add_argument('-E',
+                      '--error-stacktrace',
+                      required=False,
+                      dest='error',
+                      help='Print a stacktrace for an error',
+                      action='store_true')
 
     opts = args.parse_args()
 
@@ -837,7 +841,7 @@ if __name__ == '__main__':
             if opts.pdf:
                 rtems.build_pdf(opts.milestone, opts.output)
         except Exception as e:
-            if raise_error:
+            if opts.error:
                 raise
             print('error: ' + str(e), file=sys.stderr)
             ec = 1

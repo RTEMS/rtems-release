@@ -109,10 +109,10 @@ class html_parser(html.parser.HTMLParser):
             self.write('* ')
         elif tag == 'code':
             self.write('``')
-        elif tag in ['span']:
+        elif tag in ['span', 'p']:
             pass
         else:
-            raise RuntimeError('invalid html tag')
+            raise RuntimeError('invalid html tag: ' + tag)
 
     def handle_endtag(self, tag):
         if tag == 'li':
@@ -132,7 +132,7 @@ class generator:
     md_comment_start = re.compile(r'<![-\S].*')
     md_comment_end = re.compile(r'.*[-\S]>')
     md_single_quote = re.compile(r'`(.*?)`')
-    md_url = re.compile(r'\[(.*?)\](\(([^()]|([()]))*\))')
+    md_url = re.compile(r'\[([^\]]+)\]\([^)]+\)')
     md_reference = re.compile(r'[\s"]+[\w/]*[@!#][\w]+')
     md_unicode = re.compile(r'&#(.*?);')
     section_chars = ['*', '=', '-', '`', "'", '.', '~', '*', '+', '^']
