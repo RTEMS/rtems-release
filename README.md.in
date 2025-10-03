@@ -56,7 +56,7 @@ Developer <https://gitlab.rtems.org/>
 
 [sources](sources)                         Source code for this release
 
-[rtems-@RELEASE@-release-notes][RN-H]  @R_SP@   HTML RTEMS Release notes
+[rtems-@RELEASE@-release-notes][RN-H]  @R_SP@ HTML RTEMS Release notes
 
 [rtems-@RELEASE@-release-notes.pdf][RN-P]  @R_SP@ PDF RTEMS Release notes
 

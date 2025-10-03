@@ -54,7 +54,6 @@ revision=$3
 release_url=$4
 toptop=$5
 
-. ${release_top}/rtems-release-package-lists
 . ${release_top}/rtems-release-version
 
 prefix=${package}-${release}
@@ -202,5 +201,6 @@ else
 fi
 tar cf - rtems-doxygen-${release} | \
     ${comp} > ../rtems-${release}-doxygen-html.tar.${comp_ext}
+rm -rf ${prefix}/doc
 
 exit 0

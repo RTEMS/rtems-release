@@ -63,85 +63,125 @@ stamped_tar=${prefix}-unstamped
 # submodule archives are merged into the main archive once we have collected
 # them all.
 #
+# A package may have one or more branches that need to be package.
+# If not defined there is only one the version based branch
 #
+# Get the package's branches and package names
+#
+var_pkg_branches=${package_prefix}_pkg_branches
+eval "pkg_branches=\${$var_pkg_branches}"
+var_pkg_names=${package_prefix}_pkg_names
+eval "pkg_names=\${$var_pkg_names}"
+# If there are no package branches use the default mapping
+if [ -z "${pkg_branches}" ]; then
+    # See rtems-release-package-start for the map branch macro
+    pkg_branches=$(rtems_map_branch ${package} ${version})
+    pkg_names=""
+fi
 cd ${git_local}
  echo "git fetch origin"
  git fetch origin
- # Map the branch name to a specific package and release branch name
- remote_branch=$(rtems_map_branch ${package} ${version})
- echo "] Package ${package} ${version}: ${remote_branch}"
- git_submodules=$(git submodule | awk '{print $2}')
+ cd ..   # ${git_local}
+echo "] Package ${package} ${version}: remote-branches='${pkg_branches}' pkg-names='${pkg_names}'"
+for remote_branch in ${pkg_branches}
+do
+cd ${git_local}
+  if [ -n "${pkg_names}" ]; then
+   pkg_name=$(echo ${pkg_names} | cut -f1 -d ' ')
+   if [ "${pkg_name}" = "none" ]; then
+    pkg_name=""
+   else
+    pkg_name="-${pkg_name}"
+   fi
+   pkg_names=$(echo ${pkg_names} | cut -f2- -d ' ')
+   pkg_prefix=${package}${pkg_name}-${release}
+  else
+   pkg_name=""
+   pkg_prefix=${prefix}
+  fi
+  echo "] Package ${package} ${version}: remote-branch=${remote_branch} pkg-name=${pkg_name}"
+  git_submodules=$(git submodule | awk '{print $2}')
+  if [ -n "${git_submodules}" ]; then
+   echo "] git submodules found ...."
+   echo "git submodules init"
+   git submodule init
+   echo "git checkout ${remote_branch}"
+   git checkout ${remote_branch}
+   for s in ${git_submodules}
+    do
+    ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
+    if [ "${ok}" != "no" ]; then
+     echo "git submodule update ${s}"
+     git submodule update ${s}
+     treeish=$(git ls-tree HEAD ${s} | awk '{print $3}')
+     cd ${s}
+      echo "git archive --format=tar --prefix=${pkg_prefix}/${s}/ ${treeish}"
+      git archive --format=tar --prefix=${pkg_prefix}/${s}/ ${treeish} > \
+                                          ../../${stamped_tar}-${s}.tar
+      cd ..   # ${s}
+    else
+     echo "git submodule ${s} excluded"
+    fi
+   done
+   echo "git checkout main"
+   git checkout main
+  fi
+  echo "git archive --format=tar --prefix=${pkg_prefix}/ ${remote_branch}"
+  git archive --format=tar --prefix=${pkg_prefix}/ ${remote_branch} > \
+                                          ../${stamped_tar}.tar
+  cd ..   # ${git_local}
+
+ if [ ! -f ${stamped_tar}.tar ]; then
+  echo "error: git archive failed, no tar file"
+  exit 1
+ fi
+ echo "tar xf ${stamped_tar}.tar"
+ tar xf ${stamped_tar}.tar
  if [ -n "${git_submodules}" ]; then
-  echo "] git submodules found ...."
-  echo "git submodules init"
-  git submodule init
-  echo "git checkout ${remote_branch}"
-  git checkout ${remote_branch}
   for s in ${git_submodules}
   do
-   ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
-   if [ "${ok}" != "no" ]; then
-    echo "git submodule update ${s}"
-    git submodule update ${s}
-    treeish=$(git ls-tree HEAD ${s} | awk '{print $3}')
-    cd ${s}
-     echo "git archive --format=tar --prefix=${prefix}/${s}/ ${treeish}"
-     git archive --format=tar --prefix=${prefix}/${s}/ ${treeish} > \
- 	                                  ../../${stamped_tar}-${s}.tar
-     cd ..   # ${s}
-   else
-    echo "git submodule ${s} excluded"
-   fi
+    ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
+    if [ "${ok}" != "no" ]; then
+     echo "tar xf ${stamped_tar}-${s}.tar"
+     tar xf ${stamped_tar}-${s}.tar
+    fi
   done
-  echo "git checkout main"
-  git checkout main
  fi
- echo "git archive --format=tar --prefix=${prefix}/ ${remote_branch}"
- git archive --format=tar --prefix=${prefix}/ ${remote_branch} > \
-                                          ../${stamped_tar}.tar
- cd ..   # ${git_local}
 
-if [ ! -f ${stamped_tar}.tar ]; then
- echo "error: git archive failed, no tar file"
- exit 1
-fi
-echo "tar xf ${stamped_tar}.tar"
-tar xf ${stamped_tar}.tar
-if [ -n "${git_submodules}" ]; then
- for s in ${git_submodules}
- do
-   ok=$(echo ${git_submodules_excludes} | sed -e "s/.*${s}.*/no/g")
-   if [ "${ok}" != "no" ]; then
-    echo "tar xf ${stamped_tar}-${s}.tar"
-    tar xf ${stamped_tar}-${s}.tar
-   fi
- done
-fi
+ cd ${pkg_prefix}
+  echo "] Creating VERSION: ${release}"
+  echo "[version]" > VERSION
+  echo "revision = ${release}" >> VERSION
+  cd .. # ${pkg_prefix}
 
-cd ${prefix}
- echo "] Creating VERSION: ${release}"
- echo "[version]" > VERSION
- echo "revision = ${release}" >> VERSION
- cd .. # ${prefix}
+ #
+ # Run the worker script if provided. It can perform any package
+ # specific set up functions. This is done before we finally
+ # package the release.
+ #
+ if [ -n "${worker}" ]; then
+  wk_name=$(basename ${worker})
+  echo "] Worker: ${wk_name}"
+  ${worker} ${package} ${version} ${revision} ${release_url} ${top}
+ fi
 
-#
-# Run the worker script if provided. It can perform any package
-# specific set up functions. This is done before we finally
-# package the release.
-#
-if [ -n "${worker}" ]; then
- wk_name=$(basename ${worker})
- echo "] Worker: ${wk_name}"
- ${worker} ${package} ${version} ${revision} ${release_url} ${top}
-fi
+ #
+ # The '..' is the release directory.
+ #
+ echo "tar cf - ${pkg_prefix}"
+ tar cf - ${pkg_prefix} | ${comp} > ../${pkg_prefix}.tar.${comp_ext}
 
-#
-# The '..' is the release directory.
-#
-echo "tar cf - ${prefix}"
-tar cf - ${prefix} | ${comp} > ../${prefix}.tar.${comp_ext}
+ echo "] Created: ${release}/${pkg_prefix}.tar.${comp_ext}"
 
-echo "] Created: ${release}/${prefix}.tar.${comp_ext}"
+ #
+ # Update the global exported variables
+ #
+ echo "# Package ${package} ${version}: remote-branches=\"${pkg_branches}\" pkg-names=\"${pkg_names}\"" >> ${pkg_list}
+ echo "rtems_packages=\"\${rtems_packages} ${pkg_prefix}\"" >> ${pkg_list}
+ if [ ${add_rsb_hash} = yes ]; then
+  echo "rtems_rsb_hash_pkgs=\"\${rtems_rsb_hash_pkgs} ${pkg_prefix}\"" >> ${pkg_list}
+ fi
+done
 
 #
 # Comman package end.

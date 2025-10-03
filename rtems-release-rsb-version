@@ -50,19 +50,18 @@ revision=$3
 release_url=$4
 toptop=$5
 
-. ${release_top}/rtems-release-package-lists
 . ${release_top}/rtems-release-version
+
+#
+# Get the RSB packages hashes creating doing this release
+#
+. ${pkg_list}
 
 prefix=${package}-${release}
 
 echo "] RTEMS Release RSB Versioning, v${release}"
 echo "] Package: ${package}"
 echo "] Release: ${release}"
-
-#
-# Conditional add an RSB hash if the package is enabled. Look in rtems-release.
-#
-rtems_rsb_hash="${rtems_rsb_hash} ${rtems_rsb_hash_pkgs}"
 
 #
 # Get the release sources path and add it to the VERSION.
@@ -78,9 +77,9 @@ checksum=sha512
 #
 echo >> ${prefix}/VERSION
 echo "[hashes]" >> ${prefix}/VERSION
-for p in ${rtems_rsb_hash}
+for p in ${rtems_rsb_hash_pkgs}
 do
-  file=${p}-${release}.tar.xz
+  file=${p}.tar.xz
   hash=$(${checksum} -q ${toptop}/${release}/${file})
   echo "${file} = ${checksum} ${hash}" >> ${prefix}/VERSION
 done

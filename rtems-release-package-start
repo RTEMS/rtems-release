@@ -46,11 +46,11 @@ if [ $# -lt 4 -o $# -gt 5 ]; then
 fi
 package=$(basename $1)
 package_git_path=$(dirname $1)
+package_prefix=$(echo ${package} | sed -e 's/-/_/g')
 version=$2
 revision=$3
 release_url=$4
 
-. ${release_top}/rtems-release-package-lists
 . ${release_top}/rtems-release-version
 
 if [ $# -eq 5 ]; then
@@ -104,6 +104,11 @@ cd ${release}
 rm -rf ${workspace}
 mkdir ${workspace}
 cd ${workspace}
+
+#
+# LibBSD Configuration, multiple branch packages
+#
+. ${release_top}/rtems-release-libbsd-conf
 
 #
 # Function to map package and version to branch names.

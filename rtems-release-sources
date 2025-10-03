@@ -53,8 +53,12 @@ release_url=$3
 
 package=rtems-source-builder
 
-. ${release_top}/rtems-release-package-lists
 . ${release_top}/rtems-release-version
+
+#
+# Get the RSB packages hashes creating doing this release
+#
+. ${pkg_list}
 
 prefix=${package}-${release}
 
@@ -70,6 +74,11 @@ echo "] Release: ${release}"
 # Source the source packages to package (haha)
 #
 . rtems-source-packages
+
+#
+# Get the top level packages creating doing this release
+#
+. ${pkg_list}
 
 if [ ! -e ${release} ]; then
  mkdir ${release}
@@ -123,14 +132,14 @@ cd ${workspace}
                                        ${pkgs}
      else
       echo "../source-builder/sb-get-sources "
-      ../source-builder/sb-get-sources --stop-on-error
+      ../source-builder/sb-get-sources
      fi
      #
      # Remove the top level packages because they do not have a VERSION file.
      #
      # These packages may or will be referencing git so remove those as well.
      #
-     for p in ${top_packages}
+     for p in ${rtems_packages}
      do
       rm -f $(find sources -name ${p}-\*.tar.\*)
       rm -rf sources/git/${p}.git
@@ -191,7 +200,7 @@ cd ${workspace}
   # Copy in any source not present on the server. If these are not copied in
   # the RSB does not find them.
   #
-  for p in ${top_packages}
+  for p in ${rtems_packages}
   do
    f="${top}/${release}/${p}-${release}.tar.${comp_ext}"
    if [ -f $f ]; then
@@ -208,16 +217,21 @@ cd ${workspace}
   #
   # Remove any copies from the sources.
   #
-  ls -1 ${sources}
-  for p in $(ls -1 | grep ${sources}/rtems-*.tar.${comp_ext})
+  echo "] Remove extra RTEMS packages from sources"
+  for p in $(ls -1 ${sources} | grep rtems[_-].*.tar.* | grep -v rtems-sis.*)
   do
-   echo "] Removing ${p}"
-   rm -f ${p}
+   echo "] Removing copy ${sources}/${p}"
+   rm -f ${sources}/${p}
   done
+  #
+  # Move the top level released packages to the sources.
+  #
+  echo "] Moving RTEMS packages to sources"
   for p in ${rtems_packages}
   do
-   if [ -e ${p}-${release}.tar.${comp_ext} ]; then
-    mv ${p}-${release}.tar.${comp_ext} ${sources}/${p}-${release}.tar.${comp_ext}
+   if [ -e ${p}.tar.${comp_ext} ]; then
+    echo "] Moving ${p} to sources"
+    mv ${p}.tar.${comp_ext} ${sources}/${p}.tar.${comp_ext}
    fi
   done
 

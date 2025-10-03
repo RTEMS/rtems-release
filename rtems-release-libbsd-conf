@@ -1,6 +1,7 @@
+#! /bin/sh
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2015,2016,2020 Chris Johns (chrisj@rtems.org)
+# Copyright 2022-2025 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -29,86 +30,26 @@
 #
 
 #
-# RTEMS Release Defaults.
+# Define the build branches for each version. LibBSD can release more
+# than one branch in a release.
 #
-
-#
-# Stop on any error
-#
-set -e
-
-#
-# Required to be set.
-#
-version="not-set"
-revision="not-set"
-release="not-set"
-
-#
-# The main branch release
-#
-main_version=6
-
-#
-# Keep the top where we start.
-#
-top=${PWD}
-
-#
-# The default checksum.
-#
-checksum=sha512
-
-#
-# Default compression and options plus file suffix.
-#
-comp="xz --threads=0"
-comp_ext=xz
-comp_tar=J
-
-#
-# Defaults.
-#
-rtems_deployment=yes
-rtems_waf=yes
-rtems_examples=yes
-rtems_libbsd=yes
-rtems_lwip=yes
-rtems_net_legacy=yes
-rtems_net_services=yes
-rtems_docs=yes
-rtems_docs_required=yes
-rtems_docs_build=sphinx
-rtems_docs_singlehtml=no
-rtems_release_info_html=no
-rtems_release_notes=yes
-rtems_readme=README.md.in
-rtems_readme_release_notes=
-rtems_release_conf=
-rtems_release_url=https://ftp.rtems.org/pub/rtems/releases
-rtems_packages=
-rtems_repos=
-
-#
-# Where we collect the sources and docs.
-#
-sources="sources"
-docs="docs"
-
-#
-# Common email addresses
-#
-email_build_to="build@rtems.org"
-email_announce_to="users@rtems.org,devel@rtems.org"
-
-#
-# Pandoc options
-#
-pandoc_std_opts="-f markdown_phpextra+grid_tables+multiline_tables+simple_tables+auto_identifiers+line_blocks+inline_code_attributes+fancy_lists+backtick_code_blocks --section-divs"
-
-#
-# The date stamp
-#
-now=$(date +"%d %B %Y")
-now_year=$(date +"%Y")
-export now now_year
+if [ ${rtems_libbsd} = yes ]; then
+ case ${version} in
+  5)
+    rtems_libbsd_pkg_branches="5-libbsd-12"
+    rtems_libbsd_pkg_names="libbsd"
+    rtems_libbsd_pkg_rsb_hash="rtems-libbsd-${release}"
+    ;;
+  6)
+    rtems_libbsd_pkg_branches="${version}-freebsd-12"
+    rtems_libbsd_pkg_branches="${rtems_libbsd_pkg_branches} ${version}-freebsd-14"
+    rtems_libbsd_pkg_names="none fb14"
+    rtems_libbsd_pkg_rsb_hash="rtems-libbsd-${release} rtems-libbsd-${release}-fb14"
+    ;;
+  *)
+    rtems_libbsd_pkg_branches="${version}-freebsd-14"
+    rtems_libbsd_pkg_names="fb14"
+    rtems_libbsd_pkg_rsb_hash="rtems-libbsd-${release}-fb14"
+    ;;
+ esac
+fi
