@@ -16,14 +16,14 @@ The Real-Time Executive for Multiprocessor Systems or RTEMS is an open source
 Real Time Operating System (RTOS) that supports open standard application
 programming interfaces (API) such as POSIX. It is used in space flight,
 medical, networking and many more embedded devices using processor
-architectures including ARM, PowerPC, SPARC, Intel, RISCV, MIPS, NIOS-II,
-Microblaze and more (a full list is provided at the end).
+architectures including AARCH, ARM, PowerPC, SPARC, Intel, RISCV, Microblaze
+and more (a full list is provided at the end).
 
 This release directory contains the source code for the RTEMS @RELEASE@
 operating system and tools. All the documenation provided in HTML and PDF
 formats.
 
-Please drop by our Discord server (https://www.rtems.org/discord) and let us
+Please drop by our Discord server (<https://www.rtems.org/discord>) and let us
 know how you are using RTEMS. We love hearing about user projects.
 
 Many thanks to everyone who helped create this release.
@@ -194,7 +194,7 @@ To build the tools, kernel and all packages for the Beagleboneblack:
   bsps/beagleboneblack
 ~~~~~~~
 
-If you encounter a problem please post to the users@rtems.org mailing list. You
-can join the Users mailing at <https://lists.rtems.org/>.
+If you encounter a problem please drop by our Discord server
+(<https://www.rtems.org/discord>) or port to <https://users.rtems.org/>.
 
-If you find a bug please raise an issue at https://gitlab.rtems.org/rtems/
+If you find a bug please raise an issue at <https://gitlab.rtems.org/rtems/>
