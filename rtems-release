@@ -133,8 +133,10 @@ build()
 if [ -e ${release} ]; then
  echo "] Removing existing release ${release}"
  rm -rf ${release}
- mkdir ${release}
 fi
+
+echo "] Making release ${release}"
+mkdir ${release}
 
 #
 # Package paths

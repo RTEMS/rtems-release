@@ -117,14 +117,7 @@ rtems_map_branch()
 {
  # $1=package
  # $2=version
- case "$1" in
-  rtems-libbsd)
-   branch="$2-freebsd-${rtems_libbsd_release}"
-   ;;
-  *)
-   branch="$2"
-   ;;
- esac
+ branch="$2"
  # Get the remote branch. If the release branch is not found use release's main.
  remote_branch=$(git branch --remote | grep "${branch}$" | tr -d "[:space:]")
  if [ -z "${remote_branch}" ]; then

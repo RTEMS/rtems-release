@@ -76,7 +76,7 @@ echo "] Release: ${release}"
 . rtems-source-packages
 
 #
-# Get the top level packages creating doing this release
+# Get the top level packages creating during this release
 #
 . ${pkg_list}
 
@@ -196,22 +196,7 @@ cd ${workspace}
    cd ..   # ${prefix}
   cd ..   # ${workspace}
 
-  #
-  # Copy in any source not present on the server. If these are not copied in
-  # the RSB does not find them.
-  #
-  for p in ${rtems_packages}
-  do
-   f="${top}/${release}/${p}-${release}.tar.${comp_ext}"
-   if [ -f $f ]; then
-    mv $f ${top}/${release}/${sources}/
-   fi
-  done
-  f="${top}/${release}/rtems-${release}.tar.${comp_ext}"
-  if [ -f $f ]; then
-   mv $f ${top}/${release}/${sources}/
-  fi
-
+  echo "Removing workspace: ${workspace}"
   rm -rf ${workspace}
 
   #
