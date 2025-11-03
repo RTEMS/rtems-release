@@ -37,6 +37,7 @@ Implementation improvements usually fall into one of the following categories:
 
 #### API Removals
 
+* `set_vector()` was removed. Use `rtems_interrupt_handler_install()` instead.
 * TBD
 
 ### Configuration Changes
