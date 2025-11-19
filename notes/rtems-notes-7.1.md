@@ -21,7 +21,8 @@ Implementation improvements usually fall into one of the following categories:
 
 ### API Changes
 
-* TBD
+* The value returned by `rtems_task_get_priority()` is 0 for tasks that are
+  scheduled with deadlines using the EDF, CBS, and EDF SMP schedulers.
 
 #### API Additions
 
@@ -43,7 +44,11 @@ Implementation improvements usually fall into one of the following categories:
 ### Configuration Changes
 
 * Configuration changes:
-    * TBD
+    * The EDF, CBS, and EDF SMP schedulers now use the
+      `CONFIGURE_MAXIMUM_PRIORITY` option to determine the valid priority
+      range. Previously the range was fixed as `[0, INT_MAX]`. The default is
+      now `[0, PRIORITY_DEFAULT_MAXIMUM]` consistent with other schedulers,
+      where `PRIORITY_DEFAULT_MAXIMUM` typically is 255.
 
 * New configuration options:
 
