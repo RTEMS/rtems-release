@@ -6,6 +6,8 @@
 
 [RTEMS Release] @chris
 *
+*.in @approvers/docs
+*.md @approvers/docs
 
 [Documentation] @approvers/docs
 *.in
