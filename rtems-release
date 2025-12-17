@@ -114,9 +114,7 @@ fi
 #
 # Does the release provide release notes?
 #
-if [ -f rtems-notes-${version}.md ]; then
- rtems_readme_release_notes=rtems-notes-${version}.md
-fi
+rtems_readme_release_notes=$(ls notes/rtems-notes-${version}.*.md | sort -r)
 
 #
 # This call lets us have smaller lines in this script.

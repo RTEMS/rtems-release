@@ -42,16 +42,23 @@ sp_len=$(expr ${rep_len} - ${rev_len} - 7)
 r_sp=$(head -c ${sp_len} < /dev/zero | tr '\0' ' ')
 echo "
 ## Architectures and BSPs
-" | \
-  cat ${rtems_readme} ${rtems_readme_release_notes} - ARCH-BSP.md | \
-  sed -e "s/@RELEASE_URL@/${escaped_release_path}/g" \
-      -e "s/@RELEASE@/${release}/g" \
-      -e "s/@VERSION@/${version}/g" \
-      -e "s/@REVISION@/${revision}/g" \
-      -e "s/@RTEMS_RELEASE_NOTES@/${release_notes}/g" \
-      -e "s/@R_SP@/${r_sp}/g" \
-      -e "s/@DATE@/${now}/g" > ${release}/contrib/README.md
-rm ARCH-BSP.md
+" > RN-ARCH-BSP.md
+cat ARCH-BSP.md >> RN-ARCH-BSP.md
+md_files="${rtems_readme} ${rtems_readme_release_notes} RN-ARCH-BSP.md"
+for md in ${md_files}; \
+do \
+ cat "${md}"; \
+ echo ""; \
+ echo ""; \
+done | \
+ sed -e "s/@RELEASE_URL@/${escaped_release_path}/g" \
+     -e "s/@RELEASE@/${release}/g" \
+     -e "s/@VERSION@/${version}/g" \
+     -e "s/@REVISION@/${revision}/g" \
+     -e "s/@RTEMS_RELEASE_NOTES@/${release_notes}/g" \
+     -e "s/@R_SP@/${r_sp}/g" \
+     -e "s/@DATE@/${now}/g" > ${release}/contrib/README.md
+rm ARCH-BSP.md RN-ARCH-BSP.md
 
 title="RTEMS ${version} Embedded Realtime Operating System"
 

@@ -51,7 +51,6 @@ title="RTEMS Release Package"
 #
 # Clone the repo and then check if there are any submodules.
 #
-set -x
 echo "git clone ${git_remote} ${git_local}"
 git clone ${git_remote} ${git_local}
 
