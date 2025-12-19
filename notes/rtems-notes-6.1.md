@@ -30,11 +30,11 @@ Implementation improvements usually fall into one of the following categories:
   `RTEMS_INVALID_SIZE` instead of `RTEMS_INVALID_NUMBER`.
 
 * If time-of-day argument is `NULL`, then `rtems_timer_fire_when()`,
-  `rtems_timer_server_fire_when(), and `rtems_task_wake_when()` return
+  `rtems_timer_server_fire_when()`, and `rtems_task_wake_when()` return
   `RTEMS_INVALID_ADDRESS` instead of `RTEMS_INVALID_CLOCK`.
 
 * The time-of-day arguments in `rtems_timer_fire_when()`,
-  `rtems_timer_server_fire_when(), and `rtems_task_wake_when()` were
+  `rtems_timer_server_fire_when()`, and `rtems_task_wake_when()` were
   constified.
 
 * If the entry point is `NULL`, then `rtems_task_start()` returns now
@@ -291,17 +291,17 @@ Implementation improvements usually fall into one of the following categories:
 
 * Renamed configuration options:
 
-    * TBD
+    * See issues and MRs
 
 * Removed configuration options:
 
-    * TBD
+    * See issues and MRs
 
 ## RTEMS Shell Improvements
 
 The following improvements were made to the RTEMS Shell:
 
-* TBD
+  * See issues and MRs
 
 ## General
 
@@ -327,7 +327,7 @@ Obsoleted architectures:
 
 * General
 
-    * TBD
+    * See issues and MRs
 
 * New Architectures
 
@@ -388,7 +388,7 @@ Obsoleted architectures:
 
 * Significant updates to existing BSPs
 
-    * `ARCH/BSP`: TBD
+    * `ARCH/BSP`: See issues and MRs
 
 * Removal of obsoleted BSPs
 
@@ -460,7 +460,7 @@ Obsoleted architectures:
 
 * Drivers
 
-    * TBD
+    * See issues and MRs
 
 ## Newlib Changes
 
