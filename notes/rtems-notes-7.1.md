@@ -107,6 +107,7 @@ Obsoleted architectures:
 * New BSPs
 
     * `arm/efm32gg11`
+    * `aarch64/rk3399`
 
 * Significant updates to existing BSPs
 
