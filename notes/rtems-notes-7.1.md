@@ -30,7 +30,8 @@ Implementation improvements usually fall into one of the following categories:
 
 #### API Implementation Improvements
 
-* TBD
+* The `stringto*` utility methods now return `RTEMS_INVALID_ADDRESS` when
+the input string is NULL.
 
 #### API Deprecations
 
