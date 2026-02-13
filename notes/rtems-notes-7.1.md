@@ -92,7 +92,8 @@ Removed obsoleted architectures:
 
 Obsoleted architectures:
 
-* TBD
+* NIOS2
+* aarch64 ilp32 variant
 
 ## BSPs and Device Drivers
 
@@ -108,6 +109,13 @@ Obsoleted architectures:
 
     * `arm/efm32gg11`
     * `aarch64/rk3399`
+    * `aarch64/raspberry5`
+    * `aarch64/xen`
+    * `arm/efm32gg11`
+    * `arm/stm32f446ze`
+    * `arm/nucleo-h753zi`
+    * `arm/stm32u5-grisp-nano`
+    * `arm/xilinx-versal-rpu`
 
 * Significant updates to existing BSPs
 
@@ -137,6 +145,7 @@ Obsoleted architectures:
     * `m68k/mvme162lx`
     * `m68k/mvme167`
     * `m68k/ods68302`
+    * `powerpc/mvme5500 (use beatnik)`
     * `sparc64/niagara`
     * `sparc64/usiii`
     * `sh/gensh1`
