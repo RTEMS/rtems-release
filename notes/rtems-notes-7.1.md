@@ -107,7 +107,6 @@ Obsoleted architectures:
 
 * New BSPs
 
-    * `arm/efm32gg11`
     * `aarch64/rk3399`
     * `aarch64/raspberry5`
     * `aarch64/xen`
