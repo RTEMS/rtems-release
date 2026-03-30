@@ -36,7 +36,7 @@
 if [ ${rtems_libbsd} = yes ]; then
  case ${version} in
   5)
-    rtems_libbsd_pkg_branches="5-libbsd-12"
+    rtems_libbsd_pkg_branches="5-freebsd-12"
     rtems_libbsd_pkg_names="libbsd"
     rtems_libbsd_pkg_rsb_hash="rtems-libbsd-${release}"
     ;;
