@@ -273,7 +273,9 @@ class generator:
                   widths: list[int] = None) -> None:
         cols = [len(r) for r in self.table]
         if len(set(cols)) != 1:
-            raise RuntimeError('invalid table')
+            raise RuntimeError(
+                'invalid table: different number of cols ({}), tabl={}'.format(
+                    cols, self.table))
         cols = cols[0]
         if mode == 'simple':
             dashes = ''
@@ -551,7 +553,7 @@ class generator:
                                 self.table_row()
                             add_row = True
                             for col in row:
-                                if col.startswith('---'):
+                                if col.startswith('--'):
                                     heading = True
                                     add_row = False
                                 else:
