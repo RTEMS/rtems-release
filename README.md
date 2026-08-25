@@ -54,7 +54,8 @@ systems.
    pip install sphinx sphinxcontrib-bibtex sphinx_inline_tabs \
                myst_parser \
                furo \
-               python-gitlab
+               python-gitlab \
+               sphinx_inline_tabs
    ```
 
 4. Install `npm` and the install the HTML inliner:
