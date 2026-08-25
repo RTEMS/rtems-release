@@ -69,6 +69,12 @@ stamped_tar=${prefix}-unstamped
 # Get the package's branches and package names
 #
 cd ${git_local}
+ var_pkg_main=${package_prefix}_pkg_main
+ eval "pkg_main=\${$var_pkg_main}"
+ # If there is no package main use main
+ if [ -z "${pkg_main}" ]; then
+   pkg_main="main"
+ fi
  var_pkg_branches=${package_prefix}_pkg_branches
  eval "pkg_branches=\${$var_pkg_branches}"
  var_pkg_names=${package_prefix}_pkg_names
@@ -124,8 +130,8 @@ cd ${git_local}
      echo "git submodule ${s} excluded"
     fi
    done
-   echo "git checkout main"
-   git checkout main
+   echo "git checkout ${pkg_main}"
+   git checkout ${pkg_main}
   fi
   echo "git archive --format=tar --prefix=${pkg_prefix}/ ${remote_branch}"
   git archive --format=tar --prefix=${pkg_prefix}/ ${remote_branch} > \

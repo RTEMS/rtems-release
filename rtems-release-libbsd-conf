@@ -34,6 +34,7 @@
 # than one branch in a release.
 #
 if [ ${rtems_libbsd} = yes ]; then
+ rtems_libbsd_pkg_main="freebsd-current"
  case ${version} in
   5)
     rtems_libbsd_pkg_branches="5-freebsd-12"
