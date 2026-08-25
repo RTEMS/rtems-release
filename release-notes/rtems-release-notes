@@ -77,7 +77,7 @@ def milestone_major_minor_rev(
     if milestone != 'all' and milestone is not None:
         ss = milestone.split('.')
         if len(ss) > 3:
-            raise InvalidValue('milestone has too many dots: ' + milestone)
+            raise ValueError('milestone has too many dots: ' + milestone)
         try:
             major = int(ss[0])
         except:
@@ -92,6 +92,8 @@ def milestone_major_minor_rev(
                     revision = int(ss[2])
                 except:
                     pass
+    if major is None or minor is None:
+        raise ValueError('invalid milestone: ' + milestone)
     return major, minor, revision
 
 
@@ -277,6 +279,8 @@ class rtems_gitlab:
         print()
         for milestone in self.rtems_milestones:
             major, minor, revision = milestone_major_minor_rev(self.milestone)
+            if major is None or minor is None:
+                raise ValueError('invalid milestone: ' + self.milestone)
             title = milestone['title']
             add = False
             if self.milestone == 'all':

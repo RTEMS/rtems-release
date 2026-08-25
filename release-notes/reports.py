@@ -361,7 +361,7 @@ class generator:
                 code = '|md_' + str(base) + '_' + uc + '|'
                 xml = '&#' + uc + ';'
                 codes[code] = hex(int(uc))
-                md = md.replace(xml, '\ ' + code + '\ ')
+                md = md.replace(xml, '\\ ' + code + '\\ ')
             return codes, md
 
         def _get_link(self, line: str, url: url_meta) -> None:
