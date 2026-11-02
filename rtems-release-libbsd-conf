@@ -41,12 +41,6 @@ if [ ${rtems_libbsd} = yes ]; then
     rtems_libbsd_pkg_names="libbsd"
     rtems_libbsd_pkg_rsb_hash="rtems-libbsd-${release}"
     ;;
-  6)
-    rtems_libbsd_pkg_branches="${version}-freebsd-12"
-    rtems_libbsd_pkg_branches="${rtems_libbsd_pkg_branches} ${version}-freebsd-14"
-    rtems_libbsd_pkg_names="none fb14"
-    rtems_libbsd_pkg_rsb_hash="rtems-libbsd-${release} rtems-libbsd-${release}-fb14"
-    ;;
   *)
     rtems_libbsd_pkg_branches="${version}-freebsd-14"
     rtems_libbsd_pkg_names="fb14"

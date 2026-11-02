@@ -112,7 +112,7 @@ cd ${prefix}
  cd ..
 
 echo "tar cf - ${prefix}"
-tar cf - ${prefix} | ${comp} > ../${prefix}.tar.${comp_ext}
+tar ${tar_ownership} -cf - ${prefix} | ${comp} > ../${prefix}.tar.${comp_ext}
 
 echo "] Created: ${release}/${prefix}.tar.${comp_ext}"
 
@@ -134,7 +134,7 @@ cd ${prefix}
 mkdir ${top}/${release}/${docs}
 cd install
  echo "] Creating DOC all rtems-${release}-docs-all.tar.${comp_ext}"
- tar cf - * | \
+ tar ${tar_ownership} -cf - * | \
   ${comp} > ${top}/${release}/${docs}/rtems-${release}-docs-all.tar.${comp_ext}
  for p in $(find . -name \*.pdf)
  do
@@ -158,7 +158,7 @@ cd install
   # Tar the multi-page html and install.
   #
   echo "] Creating HTML rtems-${release}-${manual}-html.tar.${comp_ext}"
-  tar cf - ${base}/${manual} | \
+  tar ${tar_ownership} -cf - ${base}/${manual} | \
       ${comp} > ${top}/${release}/${docs}/rtems-${release}-${manual}-html.tar.${comp_ext}
  done
  cd ..

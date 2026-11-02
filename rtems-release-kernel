@@ -199,7 +199,7 @@ if [ ${version} -lt 5 ]; then
 else
  cp -r ${prefix}/doc/html rtems-doxygen-${release}
 fi
-tar cf - rtems-doxygen-${release} | \
+tar ${tar_ownership} -cf - rtems-doxygen-${release} | \
     ${comp} > ../rtems-${release}-doxygen-html.tar.${comp_ext}
 rm -rf ${prefix}/doc
 

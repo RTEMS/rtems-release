@@ -112,3 +112,9 @@ pandoc_std_opts="-f markdown_phpextra+grid_tables+multiline_tables+simple_tables
 now=$(date +"%d %B %Y")
 now_year=$(date +"%Y")
 export now now_year
+
+#
+# Tar ownership
+#
+# See the first entry in the git log for the number
+tar_ownership="--owner=rtems:1995 --group=rtems:1992"

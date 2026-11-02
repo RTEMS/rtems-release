@@ -277,4 +277,11 @@ cd ${release}
 
  cd ..
 
+release_tar="rtems-${release}.tar.xz"
+echo "Package release into ${release_tar}"
+# See the first entry in the git log for the number
+tar ${tar_ownership} -jcf ${release_tar} ${release}
+
+echo "Finished ${release}"
+
 exit 0

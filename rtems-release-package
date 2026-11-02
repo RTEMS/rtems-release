@@ -175,8 +175,8 @@ cd ${git_local}
  #
  # The '..' is the release directory.
  #
- echo "tar cf - ${pkg_prefix}"
- tar cf - ${pkg_prefix} | ${comp} > ../${pkg_prefix}.tar.${comp_ext}
+ echo "tar ${tar_ownership} -cf - ${pkg_prefix}"
+ tar ${tar_ownership} -cf - ${pkg_prefix} | ${comp} > ../${pkg_prefix}.tar.${comp_ext}
 
  echo "] Created: ${release}/${pkg_prefix}.tar.${comp_ext}"
 
