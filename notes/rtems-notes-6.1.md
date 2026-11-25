@@ -297,18 +297,18 @@ Implementation improvements usually fall into one of the following categories:
 
     * See issues and MRs
 
-## RTEMS Shell Improvements
+### RTEMS Shell Improvements
 
 The following improvements were made to the RTEMS Shell:
 
   * See issues and MRs
 
-## General
+### General
 
 * The obsolete libmisc/serdbg was removed. Use libdebugger instead. This functionality
   was not built as part of the 5 release series in anticipation of its removal.
 
-## Architectures
+### Architectures
 
 Removed obsoleted architectures:
 
@@ -323,7 +323,7 @@ Obsoleted architectures:
 * SuperH (sh)
 * V850
 
-## BSPs and Device Drivers
+### BSPs and Device Drivers
 
 * General
 
@@ -462,17 +462,17 @@ Obsoleted architectures:
 
     * See issues and MRs
 
-## Newlib Changes
+### Newlib Changes
 
 * Add `futimens()` and `utimensat()`
 
-## Ecosystem
+### Ecosystem
 
 * Improved GCOV support for RTEMS and embedded systems in general.  See GCC
   options `-fprofile-info-section` and `-fprofile-update=atomic`.  The
   `libgcov` provides now the `__gcov_info_to_gcda()` function to dump the GCOV
   information.
 
-## Debugger Improvements 
+### Debugger Improvements
 
 * `rtems-gdb` now supports auto-loading of Python - allowing for pretty-printing support. All C++ STL Structures are now pretty-printed, and support for additional structures (including RTEMS SCORE) can be added using Python.

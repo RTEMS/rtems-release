@@ -112,9 +112,17 @@ if [ ! $(command -v pandoc) ]; then
 fi
 
 #
-# Does the release provide release notes?
+# Does the release provide release notes? Make a complete set
+# file names for version present and not present.
 #
-rtems_readme_release_notes=$(ls notes/rtems-notes-${version}.*.md | sort -r)
+rel_suffix=${revision#"${revision%%[!0-9]*}"}
+rel=${revision%"$rel_suffix"}
+rn=
+while [ "${rel}" -gt 0 ]; do
+ rn="${rn} ${rn:+}notes/rtems-notes-${version}.${rel}.md"
+ rel=$((rel - 1))
+done
+rtems_readme_release_notes=${rn}
 
 #
 # This call lets us have smaller lines in this script.
@@ -169,38 +177,38 @@ export add_rsb_hash=yes
 build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url}
 build ${pkg_rtems_tools}          ${version} ${revision} ${release_url}
 build ${pkg_rtems}                ${version} ${revision} ${release_url} rtems-release-kernel
-if [ ${rtems_libbsd} = yes ]; then
+if [ ${rtems_libbsd} = ${rtems_info_test}yes ]; then
  build ${pkg_rtems_libbsd} ${version} ${revision} ${release_url}
 fi
-if [ ${rtems_lwip} = yes ]; then
+if [ ${rtems_lwip} = ${rtems_info_test}yes ]; then
  build ${pkg_rtems_lwip} ${version} ${revision} ${release_url}
 fi
-if [ ${rtems_net_legacy} = yes ]; then
+if [ ${rtems_net_legacy} = ${rtems_info_test}yes ]; then
  build ${pkg_rtems_net_legacy} ${version} ${revision} ${release_url}
 fi
-if [ ${rtems_net_services} = yes ]; then
+if [ ${rtems_net_services} = ${rtems_info_test}yes ]; then
  build ${pkg_rtems_net_services} ${version} ${revision} ${release_url}
 fi
 add_rsb_hash=no
 build ${pkg_rtems_source_builder} ${version} ${revision} ${release_url} rtems-release-rsb-version
-if [ ${rtems_deployment} = yes ]; then
+if [ ${rtems_deployment} = ${rtems_info_test}yes ]; then
  build ${pkg_rtems_deployment} ${version} ${revision} ${release_url}
 fi
-if [ ${rtems_examples} = yes ]; then
+if [ ${rtems_examples} = ${rtems_info_test}yes ]; then
  build ${pkg_rtems_examples} ${version} ${revision} ${release_url}
 fi
 
 #
 # Documentation.
 #
-if [ ${rtems_docs} = yes ]; then
+if [ ${rtems_docs} = ${rtems_info_test}yes ]; then
  ./rtems-release-docs ${pkg_rtems_docs} ${version} ${revision} ${release_url}
 fi
 
 #
 # Release notes.
 #
-if [ ${rtems_release_notes} = yes ]; then
+if [ ${rtems_release_notes} = ${rtems_info_test}yes ]; then
  ./rtems-release-notes rtems-release-notes ${version} ${revision} ${release_url}
 fi
 
@@ -208,7 +216,9 @@ fi
 # The sources is always last.
 #
 echo "] Collect tools sources"
-./rtems-release-sources ${version} ${revision} ${release_url}
+if [ ${rtems_get_sources} = ${rtems_info_test}yes ]; then
+ ./rtems-release-sources ${version} ${revision} ${release_url}
+fi
 
 #
 # Make the contrib directory
@@ -249,12 +259,14 @@ for f in README.md \
 	 rtems-release-version \
 	 rtems-source-packages
 do
- if [ ! -e $(dirname ${f}) ]; then
-  mkdir -p $(dirname ${f})
+ if [ -f "${f}" ]; then
+  if [ ! -e $(dirname ${f}) ]; then
+   mkdir -p $(dirname ${f})
+  fi
+  cp ${f} ${release}/contrib/rtems-release/
+  csum=$(${checksum} -q ${f})
+  echo "${csum} ${f}" >> ${release}/contrib/rtems-release/${checksum}sum.txt
  fi
- cp ${f} ${release}/contrib/rtems-release/
- csum=$(${checksum} -q ${f})
- echo "${csum} ${f}" >> ${release}/contrib/rtems-release/${checksum}sum.txt
 done
 
 #

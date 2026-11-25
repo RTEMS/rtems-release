@@ -68,20 +68,20 @@ the input string is NULL.
 All build sets depending on github.com, git.rtems.org, and devel.rtems.org have
 been migrated to use the appropriate resources on gitlab.rtems.org.
 
-## RTEMS Shell Improvements
+### RTEMS Shell Improvements
 
 The following improvements were made to the RTEMS Shell:
 
 * TBD
 
-## General
+### General
 
 * The obsolete libmisc/serdbg was removed. Use libdebugger instead. This functionality
   was not built as part of the 5 release series in anticipation of its removal.
 
 * Add setup instructions for [NixOS](https://nixos.org/) to users guide.
 
-## Architectures
+### Architectures
 
 Removed obsoleted architectures:
 
@@ -96,7 +96,7 @@ Obsoleted architectures:
 * NIOS2
 * aarch64 ilp32 variant
 
-## BSPs and Device Drivers
+### BSPs and Device Drivers
 
 * General
 
@@ -170,14 +170,14 @@ Obsoleted architectures:
 
     * TBD
 
-## Newlib Changes
+### Newlib Changes
 
 * TBD
 
-## Ecosystem
+### Ecosystem
 
 * TBD
 
-## Debugger Improvements 
+## Debugger Improvements
 
 * TBD

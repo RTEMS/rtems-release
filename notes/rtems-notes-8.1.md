@@ -56,17 +56,17 @@ Implementation improvements usually fall into one of the following categories:
 
     * TBD
 
-## RTEMS Shell Improvements
+### RTEMS Shell Improvements
 
 The following improvements were made to the RTEMS Shell:
 
 * TBD
 
-## General
+### General
 
 * TBD
 
-## Architectures
+### Architectures
 
 Removed obsoleted architectures:
 
@@ -76,7 +76,7 @@ Obsoleted architectures:
 
 * TBD
 
-## BSPs and Device Drivers
+### BSPs and Device Drivers
 
 * General
 
@@ -106,14 +106,14 @@ Obsoleted architectures:
 
     * TBD
 
-## Newlib Changes
+### Newlib Changes
 
 * TBD
 
-## Ecosystem
+### Ecosystem
 
 * TBD
 
-## Debugger Improvements 
+### Debugger Improvements
 
 * TBD

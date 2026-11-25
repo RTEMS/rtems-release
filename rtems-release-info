@@ -1,6 +1,6 @@
 #
 # RTEMS Tools Project (http://www.rtems.org/)
-# Copyright 2020 Chris Johns (chrisj@rtems.org)
+# Copyright 2020-2026 Chris Johns (chrisj@rtems.org)
 # All rights reserved.
 #
 # This file is part of the RTEMS Tools package in 'rtems-tools'.
@@ -34,41 +34,69 @@
 . ${release_top}/rtems-release-path
 
 #
-# Create the README.md and from that README.txt and index.html
+# Calculate @R_SP@ column padding and assemble README.md (and plain-text README.txt)
 #
 rep_len=$(echo "@RELEASE@@R_SP@" | wc -c)
 rev_len=$(echo "${release}" | wc -c)
 sp_len=$(expr ${rep_len} - ${rev_len} - 7)
 r_sp=$(head -c ${sp_len} < /dev/zero | tr '\0' ' ')
-echo "
-## Architectures and BSPs
-" > RN-ARCH-BSP.md
-cat ARCH-BSP.md >> RN-ARCH-BSP.md
-md_files="${rtems_readme} ${rtems_readme_release_notes} RN-ARCH-BSP.md"
-for md in ${md_files}; \
-do \
- cat "${md}"; \
- echo ""; \
- echo ""; \
+
+md_files="${rtems_readme} ${rtems_readme_release_notes}"
+for md in ${md_files}; do
+ if [ -f "${md}" ]; then
+  cat "${md}"
+  echo ""
+  echo ""
+ else
+  ver=${md#notes/rtems-notes-}
+  ver=${ver%.md}
+  echo "## RTEMS ${ver} Release Notes"
+  echo ""
+  echo "See [RTEMS ${release} Release Notes](rtems-${release}-release-notes)."
+  echo ""
+ fi
 done | \
- sed -e "s/@RELEASE_URL@/${escaped_release_path}/g" \
-     -e "s/@RELEASE@/${release}/g" \
-     -e "s/@VERSION@/${version}/g" \
-     -e "s/@REVISION@/${revision}/g" \
-     -e "s/@RTEMS_RELEASE_NOTES@/${release_notes}/g" \
-     -e "s/@R_SP@/${r_sp}/g" \
-     -e "s/@DATE@/${now}/g" > ${release}/contrib/README.md
-rm ARCH-BSP.md RN-ARCH-BSP.md
+ sed -e "s|@RELEASE_URL@|${escaped_release_path}|g" \
+     -e "s|@RELEASE@|${release}|g" \
+     -e "s|@VERSION@|${version}|g" \
+     -e "s|@REVISION@|${revision}|g" \
+     -e "s|@RTEMS_RELEASE_NOTES@|${release_notes}|g" \
+     -e "s|@R_SP@|${r_sp}|g" \
+     -e "s|@DATE@|${now}|g" > "${release}/contrib/README-base.md"
+
+# Assemble full README.md (including ARCH-BSP.md)
+{
+  cat ${release}/contrib/README-base.md
+  echo "## Architectures and BSPs"
+  echo ""
+  cat ARCH-BSP.md
+} > ${release}/contrib/README.md
 
 title="RTEMS ${version} Embedded Realtime Operating System"
 
-pandoc_std_opts="-f markdown_phpextra+grid_tables+multiline_tables+simple_tables+auto_identifiers --section-divs"
+# Generate clean, formatted plain-text README.txt (without Pandoc)
+${release_top}/rtems-release-gen-readme.py \
+  --title "${title}" \
+  --markdown "${release}/contrib/README.md" \
+  --output "${release}/README.txt"
 
-echo "${title}" > ${release}/README.txt
-echo >> ${release}/README.txt
-pandoc ${release}/contrib/README.md \
-       ${pandoc_std_opts} -t plain >> ${release}/README.txt
+# Generate Svelte Single-File Static Release Coverpage (${release}/index.html)
+site_template="${release_top}/rtems-release-site"
+site_build_dir="${release}/contrib/site-build"
 
-pandoc ${release}/contrib/README.md \
-       ${pandoc_std_opts} --toc -M title="${title}" -t html \
-       --include-in-header=rtems-release-notes.css > ${release}/index.html
+${release_top}/rtems-release-gen-coverpage.py \
+  --title "${title}" \
+  --release "${release}" \
+  --version "${version}" \
+  --revision "${revision}" \
+  --release-url "${release_path}" \
+  --release-notes "${release_notes}" \
+  --date "${now}" \
+  --release-top "${release_top}" \
+  --site-template "${site_template}" \
+  --build-dir "${site_build_dir}" \
+  --readme-base "${release}/contrib/README-base.md" \
+  --arch-bsp "ARCH-BSP.md" \
+  --output "${release}/index.html"
+
+#rm -rf "${site_build_dir}" ${release}/contrib/README-base.md ARCH-BSP.md

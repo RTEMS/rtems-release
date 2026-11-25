@@ -47,7 +47,7 @@ release="not-set"
 #
 # The main branch release
 #
-main_version=6
+main_version=7
 
 #
 # Keep the top where we start.
@@ -88,6 +88,13 @@ rtems_release_conf=
 rtems_release_url=https://ftp.rtems.org/pub/rtems/releases
 rtems_packages=
 rtems_repos=
+rtems_get_sources=yes
+rtems_doxygen=yes
+
+#
+# Set to yes when testing the info generation
+#
+rtems_info_test=
 
 #
 # Where we collect the sources and docs.

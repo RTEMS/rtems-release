@@ -9,7 +9,7 @@
 All build sets depending on github.com, git.rtems.org, and devel.rtems.org have
 been migrated to use the appropriate resources on gitlab.rtems.org.
 
-## BSPs and Device Drivers
+### BSPs and Device Drivers
 
 * Obsoleted BSPs
     * `powerpc/mvme5500`
